@@ -1,14 +1,12 @@
 /** @jsxImportSource @emotion/react */
+import Header from "../Header/Header";
 import * as s from "./styles";
 
 
 function MainPage() {
     return (
-        <div css={s.container}>
-            <div css={s.mainContainer}>
-                <h1>안녕하세요</h1>
-
-            </div>
+        <div className="min-h-screen bg-[#f5f1eb]">
+            <Header />
         </div>
     );
 }
