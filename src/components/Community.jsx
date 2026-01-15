@@ -15,7 +15,7 @@ export function Community({ onNavigate, onPostClick }) {
             <div className="max-w-5xl mx-auto px-6 py-12">
                 <button
                     onClick={() => onNavigate('home')}
-                    className="flex items-center gap-2 mb-6 text-[#3d3226] hover:text-[#5d4a36] transition-colors"
+                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                 >
                     <ArrowLeft size={20} />
                     메인으로 돌아가기
@@ -41,7 +41,7 @@ export function Community({ onNavigate, onPostClick }) {
                         {posts.map((post) => (
                             <div
                                 key={post.id}
-                                onClick={() => onPostClick?.(post.id)}
+                                onClick={() => onPostClick && onPostClick(post.id)}
                                 className="p-6 hover:bg-[#ebe5db] cursor-pointer transition-colors"
                             >
                                 <div className="flex items-start justify-between">

@@ -1,18 +1,19 @@
 import { useState, useRef } from 'react';
-import { ArrowLeft, Upload, Plus, X, Sparkles, Mail } from 'lucide-react';
+import { ArrowLeft, Upload, Plus, X, Sparkles } from 'lucide-react';
 
-export function RecipeWrite({ onNavigate }) {
-    const [title, setTitle] = useState('');
-    const [completedImage, setCompletedImage] = useState('');
+export function RecipeEdit({ onNavigate, recipeId }) {
+    const [title, setTitle] = useState('초간단 김치볶음밥');
+    const [completedImage, setCompletedImage] = useState('https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?w=400');
     const [ingredientsImage, setIngredientsImage] = useState('');
-    const [ingredients, setIngredients] = useState(['']);
-    const [cookingMethod, setCookingMethod] = useState('');
-    const [hashtags, setHashtags] = useState([]);
+    const [recipeImages, setRecipeImages] = useState([]); // 추가 레시피 사진들
+    const [ingredients, setIngredients] = useState(['김치 200g', '밥 1공기', '참기름 1큰술', '식용유 약간']);
+    const [cookingMethod, setCookingMethod] = useState('1. 팬에 식용유를 두르고 김치를 볶는다.\n2. 밥을 넣고 함께 볶는다.\n3. 참기름을 넣고 마무리한다.');
+    const [hashtags, setHashtags] = useState(['15분요리', '간단레시피', '자취생']);
     const [newHashtag, setNewHashtag] = useState('');
-    const [showEmailWarning, setShowEmailWarning] = useState(false);
 
     const completedImageRef = useRef(null);
     const ingredientsImageRef = useRef(null);
+    const recipeImagesRef = useRef(null);
 
     const handleImageUpload = (e, type) => {
         const file = e.target.files?.[0];
@@ -22,11 +23,23 @@ export function RecipeWrite({ onNavigate }) {
                 const imageData = reader.result;
                 if (type === 'completed') {
                     setCompletedImage(imageData);
-                } else {
+                } else if (type === 'ingredients') {
                     setIngredientsImage(imageData);
+                } else if (type === 'recipe') {
+                    setRecipeImages([...recipeImages, imageData]);
                 }
             };
             reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveImage = (type, index) => {
+        if (type === 'completed') {
+            setCompletedImage('');
+        } else if (type === 'ingredients') {
+            setIngredientsImage('');
+        } else if (type === 'recipe' && index !== undefined) {
+            setRecipeImages(recipeImages.filter((_, i) => i !== index));
         }
     };
 
@@ -69,34 +82,18 @@ export function RecipeWrite({ onNavigate }) {
     };
 
     const handleSubmit = () => {
-        // Check email verification
-        const userProfile = localStorage.getItem('userProfile');
-        if (userProfile) {
-            const profile = JSON.parse(userProfile);
-            if (!profile.emailVerified) {
-                setShowEmailWarning(true);
-                return;
-            }
-        } else {
-            setShowEmailWarning(true);
-            return;
-        }
-
-        // TODO: Implement recipe submission
+        // TODO: Implement recipe update
         console.log({
+            recipeId,
             title,
             completedImage,
             ingredientsImage,
+            recipeImages,
             ingredients: ingredients.filter(i => i.trim()),
             cookingMethod,
             hashtags,
         });
-        alert('레시피가 등록되었습니다!');
-        onNavigate('home');
-    };
-
-    const handleGoToProfile = () => {
-        setShowEmailWarning(false);
+        alert('레시피가 수정되었습니다!');
         onNavigate('profile');
     };
 
@@ -104,7 +101,7 @@ export function RecipeWrite({ onNavigate }) {
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
-                    onClick={() => onNavigate('home')}
+                    onClick={() => onNavigate('profile')}
                     className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                 >
                     <ArrowLeft size={20} />
@@ -114,8 +111,8 @@ export function RecipeWrite({ onNavigate }) {
                 <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden">
                     {/* Header */}
                     <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
-                        <h1 className="text-3xl mb-2">레시피 작성하기</h1>
-                        <p className="text-[#e5dfd5]">나만의 특별한 레시피를 공유해보세요</p>
+                        <h1 className="text-3xl mb-2">레시피 수정하기</h1>
+                        <p className="text-[#e5dfd5]">레시피를 수정하여 업데이트하세요</p>
                     </div>
 
                     {/* Form */}
@@ -153,6 +150,14 @@ export function RecipeWrite({ onNavigate }) {
                                     onChange={(e) => handleImageUpload(e, 'completed')}
                                     className="hidden"
                                 />
+                                {completedImage && (
+                                    <button
+                                        onClick={() => handleRemoveImage('completed')}
+                                        className="p-3 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                )}
                             </div>
                         </div>
 
@@ -175,6 +180,46 @@ export function RecipeWrite({ onNavigate }) {
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) => handleImageUpload(e, 'ingredients')}
+                                    className="hidden"
+                                />
+                                {ingredientsImage && (
+                                    <button
+                                        onClick={() => handleRemoveImage('ingredients')}
+                                        className="p-3 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                    >
+                                        <X size={20} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Recipe Images */}
+                        <div>
+                            <label className="block text-sm mb-2 text-[#3d3226]">레시피 단계별 사진</label>
+                            <div className="flex gap-4">
+                                {recipeImages.map((image, index) => (
+                                    <div key={index} className="relative">
+                                        <img src={image} alt={`레시피 ${index + 1}`} className="w-32 h-32 object-cover rounded-md" />
+                                        <button
+                                            onClick={() => handleRemoveImage('recipe', index)}
+                                            className="absolute top-1 right-1 p-1 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                        >
+                                            <X size={16} />
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    onClick={() => recipeImagesRef.current?.click()}
+                                    className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors"
+                                >
+                                    <Upload size={20} />
+                                    사진 추가
+                                </button>
+                                <input
+                                    ref={recipeImagesRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleImageUpload(e, 'recipe')}
                                     className="hidden"
                                 />
                             </div>
@@ -272,50 +317,10 @@ export function RecipeWrite({ onNavigate }) {
                             onClick={handleSubmit}
                             className="w-full py-4 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors font-medium text-lg"
                         >
-                            레시피 등록하기
+                            레시피 수정 완료
                         </button>
                     </div>
                 </div>
-
-                {/* Email Verification Warning Modal */}
-                {showEmailWarning && (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-lg shadow-xl max-w-md w-full border-2 border-[#e5dfd5]">
-                            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-t-lg">
-                                <h3 className="text-xl font-bold">이메일 인증 필요</h3>
-                            </div>
-                            <div className="p-6">
-                                <div className="flex items-start gap-4 mb-6">
-                                    <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                                        <Mail size={24} className="text-emerald-600" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-[#3d3226] mb-2">
-                                            게시글 작성을 위해서는 이메일 인증이 필요합니다.
-                                        </p>
-                                        <p className="text-sm text-[#6b5d4f]">
-                                            프로필 페이지에서 이메일 인증을 완료해주세요.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() => setShowEmailWarning(false)}
-                                        className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] text-[#3d3226] rounded-md hover:border-[#3d3226] transition-colors"
-                                    >
-                                        취소
-                                    </button>
-                                    <button
-                                        onClick={handleGoToProfile}
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-md"
-                                    >
-                                        이메일 인증하기
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

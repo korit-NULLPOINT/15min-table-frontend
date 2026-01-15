@@ -1,35 +1,49 @@
-/** @jsxImportSource @emotion/react */
-// import * as s from "./styles";
-
-
 import { useState, useEffect, useRef } from 'react';
-import { Save, Edit, ArrowLeft, Upload, User as UserIcon, FileText, MessageSquare, Star } from 'lucide-react';
+import { Save, Edit, ArrowLeft, Upload, User as UserIcon, FileText, MessageSquare, Bookmark, LogOut, UserX, Trash2, Users, Mail, CheckCircle } from 'lucide-react';
 
-export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
+export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname, onEditRecipe, onFollowersClick, onFollowingClick, onCommunityPostClick, onEditCommunityPost }) {
     const [profileData, setProfileData] = useState({
         gender: '',
         age: '',
         weight: '',
         allergies: '',
         profileImage: '',
+        email: '',
+        emailVerified: false,
     });
 
     const [savedProfile, setSavedProfile] = useState(null);
     const [isEditing, setIsEditing] = useState(true);
     const [isSaved, setIsSaved] = useState(false);
-    const [activeTab, setActiveTab] = useState('info');
+    const [activeTab, setActiveTab] = useState('myProfile');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [postType, setPostType] = useState('recipe'); // 레시피 또는 커뮤니티
+    const [myProfilePostType, setMyProfilePostType] = useState('recipe'); // My 프로필 내 게시글 타입
+
     const fileInputRef = useRef(null);
 
-    // Load saved profile data from localStorage
-    useEffect(() => {
-        const savedData = localStorage.getItem('userProfile');
-        if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            setProfileData(parsedData);
-            setSavedProfile(parsedData);
-            setIsEditing(false);
-        }
-    }, []);
+    // Mock data for posts, comments, and favorites
+    const myPosts = [
+        { id: 1, title: '초간단 김치볶음밥', date: '2026.01.10', thumbnail: 'https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?w=400' },
+        { id: 2, title: '크림 파스타 레시피', date: '2026.01.08', thumbnail: 'https://images.unsplash.com/photo-1587740907856-997a958a68ac?w=400' },
+    ];
+
+    const myCommunityPosts = [
+        { id: 101, title: '자취생 필수 조리도구 추천', date: '2026.01.12', views: 245, comments: 12 },
+        { id: 102, title: '냉장고 파먹기 레시피 공유해요', date: '2026.01.09', views: 189, comments: 8 },
+    ];
+
+    const [myComments, setMyComments] = useState([
+        { id: 1, type: 'recipe', postTitle: '초간단 김치볶음밥', comment: '정말 맛있어 보이네요! 저도 만들어봐야겠어요', date: '2026.01.11', postId: 1 },
+        { id: 2, type: 'recipe', postTitle: '로제 파스타', comment: '생크림 대신 우유 사용해도 되나요?', date: '2026.01.09', postId: 2 },
+        { id: 3, type: 'community', postTitle: '자취생 필수 조리도구 추천', comment: '정말 유용한 정보네요! 감사합니다', date: '2026.01.10', postId: 101 },
+        { id: 4, type: 'community', postTitle: '냉장고 파먹기 레시피 공유해요', comment: '저도 같은 고민 했는데 도움됐어요', date: '2026.01.08', postId: 102 },
+    ]);
+
+    const myFavorites = [
+        { id: 3, title: '5분만에 완성 덮밥', thumbnail: 'https://images.unsplash.com/photo-1763844668895-6931b4e09458?w=400' },
+        { id: 4, title: '라면 업그레이드', thumbnail: 'https://images.unsplash.com/photo-1627900440398-5db32dba8db1?w=400' },
+    ];
 
     const handleChange = (field, value) => {
         setProfileData(prev => ({ ...prev, [field]: value }));
@@ -59,28 +73,45 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
         setIsEditing(true);
     };
 
-    // Mock data for posts, comments, and favorites
-    const myPosts = [
-        { id: 1, title: '초간단 김치볶음밥', date: '2026.01.10', thumbnail: 'https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?w=400' },
-        { id: 2, title: '크림 파스타 레시피', date: '2026.01.08', thumbnail: 'https://images.unsplash.com/photo-1587740907856-997a958a68ac?w=400' },
-    ];
+    const handleLogout = () => {
+        if (onLogout) {
+            onLogout();
+        }
+    };
 
-    const myComments = [
-        { id: 1, postTitle: '초간단 김치볶음밥', comment: '정말 맛있어 보이네요! 저도 만들어봐야겠어요', date: '2026.01.11', postId: 1 },
-        { id: 2, postTitle: '로제 파스타', comment: '생크림 대신 우유 사용해도 되나요?', date: '2026.01.09', postId: 2 },
-    ];
+    const handleDeleteAccount = () => {
+        // Remove all user data from localStorage
+        localStorage.removeItem('userProfile');
+        localStorage.removeItem('currentUser');
+        // Call logout to return to login screen
+        if (onLogout) {
+            onLogout();
+        }
+        setShowDeleteConfirm(false);
+    };
 
-    const myFavorites = [
-        { id: 3, title: '5분만에 완성 덮밥', thumbnail: 'https://images.unsplash.com/photo-1763844668895-6931b4e09458?w=400' },
-        { id: 4, title: '라면 업그레이드', thumbnail: 'https://images.unsplash.com/photo-1627900440398-5db32dba8db1?w=400' },
-    ];
+    const handleDeleteComment = (commentId, e) => {
+        e.stopPropagation();
+        setMyComments(prevComments => prevComments.filter(comment => comment.id !== commentId));
+    };
+
+    // Load saved profile from localStorage
+    useEffect(() => {
+        const savedData = localStorage.getItem('userProfile');
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            setProfileData(parsedData);
+            setSavedProfile(parsedData);
+            setIsEditing(false);
+        }
+    }, []);
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
                     onClick={() => onNavigate('home')}
-                    className="flex items-center gap-2 mb-6 text-[#3d3226] hover:text-[#5d4a36] transition-colors"
+                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                 >
                     <ArrowLeft size={20} />
                     메인으로 돌아가기
@@ -89,38 +120,60 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                 <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden">
                     {/* Header */}
                     <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
-                        <h1 className="text-3xl mb-2">내 프로필</h1>
-                        <p className="text-[#e5dfd5]">건강한 식생활을 위한 정보를 입력해주세요</p>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-3xl mb-2">내 프로필</h1>
+                                <p className="text-[#e5dfd5]">건강한 식생활을 위한 정보를 입력해주세요</p>
+                            </div>
+                            {savedProfile && (
+                                <div className={`px-4 py-2 rounded-full flex items-center gap-2 ${savedProfile.emailVerified
+                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
+                                        : 'bg-orange-500'
+                                    }`}>
+                                    {savedProfile.emailVerified ? (
+                                        <>
+                                            <CheckCircle size={18} />
+                                            <span className="font-medium">인증된 계정</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Mail size={18} />
+                                            <span className="font-medium">미인증 계정</span>
+                                        </>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Tabs */}
                     <div className="border-b-2 border-[#e5dfd5] bg-[#ebe5db]">
                         <div className="flex">
                             <button
+                                onClick={() => setActiveTab('myProfile')}
+                                className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'myProfile'
+                                        ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
+                                        : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                    }`}
+                            >
+                                <Users size={20} />
+                                My 프로필
+                            </button>
+                            <button
                                 onClick={() => setActiveTab('info')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'info'
-                                    ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
-                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                        ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
+                                        : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                     }`}
                             >
                                 <UserIcon size={20} />
                                 프로필 정보
                             </button>
                             <button
-                                onClick={() => setActiveTab('posts')}
-                                className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'posts'
-                                    ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
-                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
-                                    }`}
-                            >
-                                <FileText size={20} />
-                                내 게시글
-                            </button>
-                            <button
                                 onClick={() => setActiveTab('comments')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'comments'
-                                    ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
-                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                        ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
+                                        : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                     }`}
                             >
                                 <MessageSquare size={20} />
@@ -129,17 +182,145 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                             <button
                                 onClick={() => setActiveTab('favorites')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'favorites'
-                                    ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
-                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                        ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
+                                        : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                     }`}
                             >
-                                <Star size={20} />
-                                찜한 게시물
+                                <Bookmark size={20} />
+                                저장한 게시물
                             </button>
                         </div>
                     </div>
 
                     {/* Tab Content */}
+                    {activeTab === 'myProfile' && (
+                        <div className="p-8">
+                            {/* Profile Image and Nickname */}
+                            <div className="flex flex-col items-center mb-8">
+                                <div className="w-32 h-32 rounded-full border-4 border-[#d4cbbf] overflow-hidden bg-[#ebe5db] flex items-center justify-center">
+                                    {savedProfile?.profileImage ? (
+                                        <img
+                                            src={savedProfile.profileImage}
+                                            alt="프로필"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <UserIcon size={48} className="text-[#6b5d4f]" />
+                                    )}
+                                </div>
+                                <h2 className="text-2xl text-[#3d3226] mt-4">{userNickname || '닉네임 없음'}</h2>
+
+                                {/* Followers / Following */}
+                                <div className="flex gap-6 mt-4">
+                                    <button
+                                        onClick={onFollowersClick}
+                                        className="flex flex-col items-center gap-1 px-4 py-2 hover:bg-[#ebe5db] rounded-md transition-colors"
+                                    >
+                                        <span className="text-2xl font-bold text-[#3d3226]">124</span>
+                                        <span className="text-sm text-[#6b5d4f]">팔로워</span>
+                                    </button>
+                                    <div className="w-px bg-[#d4cbbf]" />
+                                    <button
+                                        onClick={onFollowingClick}
+                                        className="flex flex-col items-center gap-1 px-4 py-2 hover:bg-[#ebe5db] rounded-md transition-colors"
+                                    >
+                                        <span className="text-2xl font-bold text-[#3d3226]">89</span>
+                                        <span className="text-sm text-[#6b5d4f]">팔로잉</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* User Posts */}
+                            <div>
+                                {/* Toggle Buttons */}
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-xl text-[#3d3226]">내가 작성한 게시글</h3>
+                                    <div className="flex gap-2 bg-[#ebe5db] p-1 rounded-md border-2 border-[#d4cbbf]">
+                                        <button
+                                            onClick={() => setMyProfilePostType('recipe')}
+                                            className={`px-4 py-2 rounded-md transition-colors ${myProfilePostType === 'recipe'
+                                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                                }`}
+                                        >
+                                            레시피 게시판
+                                        </button>
+                                        <button
+                                            onClick={() => setMyProfilePostType('community')}
+                                            className={`px-4 py-2 rounded-md transition-colors ${myProfilePostType === 'community'
+                                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                                }`}
+                                        >
+                                            커뮤니티
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Recipe Posts */}
+                                {myProfilePostType === 'recipe' && (
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {myPosts.map(post => (
+                                            <div
+                                                key={post.id}
+                                                onClick={() => onRecipeClick && onRecipeClick(post.id)}
+                                                className="cursor-pointer bg-white rounded-lg overflow-hidden border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
+                                            >
+                                                <img
+                                                    src={post.thumbnail}
+                                                    alt={post.title}
+                                                    className="w-full aspect-video object-cover"
+                                                />
+                                                <div className="p-4">
+                                                    <h4 className="text-lg text-[#3d3226] mb-2">{post.title}</h4>
+                                                    <p className="text-sm text-[#6b5d4f]">{post.date}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Community Posts */}
+                                {myProfilePostType === 'community' && (
+                                    <div className="space-y-4">
+                                        {myCommunityPosts.map(post => (
+                                            <div
+                                                key={post.id}
+                                                onClick={() => onCommunityPostClick && onCommunityPostClick(post.id)}
+                                                className="cursor-pointer p-6 bg-white rounded-lg border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
+                                            >
+                                                <h4 className="text-lg text-[#3d3226] mb-2">{post.title}</h4>
+                                                <div className="flex items-center gap-4 text-sm text-[#6b5d4f]">
+                                                    <span>{post.date}</span>
+                                                    <span>조회 {post.views}</span>
+                                                    <span>댓글 {post.comments}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Logout and Delete Account Buttons */}
+                            <div className="mt-8 space-y-3">
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full py-3 border-2 border-[#3d3226] text-[#3d3226] rounded-md hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <LogOut size={20} />
+                                    로그아웃
+                                </button>
+                                <button
+                                    onClick={() => setShowDeleteConfirm(true)}
+                                    className="w-full py-3 border-2 border-red-600 text-red-600 rounded-md hover:bg-red-600 hover:text-white transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <UserX size={20} />
+                                    회원 탈퇴
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {activeTab === 'info' && (
                         <>
                             {/* Form - Only show when editing or no saved profile */}
@@ -192,8 +373,8 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                                                 <button
                                                     onClick={() => handleChange('gender', '남성')}
                                                     className={`flex-1 px-6 py-3 rounded-md border-2 transition-colors ${profileData.gender === '남성'
-                                                        ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                        : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
                                                         }`}
                                                 >
                                                     남성
@@ -201,8 +382,8 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                                                 <button
                                                     onClick={() => handleChange('gender', '여성')}
                                                     className={`flex-1 px-6 py-3 rounded-md border-2 transition-colors ${profileData.gender === '여성'
-                                                        ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                        : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
                                                         }`}
                                                 >
                                                     여성
@@ -210,8 +391,8 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                                                 <button
                                                     onClick={() => handleChange('gender', '기타')}
                                                     className={`flex-1 px-6 py-3 rounded-md border-2 transition-colors ${profileData.gender === '기타'
-                                                        ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                        : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
                                                         }`}
                                                 >
                                                     기타
@@ -231,17 +412,73 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                                             />
                                         </div>
 
-                                        {/* Weight */}
-                                        <div>
-                                            <label className="block text-sm mb-2 text-[#3d3226]">체중 (kg)</label>
-                                            <input
-                                                type="number"
-                                                value={profileData.weight}
-                                                onChange={(e) => handleChange('weight', e.target.value)}
-                                                className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white"
-                                                placeholder="예: 65"
-                                            />
+                                        {/* Weight and Email */}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm mb-2 text-[#3d3226]">체중 (kg)</label>
+                                                <input
+                                                    type="number"
+                                                    value={profileData.weight}
+                                                    onChange={(e) => handleChange('weight', e.target.value)}
+                                                    className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white"
+                                                    placeholder="예: 65"
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm mb-2 text-[#3d3226]">이메일</label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="email"
+                                                        value={profileData.email}
+                                                        onChange={(e) => handleChange('email', e.target.value)}
+                                                        className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white pr-12"
+                                                        placeholder="email@example.com"
+                                                        disabled={profileData.emailVerified}
+                                                    />
+                                                    {profileData.emailVerified && (
+                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                            <CheckCircle size={20} className="text-emerald-500" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
+
+                                        {/* Email Verification */}
+                                        {profileData.email && (
+                                            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-lg border-2 border-emerald-200">
+                                                {!profileData.emailVerified ? (
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <Mail size={20} className="text-emerald-600" />
+                                                            <div>
+                                                                <p className="text-sm text-[#3d3226] font-medium">이메일 인증이 필요합니다</p>
+                                                                <p className="text-xs text-[#6b5d4f]">게시글 작성을 위해 이메일 인증을 완료해주세요</p>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => {
+                                                                // Mock email verification
+                                                                setProfileData(prev => ({ ...prev, emailVerified: true }));
+                                                                alert('이메일 인증이 완료되었습니다!');
+                                                            }}
+                                                            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md whitespace-nowrap"
+                                                        >
+                                                            이메일 인증
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-3">
+                                                        <CheckCircle size={20} className="text-emerald-600" />
+                                                        <div>
+                                                            <p className="text-sm text-[#3d3226] font-medium">✓ 인증 완료</p>
+                                                            <p className="text-xs text-[#6b5d4f]">이메일 인증이 완료되었습니다</p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
 
                                         {/* Allergies */}
                                         <div>
@@ -307,6 +544,15 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                                             <p className="text-sm text-[#6b5d4f] mb-2">체중</p>
                                             <p className="text-lg text-[#3d3226]">{savedProfile.weight ? `${savedProfile.weight}kg` : '-'}</p>
                                         </div>
+                                        <div className="bg-[#ebe5db] p-5 rounded-md border-2 border-[#d4cbbf]">
+                                            <p className="text-sm text-[#6b5d4f] mb-2">이메일</p>
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-lg text-[#3d3226] flex-1 truncate">{savedProfile.email || '-'}</p>
+                                                {savedProfile.emailVerified && (
+                                                    <CheckCircle size={18} className="text-emerald-500 flex-shrink-0" />
+                                                )}
+                                            </div>
+                                        </div>
                                         <div className="bg-[#ebe5db] p-5 rounded-md border-2 border-[#d4cbbf] col-span-2">
                                             <p className="text-sm text-[#6b5d4f] mb-2">알레르기 정보</p>
                                             <p className="text-lg text-[#3d3226]">{savedProfile.allergies || '-'}</p>
@@ -326,38 +572,6 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                         </>
                     )}
 
-                    {/* My Posts Tab */}
-                    {activeTab === 'posts' && (
-                        <div className="p-8">
-                            <h3 className="text-xl mb-6 text-[#3d3226]">내가 작성한 게시글</h3>
-                            <div className="space-y-4">
-                                {myPosts.length > 0 ? (
-                                    myPosts.map((post) => (
-                                        <div
-                                            key={post.id}
-                                            onClick={() => {
-                                                onRecipeClick?.(post.id);
-                                            }}
-                                            className="flex gap-4 p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf] hover:border-[#3d3226] cursor-pointer transition-colors"
-                                        >
-                                            <img
-                                                src={post.thumbnail}
-                                                alt={post.title}
-                                                className="w-24 h-24 rounded-md object-cover"
-                                            />
-                                            <div className="flex-1">
-                                                <h4 className="text-lg text-[#3d3226] mb-2">{post.title}</h4>
-                                                <p className="text-sm text-[#6b5d4f]">{post.date}</p>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-center text-[#6b5d4f] py-8">작성한 게시글이 없습니다.</p>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
                     {/* My Comments Tab */}
                     {activeTab === 'comments' && (
                         <div className="p-8">
@@ -367,16 +581,39 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                                     myComments.map((comment) => (
                                         <div
                                             key={comment.id}
-                                            onClick={() => {
-                                                onRecipeClick?.(comment.postId);
-                                            }}
-                                            className="p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf] hover:border-[#3d3226] cursor-pointer transition-colors"
+                                            className="relative p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors"
                                         >
-                                            <p className="text-sm text-[#6b5d4f] mb-2">
-                                                게시글: <span className="text-[#3d3226] font-medium">{comment.postTitle}</span>
-                                            </p>
-                                            <p className="text-[#3d3226] mb-2">{comment.comment}</p>
-                                            <p className="text-xs text-[#6b5d4f]">{comment.date}</p>
+                                            <div
+                                                onClick={() => {
+                                                    if (comment.type === 'recipe') {
+                                                        if (onRecipeClick) onRecipeClick(comment.postId);
+                                                    } else if (comment.type === 'community') {
+                                                        if (onCommunityPostClick) onCommunityPostClick(comment.postId);
+                                                    }
+                                                }}
+                                                className="cursor-pointer pr-10"
+                                            >
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${comment.type === 'recipe'
+                                                            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
+                                                            : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white'
+                                                        }`}>
+                                                        {comment.type === 'recipe' ? '📋 레시피' : '💬 커뮤니티'}
+                                                    </span>
+                                                    <span className="text-sm text-[#6b5d4f]">
+                                                        게시글: <span className="text-[#3d3226] font-medium">{comment.postTitle}</span>
+                                                    </span>
+                                                </div>
+                                                <p className="text-[#3d3226] mb-2">{comment.comment}</p>
+                                                <p className="text-xs text-[#6b5d4f]">{comment.date}</p>
+                                            </div>
+                                            <button
+                                                onClick={(e) => handleDeleteComment(comment.id, e)}
+                                                className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full hover:bg-red-700 transition-colors"
+                                                title="댓글 삭제"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
                                     ))
                                 ) : (
@@ -389,14 +626,14 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                     {/* My Favorites Tab */}
                     {activeTab === 'favorites' && (
                         <div className="p-8">
-                            <h3 className="text-xl mb-6 text-[#3d3226]">찜한 게시물</h3>
+                            <h3 className="text-xl mb-6 text-[#3d3226]">저장한 게시물</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 {myFavorites.length > 0 ? (
                                     myFavorites.map((favorite) => (
                                         <div
                                             key={favorite.id}
                                             onClick={() => {
-                                                onRecipeClick?.(favorite.id);
+                                                if (onRecipeClick) onRecipeClick(favorite.id);
                                             }}
                                             className="cursor-pointer bg-white rounded-lg overflow-hidden border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
                                         >
@@ -411,13 +648,48 @@ export function UserProfile({ onNavigate, onRecipeClick, userNickname }) {
                                         </div>
                                     ))
                                 ) : (
-                                    <p className="col-span-2 text-center text-[#6b5d4f] py-8">찜한 게시물이 없습니다.</p>
+                                    <p className="col-span-2 text-center text-[#6b5d4f] py-8">저장한 게시물이 없습니다.</p>
                                 )}
                             </div>
                         </div>
                     )}
                 </div>
             </div>
-        </div >
+
+            {/* Delete Account Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full border-2 border-[#e5dfd5]">
+                        <div className="bg-[#3d3226] text-[#f5f1eb] px-6 py-4 rounded-t-lg">
+                            <h3 className="text-xl">회원 탈퇴</h3>
+                        </div>
+                        <div className="p-6">
+                            <div className="mb-6">
+                                <p className="text-[#3d3226] mb-4">
+                                    정말로 회원 탈퇴를 진행하시겠습니까?
+                                </p>
+                                <p className="text-sm text-red-600">
+                                    ⚠️ 모든 프로필 정보와 데이터가 삭제되며, 이 작업은 되돌릴 수 없습니다.
+                                </p>
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    className="flex-1 py-3 border-2 border-[#3d3226] text-[#3d3226] rounded-md hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors"
+                                >
+                                    취소
+                                </button>
+                                <button
+                                    onClick={handleDeleteAccount}
+                                    className="flex-1 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                                >
+                                    탈퇴하기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

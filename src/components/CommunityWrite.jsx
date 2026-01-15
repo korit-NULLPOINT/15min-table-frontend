@@ -1,26 +1,33 @@
-import { useState } from 'react';
-import { ArrowLeft, Plus, X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { ArrowLeft, Upload, X } from 'lucide-react';
 
 export function CommunityWrite({ onNavigate }) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
-    const [hashtags, setHashtags] = useState([]);
-    const [newHashtag, setNewHashtag] = useState('');
+    const [image, setImage] = useState('');
+    const fileInputRef = useRef(null);
 
-    const addHashtag = () => {
-        if (newHashtag.trim() && !hashtags.includes(newHashtag.trim())) {
-            setHashtags([...hashtags, newHashtag.trim()]);
-            setNewHashtag('');
+    const handleImageUpload = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImage(reader.result);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
-    const removeHashtag = (tag) => {
-        setHashtags(hashtags.filter(t => t !== tag));
+    const removeImage = () => {
+        setImage('');
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     const handleSubmit = () => {
         // TODO: Implement post submission
-        console.log({ title, content, hashtags });
+        console.log({ title, content, image });
         alert('게시글이 등록되었습니다!');
         onNavigate('community');
     };
@@ -30,7 +37,7 @@ export function CommunityWrite({ onNavigate }) {
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
                     onClick={() => onNavigate('community')}
-                    className="flex items-center gap-2 mb-6 text-[#3d3226] hover:text-[#5d4a36] transition-colors"
+                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                 >
                     <ArrowLeft size={20} />
                     돌아가기
@@ -69,43 +76,42 @@ export function CommunityWrite({ onNavigate }) {
                             />
                         </div>
 
-                        {/* Hashtags */}
+                        {/* Image Upload */}
                         <div>
-                            <label className="block text-sm mb-2 text-[#3d3226]">해시태그</label>
+                            <label className="block text-sm mb-2 text-[#3d3226]">이미지 업로드</label>
 
-                            <div className="flex gap-2 mb-3">
-                                <input
-                                    type="text"
-                                    value={newHashtag}
-                                    onChange={(e) => setNewHashtag(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addHashtag())}
-                                    className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none"
-                                    placeholder="해시태그 입력 (# 없이)"
-                                />
-                                <button
-                                    onClick={addHashtag}
-                                    className="px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors"
-                                >
-                                    <Plus size={20} />
-                                </button>
-                            </div>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
+                                accept="image/*"
+                                className="hidden"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors flex items-center gap-2"
+                            >
+                                <Upload size={20} />
+                                이미지 선택
+                            </button>
 
-                            <div className="flex flex-wrap gap-2">
-                                {hashtags.map((tag) => (
-                                    <span
-                                        key={tag}
-                                        className="flex items-center gap-2 px-3 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border border-[#d4cbbf]"
+                            {image && (
+                                <div className="relative mt-4">
+                                    <img
+                                        src={image}
+                                        alt="Uploaded"
+                                        className="w-full h-64 object-cover rounded-md border-2 border-[#d4cbbf]"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={removeImage}
+                                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
                                     >
-                                        #{tag}
-                                        <button
-                                            onClick={() => removeHashtag(tag)}
-                                            className="hover:text-red-600 transition-colors"
-                                        >
-                                            <X size={16} />
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Submit Button */}
