@@ -1,4 +1,4 @@
-import { Eye, Clock, Star } from 'lucide-react';
+import { Eye, Clock, Star, TrendingUp, Bookmark } from 'lucide-react';
 import { useState } from 'react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -72,7 +72,7 @@ export function TopRecipes({ onRecipeClick, isLoggedIn, onOpenAuth }) {
         e.stopPropagation();
 
         if (!isLoggedIn) {
-            onOpenAuth?.();
+            if (onOpenAuth) onOpenAuth();
             return;
         }
 
@@ -88,13 +88,18 @@ export function TopRecipes({ onRecipeClick, isLoggedIn, onOpenAuth }) {
     };
 
     return (
-        <section className="px-6 py-4 max-w-7xl mx-auto">
-            <h3 className="text-3xl mb-6 text-[#3d3226]">🔥 인기 레시피</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section className="px-6 py-8 max-w-7xl mx-auto bg-[#ebe5db] rounded-lg my-8">
+            <h3 className="text-3xl mb-6 text-[#3d3226] flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#3d3226] rounded-full flex items-center justify-center">
+                    <TrendingUp size={24} className="text-[#f5f1eb]" strokeWidth={2.5} />
+                </div>
+                인기 레시피
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
                 {topRecipes.map((recipe) => (
                     <div
                         key={recipe.id}
-                        onClick={() => onRecipeClick?.(recipe.id)}
+                        onClick={() => onRecipeClick && onRecipeClick(recipe.id)}
                         className="group cursor-pointer bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border-2 border-[#e5dfd5] hover:border-[#3d3226]"
                     >
                         <div className="relative aspect-video overflow-hidden">
@@ -103,16 +108,13 @@ export function TopRecipes({ onRecipeClick, isLoggedIn, onOpenAuth }) {
                                 alt={recipe.title}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             />
-                            <div className="absolute top-3 left-3 bg-[#3d3226] text-[#f5f1eb] px-3 py-1 rounded-full text-sm font-bold">
-                                #{recipe.rank}
-                            </div>
                             <button
                                 onClick={(e) => handleFavoriteClick(e, recipe.id)}
                                 className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all"
                             >
-                                <Star
+                                <Bookmark
                                     size={20}
-                                    className={favorites.has(recipe.id) ? 'text-yellow-500' : 'text-gray-400'}
+                                    className={favorites.has(recipe.id) ? 'text-blue-600' : 'text-gray-400'}
                                     fill={favorites.has(recipe.id) ? 'currentColor' : 'none'}
                                 />
                             </button>
