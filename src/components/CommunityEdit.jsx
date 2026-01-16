@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Save, Upload, X } from 'lucide-react';
 
-export function CommunityEdit({ postId, onNavigate, userNickname }) {
+export function CommunityEdit({ postId, onNavigate, username }) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [images, setImages] = useState([]);

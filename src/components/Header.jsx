@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Menu, X, User, PenSquare, Bell, CheckCircle2, ChevronDown, CheckCheck } from 'lucide-react';
 
-export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, userNickname, onRandomRecipe, onNotificationClick }) {
+export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, onRandomRecipe, onNotificationClick }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showAllNotifications, setShowAllNotifications] = useState(false);
@@ -142,7 +142,7 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, userNicknam
                                     className="flex items-center gap-2 px-5 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                                 >
                                     <User size={20} />
-                                    {userNickname || '내 프로필'}
+                                    {username || '내 프로필'}
                                 </button>
                                 <button
                                     onClick={() => setShowNotifications(!showNotifications)}
@@ -159,7 +159,7 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, userNicknam
                         ) : (
                             <>
                                 <button
-                                    onClick={() => onOpenAuth('login')}
+                                    onClick={() => onOpenAuth('signin')}
                                     className="px-6 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                                 >
                                     로그인
@@ -284,7 +284,7 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, userNicknam
                             <div className="space-y-3">
                                 <button
                                     onClick={() => {
-                                        onOpenAuth('login');
+                                        onOpenAuth('signin');
                                         setIsSidebarOpen(false);
                                     }}
                                     className="w-full px-4 py-3 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md font-medium"

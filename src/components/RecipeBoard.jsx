@@ -101,8 +101,8 @@ export function RecipeBoard({ onNavigate, onRecipeClick, isLoggedIn, onOpenAuth 
                                             }
                                         }}
                                         className={`px-4 py-2 rounded-md border-2 transition-colors ${selectedMainCategory === category
-                                                ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
                                             }`}
                                     >
                                         {category}
@@ -129,8 +129,8 @@ export function RecipeBoard({ onNavigate, onRecipeClick, isLoggedIn, onOpenAuth 
                                             }
                                         }}
                                         className={`px-4 py-2 rounded-md border-2 transition-colors ${selectedSubCategory === category
-                                                ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
                                             }`}
                                     >
                                         {category}

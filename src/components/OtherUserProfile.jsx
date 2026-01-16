@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, User as UserIcon } from 'lucide-react';
 
-export function OtherUserProfile({ userName, onNavigate, onRecipeClick }) {
+export function OtherUserProfile({ username, onNavigate, onRecipeClick }) {
     const [isFollowing, setIsFollowing] = useState(false);
 
     // Mock user posts
@@ -25,7 +25,7 @@ export function OtherUserProfile({ userName, onNavigate, onRecipeClick }) {
                 <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden">
                     {/* Header */}
                     <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
-                        <h1 className="text-3xl mb-2">{userName}님의 프로필</h1>
+                        <h1 className="text-3xl mb-2">{username}님의 프로필</h1>
                         <p className="text-[#e5dfd5]">작성한 레시피를 확인해보세요</p>
                     </div>
 
@@ -35,7 +35,7 @@ export function OtherUserProfile({ userName, onNavigate, onRecipeClick }) {
                             <div className="w-32 h-32 rounded-full border-4 border-[#d4cbbf] overflow-hidden bg-[#ebe5db] flex items-center justify-center">
                                 <UserIcon size={48} className="text-[#6b5d4f]" />
                             </div>
-                            <h2 className="text-2xl text-[#3d3226] mt-4">{userName}</h2>
+                            <h2 className="text-2xl text-[#3d3226] mt-4">{username}</h2>
 
                             {/* Followers / Following */}
                             <div className="flex gap-6 mt-4">
@@ -54,8 +54,8 @@ export function OtherUserProfile({ userName, onNavigate, onRecipeClick }) {
                             <button
                                 onClick={() => setIsFollowing(!isFollowing)}
                                 className={`mt-6 px-8 py-3 rounded-md transition-colors ${isFollowing
-                                        ? 'bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36]'
-                                        : 'border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb]'
+                                    ? 'bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36]'
+                                    : 'border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb]'
                                     }`}
                             >
                                 {isFollowing ? '팔로잉' : '팔로우'}
@@ -64,7 +64,7 @@ export function OtherUserProfile({ userName, onNavigate, onRecipeClick }) {
 
                         {/* User Posts */}
                         <div>
-                            <h3 className="text-xl mb-6 text-[#3d3226]">{userName}님이 작성한 레시피</h3>
+                            <h3 className="text-xl mb-6 text-[#3d3226]">{username}님이 작성한 레시피</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 {userPosts.map(post => (
                                     <div

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { TopRecipes } from './components/TopRecipes';
 import { HighRatedSlider } from './components/HighRatedSlider';
-import { AuthModal } from './components/AuthModal';
+import { AuthModal } from './pages/auth-page/AuthModal';
 import { UserProfile } from './components/UserProfile';
 import { RecipeDetail } from './components/RecipeDetail';
 import { RecipeWrite } from './components/RecipeWrite';
@@ -18,9 +18,9 @@ import { recipeDetailsMap } from './utils/recipeData';
 
 export default function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState('login');
+  const [authMode, setAuthMode] = useState('signin');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userNickname, setUserNickname] = useState('');
+  const [username, setUsername] = useState('');
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
@@ -42,10 +42,10 @@ export default function App() {
 
   // Load saved user data on mount
   useEffect(() => {
-    const savedNickname = localStorage.getItem('userNickname');
+    const savedUsername = localStorage.getItem('username');
     const savedLoginState = localStorage.getItem('isLoggedIn');
 
-    if (savedNickname) setUserNickname(savedNickname);
+    if (savedUsername) setUsername(savedUsername);
     if (savedLoginState === 'true') setIsLoggedIn(true);
   }, []);
 
@@ -54,13 +54,13 @@ export default function App() {
     setIsAuthModalOpen(true);
   };
 
-  const handleAuthSuccess = (nickname) => {
+  const handleAuthSuccess = (username) => {
     setIsLoggedIn(true);
     localStorage.setItem('isLoggedIn', 'true');
 
-    if (nickname) {
-      setUserNickname(nickname);
-      localStorage.setItem('userNickname', nickname);
+    if (username) {
+      setUsername(username);
+      localStorage.setItem('username', username);
     }
   };
 
@@ -81,14 +81,14 @@ export default function App() {
   };
 
   const handleOpenAuthForFeature = () => {
-    openAuthModal('login');
+    openAuthModal('signin');
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    setUserNickname('');
+    setUsername('');
     localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userNickname');
+    localStorage.removeItem('username');
     setCurrentPage('home');
     window.history.pushState({}, '', '#home');
   };
@@ -180,7 +180,7 @@ export default function App() {
         onOpenAuth={openAuthModal}
         onNavigate={handleNavigate}
         isLoggedIn={isLoggedIn}
-        userNickname={userNickname}
+        username={username}
         onRandomRecipe={handleRandomRecipe}
         onNotificationClick={handleNotificationClick}
       />
@@ -219,7 +219,7 @@ export default function App() {
         <UserProfile
           onNavigate={handleNavigate}
           onRecipeClick={handleRecipeClick}
-          userNickname={userNickname}
+          username={username}
           onLogout={handleLogout}
           onEditRecipe={handleEditRecipe}
           onFollowersClick={handleFollowersClick}
@@ -235,7 +235,7 @@ export default function App() {
           onNavigate={handleNavigate}
           isLoggedIn={isLoggedIn}
           onOpenAuth={handleOpenAuthForFeature}
-          currentUserNickname={userNickname}
+          currentUsername={username}
           onAuthorClick={handleAuthorClick}
         />
       )}
@@ -263,7 +263,7 @@ export default function App() {
         <CommunityDetail
           postId={selectedPostId}
           onNavigate={handleNavigate}
-          userNickname={userNickname}
+          username={username}
         />
       )}
 
@@ -271,7 +271,7 @@ export default function App() {
         <CommunityEdit
           postId={selectedPostId}
           onNavigate={handleNavigate}
-          userNickname={userNickname}
+          username={username}
         />
       )}
 

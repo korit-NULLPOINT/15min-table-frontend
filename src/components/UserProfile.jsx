@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Save, Edit, ArrowLeft, Upload, User as UserIcon, FileText, MessageSquare, Bookmark, LogOut, UserX, Trash2, Users, Mail, CheckCircle } from 'lucide-react';
 
-export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname, onEditRecipe, onFollowersClick, onFollowingClick, onCommunityPostClick, onEditCommunityPost }) {
+export function UserProfile({ onNavigate, onRecipeClick, onLogout, username, onEditRecipe, onFollowersClick, onFollowingClick, onCommunityPostClick, onEditCommunityPost }) {
     const [profileData, setProfileData] = useState({
         gender: '',
         age: '',
@@ -127,8 +127,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                             </div>
                             {savedProfile && (
                                 <div className={`px-4 py-2 rounded-full flex items-center gap-2 ${savedProfile.emailVerified
-                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
-                                        : 'bg-orange-500'
+                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
+                                    : 'bg-orange-500'
                                     }`}>
                                     {savedProfile.emailVerified ? (
                                         <>
@@ -152,8 +152,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                             <button
                                 onClick={() => setActiveTab('myProfile')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'myProfile'
-                                        ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
-                                        : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                    ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
+                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                     }`}
                             >
                                 <Users size={20} />
@@ -162,8 +162,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                             <button
                                 onClick={() => setActiveTab('info')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'info'
-                                        ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
-                                        : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                    ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
+                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                     }`}
                             >
                                 <UserIcon size={20} />
@@ -172,8 +172,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                             <button
                                 onClick={() => setActiveTab('comments')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'comments'
-                                        ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
-                                        : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                    ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
+                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                     }`}
                             >
                                 <MessageSquare size={20} />
@@ -182,8 +182,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                             <button
                                 onClick={() => setActiveTab('favorites')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${activeTab === 'favorites'
-                                        ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
-                                        : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                    ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
+                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                     }`}
                             >
                                 <Bookmark size={20} />
@@ -208,7 +208,7 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                                         <UserIcon size={48} className="text-[#6b5d4f]" />
                                     )}
                                 </div>
-                                <h2 className="text-2xl text-[#3d3226] mt-4">{userNickname || '닉네임 없음'}</h2>
+                                <h2 className="text-2xl text-[#3d3226] mt-4">{username || '닉네임 없음'}</h2>
 
                                 {/* Followers / Following */}
                                 <div className="flex gap-6 mt-4">
@@ -239,8 +239,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                                         <button
                                             onClick={() => setMyProfilePostType('recipe')}
                                             className={`px-4 py-2 rounded-md transition-colors ${myProfilePostType === 'recipe'
-                                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                                : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                                 }`}
                                         >
                                             레시피 게시판
@@ -248,8 +248,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                                         <button
                                             onClick={() => setMyProfilePostType('community')}
                                             className={`px-4 py-2 rounded-md transition-colors ${myProfilePostType === 'community'
-                                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                                : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                                 }`}
                                         >
                                             커뮤니티
@@ -362,7 +362,7 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                                         <div>
                                             <label className="block text-sm mb-2 text-[#3d3226]">닉네임</label>
                                             <div className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md bg-[#ebe5db] text-[#3d3226]">
-                                                {userNickname || '닉네임 없음'}
+                                                {username || '닉네임 없음'}
                                             </div>
                                         </div>
 
@@ -373,8 +373,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                                                 <button
                                                     onClick={() => handleChange('gender', '남성')}
                                                     className={`flex-1 px-6 py-3 rounded-md border-2 transition-colors ${profileData.gender === '남성'
-                                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                                        ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                        : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
                                                         }`}
                                                 >
                                                     남성
@@ -382,8 +382,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                                                 <button
                                                     onClick={() => handleChange('gender', '여성')}
                                                     className={`flex-1 px-6 py-3 rounded-md border-2 transition-colors ${profileData.gender === '여성'
-                                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                                        ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                        : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
                                                         }`}
                                                 >
                                                     여성
@@ -391,8 +391,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                                                 <button
                                                     onClick={() => handleChange('gender', '기타')}
                                                     className={`flex-1 px-6 py-3 rounded-md border-2 transition-colors ${profileData.gender === '기타'
-                                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                                        ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                        : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
                                                         }`}
                                                 >
                                                     기타
@@ -527,7 +527,7 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                                                 <UserIcon size={48} className="text-[#6b5d4f]" />
                                             )}
                                         </div>
-                                        <h2 className="text-2xl text-[#3d3226] mt-4">{userNickname || '닉네임 없음'}</h2>
+                                        <h2 className="text-2xl text-[#3d3226] mt-4">{username || '닉네임 없음'}</h2>
                                     </div>
 
                                     <h3 className="text-xl mb-6 text-[#3d3226]">저장된 프로필 정보</h3>
@@ -595,8 +595,8 @@ export function UserProfile({ onNavigate, onRecipeClick, onLogout, userNickname,
                                             >
                                                 <div className="flex items-center gap-2 mb-2">
                                                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${comment.type === 'recipe'
-                                                            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
-                                                            : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white'
+                                                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
+                                                        : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white'
                                                         }`}>
                                                         {comment.type === 'recipe' ? '📋 레시피' : '💬 커뮤니티'}
                                                     </span>
