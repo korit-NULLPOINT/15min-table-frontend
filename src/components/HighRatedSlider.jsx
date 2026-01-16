@@ -1,4 +1,4 @@
-import { Star, ChevronLeft, ChevronRight, Award, Bookmark } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, Award } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
@@ -59,9 +59,8 @@ const highRatedRecipes = [
     },
 ];
 
-export function HighRatedSlider({ onRecipeClick, isLoggedIn, onOpenAuth }) {
+export function HighRatedSlider({ onRecipeClick }) {
     const scrollContainerRef = useRef(null);
-    const [favorites, setFavorites] = useState(new Set());
 
     const scroll = (direction) => {
         if (scrollContainerRef.current) {
@@ -74,25 +73,6 @@ export function HighRatedSlider({ onRecipeClick, isLoggedIn, onOpenAuth }) {
                 behavior: 'smooth'
             });
         }
-    };
-
-    const handleFavoriteClick = (e, recipeId) => {
-        e.stopPropagation();
-
-        if (!isLoggedIn) {
-            if (onOpenAuth) onOpenAuth();
-            return;
-        }
-
-        setFavorites(prev => {
-            const newFavorites = new Set(prev);
-            if (newFavorites.has(recipeId)) {
-                newFavorites.delete(recipeId);
-            } else {
-                newFavorites.add(recipeId);
-            }
-            return newFavorites;
-        });
     };
 
     return (
@@ -129,16 +109,6 @@ export function HighRatedSlider({ onRecipeClick, isLoggedIn, onOpenAuth }) {
                                         alt={recipe.title}
                                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                                     />
-                                    <button
-                                        onClick={(e) => handleFavoriteClick(e, recipe.id)}
-                                        className="absolute top-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all"
-                                    >
-                                        <Bookmark
-                                            size={20}
-                                            className={favorites.has(recipe.id) ? 'text-blue-600' : 'text-gray-400'}
-                                            fill={favorites.has(recipe.id) ? 'currentColor' : 'none'}
-                                        />
-                                    </button>
                                 </div>
                                 <div className="p-4">
                                     <h4 className="text-lg mb-2 text-[#3d3226]">{recipe.title}</h4>

@@ -233,10 +233,6 @@ export function RecipeDetail({ recipe, onNavigate, isLoggedIn, onOpenAuth, curre
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Clock size={18} />
-                                <span>{recipe.cookTime}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
                                 <Star size={18} fill="#f59e0b" className="text-[#f59e0b]" />
                                 <span className="font-bold text-[#3d3226]">{averageRating}</span>
                                 <span className="text-sm text-[#6b5d4f]">({totalRatings}명)</span>
