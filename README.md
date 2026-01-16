@@ -13,3 +13,8 @@
 | `perf`      | 성능 개선에 대한 커밋                      |
 
 위 내용을 기준으로 커밋을 작성하고, 각 커밋의 타입을 적절히 선택하여 관리합니다.
+
+      RecipeListPage.jsx
+      RecipeDetailPage.jsx
+      RecipeWritePage.jsx
+      RecipeEditPage.jsx
