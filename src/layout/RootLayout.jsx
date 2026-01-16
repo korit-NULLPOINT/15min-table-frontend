@@ -1,14 +1,13 @@
-// src/layout/RootLayout.jsx
 import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Header } from "../components/Header";
-import { AuthModal } from "../components/AuthModal";
+import { AuthModal } from "../pages/auth-page/AuthModal";
 
 export default function RootLayout() {
     const navigate = useNavigate();
 
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [authMode, setAuthMode] = useState("login");
+    const [authMode, setAuthMode] = useState("signin");
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userNickname, setUserNickname] = useState("");
 
@@ -19,8 +18,9 @@ export default function RootLayout() {
         if (savedLoginState === "true") setIsLoggedIn(true);
     }, []);
 
-    const openAuthModal = (mode) => {
-        setAuthMode(mode);
+    const openAuthModal = (mode = "signin") => {
+        const normalized = mode === "login" ? "signin" : mode;
+        setAuthMode(normalized);
         setIsAuthModalOpen(true);
     };
 
@@ -34,13 +34,12 @@ export default function RootLayout() {
         }
     };
 
-    // Header가 기존에 쓰던 pageKey들을 최소로 라우팅에 매핑
     const handleNavigate = (pageKey) => {
         if (pageKey === "home") navigate("/");
-        // board 메뉴는 일단 대표 보드로 보내기 (원하면 마지막 boardId 기억하게 개선 가능)
         if (pageKey === "board") navigate("/boards/1/recipe");
-        if (pageKey === "community") navigate("/boards/2/free"); // 나중에 free 라우트 붙이면 동작
-        if (pageKey === "profile") navigate("/me"); // 추후 만들면
+        if (pageKey === "community") navigate("/boards/2/free");
+        if (pageKey === "profile") navigate("/me"); // 추후
+        if (pageKey === "write") navigate("/boards/1/recipe/write"); // (선택) 헤더에 글쓰기 버튼 있으면
     };
 
     return (
@@ -49,8 +48,7 @@ export default function RootLayout() {
                 onOpenAuth={openAuthModal}
                 onNavigate={handleNavigate}
                 isLoggedIn={isLoggedIn}
-                userNickname={userNickname}
-                // 필요하면 나중에 더 연결
+                username={userNickname} // ✅ (중요) userNickname -> username으로 내려주기
                 onRandomRecipe={() => {}}
                 onNotificationClick={() => {}}
             />
