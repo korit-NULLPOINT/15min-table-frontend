@@ -2,7 +2,7 @@ import { ArrowLeft, Clock, User as UserIcon, Star, Share2, Trash2, Bookmark, Map
 import { useState, useEffect } from 'react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
-export function RecipeDetail({ recipe, onNavigate, isLoggedIn, onOpenAuth, currentUserNickname, onAuthorClick }) {
+export function RecipeDetail({ recipe, onNavigate, isLoggedIn, onOpenAuth, currentUsername, onAuthorClick }) {
     const [isFavorited, setIsFavorited] = useState(false);
     const [userRating, setUserRating] = useState(0);
     const [totalRatings, setTotalRatings] = useState(24); // 총 평가 수
@@ -93,7 +93,7 @@ export function RecipeDetail({ recipe, onNavigate, isLoggedIn, onOpenAuth, curre
         if (newComment.trim() === '') return;
         const newCommentObj = {
             id: comments.length + 1,
-            author: currentUserNickname || '익명',
+            author: currentUsername || '익명',
             authorImage: '',
             content: newComment,
             createdAt: '방금 전',

@@ -94,7 +94,7 @@ const communityPosts = {
     },
 };
 
-export function CommunityDetail({ postId, onNavigate, userNickname }) {
+export function CommunityDetail({ postId, onNavigate, username }) {
     const [newComment, setNewComment] = useState('');
     const [comments, setComments] = useState(communityPosts[postId]?.comments || []);
 
@@ -124,7 +124,7 @@ export function CommunityDetail({ postId, onNavigate, userNickname }) {
 
         const newCommentObj = {
             id: comments.length + 1,
-            author: userNickname || '현재사용자', // Use actual logged-in user nickname if provided
+            author: username || '현재사용자', // Use actual logged-in user nickname if provided
             date: new Date().toISOString().split('T')[0].replace(/-/g, '.'),
             content: newComment,
         };
@@ -196,7 +196,7 @@ export function CommunityDetail({ postId, onNavigate, userNickname }) {
                                         </div>
                                         <p className="text-[#3d3226]">{comment.content}</p>
                                     </div>
-                                    {userNickname && userNickname === comment.author && (
+                                    {username && username === comment.author && (
                                         <button
                                             onClick={() => handleDeleteComment(comment.id)}
                                             className="absolute top-4 right-4 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"

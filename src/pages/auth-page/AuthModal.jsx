@@ -1,59 +1,137 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
+import { useSignin, useSignup } from '../../apis/generated/user-auth-controller/user-auth-controller';
+import { getPrincipal } from '../../apis/generated/user-account-controller/user-account-controller';
 
 export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }) {
+    const { mutateAsync: signupMutate } = useSignup();
+    const { mutateAsync: signinMutate } = useSignin();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
-    const [nickname, setNickname] = useState('');
-    const [passwordError, setPasswordError] = useState('');
+    const [username, setUsername] = useState('');
+    const [error, setError] = useState('');
+
+    const passwordRegex =
+        /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_]).{8,16}$/;
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
 
     if (!isOpen) return null;
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (mode === 'signup' && password !== passwordConfirm) {
-            setPasswordError('비밀번호가 일치하지 않습니다.');
-            return;
-        }
-
-        setPasswordError('');
+        setError('');
+        // console.log(mode);
+        // console.log(email);
 
         if (mode === 'signup') {
-            // 회원가입 - 사용자 정보를 localStorage에 저장
-            const userData = {
+            // 회원가입
+            // 입력값 검증
+            if (
+                username.trim().length === 0 ||
+                email.trim().length === 0 ||
+                password.trim().length === 0 ||
+                passwordConfirm.trim().length === 0
+            ) {
+                setError('모든 항목을 입력해주세요.');
+                return;
+            }
+
+            if (!emailRegex.test(email)) {
+                setError('이메일 형식이 올바르지 않습니다.');
+                return;
+            }
+
+            if (!passwordRegex.test(password)) {
+                setError(
+                    '비밀번호는 최소 8자리에서 16자리 까지 이고 영문자, 숫자, 특수문자를 포함하여야 합니다.'
+                );
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                setError('비밀번호가 일치하지 않습니다.');
+                return;
+            }
+
+            if (!confirm('회원 가입을 하시겠습니까?')) {
+                return;
+            }
+
+            const data = {
                 email,
                 password,
-                nickname
-            };
-            localStorage.setItem('user_' + email, JSON.stringify(userData));
+                username
+            }
 
-            // 회원가입 완료 후 로그인 모드로 전환
-            alert('회원가입이 완료되었습니다! 로그인해주세요.');
-            if (onModeChange) onModeChange('login');
-            // 입력 필드 초기화
+            signupMutate({ data }).then((response) => {
+                alert('회원가입이 완료되었습니다! 로그인해주세요.');
+                if (onModeChange) onModeChange('signin');
+
+                // 입력 필드 초기화
+                setEmail('');
+                setPassword('');
+                setPasswordConfirm('');
+                setUsername('');
+            }).catch((error) => {
+                const errorData = error.response?.data;
+                if (errorData) {
+                    alert(errorData.message || '회원가입에 실패했습니다.');
+                } else {
+                    alert('회원가입 중 오류가 발생했습니다.');
+                }
+            });
             setEmail('');
             setPassword('');
             setPasswordConfirm('');
-            setNickname('');
+            setUsername('');
         } else {
-            // 로그인 - localStorage에서 사용자 정보 확인
-            const savedUserData = localStorage.getItem('user_' + email);
-
-            if (savedUserData) {
-                const userData = JSON.parse(savedUserData);
-                if (userData.password === password) {
-                    // 로그인 성공
-                    console.log('Login successful:', { email, nickname: userData.nickname });
-                    if (onAuthSuccess) onAuthSuccess(userData.nickname);
-                    onClose();
-                } else {
-                    alert('비밀번호가 일치하지 않습니다.');
-                }
-            } else {
-                alert('등록되지 않은 이메일입니다.');
+            // 로그인
+            if (
+                email.trim().length === 0 ||
+                password.trim().length === 0
+            ) {
+                setError('모든 항목을 입력해주세요.');
+                return;
             }
+
+            const data = {
+                email,
+                password,
+            }
+
+            signinMutate({ data }).then((response) => {
+                // response is the body returned by customInstance
+                // Assuming success if we are here (2xx)
+                // If customInstance returns raw data, response.data might be undefined if response IS the data.
+                // Based on authApis.js logic: response.data.status === 'success'
+                // customInstance returns `data` (body).
+                // So now `response` IS the body. 
+                // Checks on `response.status` (field in JSON)
+                if (response.status === 'success') {
+                    localStorage.setItem('AccessToken', response.data);
+
+                    getPrincipal().then((principalResponse) => {
+                        // principalResponse is also body
+                        console.log('Login successful:', { email: principalResponse.data.email, username: principalResponse.data.username });
+                        if (onAuthSuccess) onAuthSuccess(principalResponse.data.username);
+                        onClose();
+                    });
+                } else {
+                    alert(response.message || '로그인에 실패했습니다.');
+                }
+            }).catch((error) => {
+                const errorData = error.response?.data;
+                if (errorData) {
+                    alert(errorData.message || '로그인에 실패했습니다.');
+                } else {
+                    alert('로그인 중 오류가 발생했습니다.');
+                }
+            });
+            setEmail('');
+            setPassword('');
+            setError('');
         }
     };
 
@@ -63,9 +141,9 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
     };
 
     const switchMode = () => {
-        const newMode = mode === 'login' ? 'signup' : 'login';
+        const newMode = mode === 'signin' ? 'signup' : 'signin';
         if (onModeChange) onModeChange(newMode);
-        setPasswordError('');
+        setError('');
     };
 
     return (
@@ -85,10 +163,10 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
                 <div className="p-8">
                     <div className="text-center mb-6">
                         <h2 className="text-3xl font-serif text-[#3d3226] mb-2">
-                            {mode === 'login' ? '로그인' : '회원가입'}
+                            {mode === 'signin' ? '로그인' : '회원가입'}
                         </h2>
                         <p className="text-[#6b5d4f]">
-                            {mode === 'login'
+                            {mode === 'signin'
                                 ? '십오분:식탁에 오신 것을 환영합니다'
                                 : '새로운 레시피를 공유해보세요'}
                         </p>
@@ -100,8 +178,8 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
                                 <label className="block text-sm mb-2 text-[#3d3226]">닉네임</label>
                                 <input
                                     type="text"
-                                    value={nickname}
-                                    onChange={(e) => setNickname(e.target.value)}
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
                                     className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white"
                                     placeholder="닉네임을 입력하세요"
                                     required
@@ -141,15 +219,15 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
                                     value={passwordConfirm}
                                     onChange={(e) => {
                                         setPasswordConfirm(e.target.value);
-                                        setPasswordError('');
+                                        setError('');
                                     }}
-                                    className={`w-full px-4 py-3 border-2 rounded-md focus:border-[#3d3226] focus:outline-none bg-white ${passwordError ? 'border-red-500' : 'border-[#d4cbbf]'
+                                    className={`w-full px-4 py-3 border-2 rounded-md focus:border-[#3d3226] focus:outline-none bg-white ${error ? 'border-red-500' : 'border-[#d4cbbf]'
                                         }`}
                                     placeholder="••••••••"
                                     required
                                 />
-                                {passwordError && (
-                                    <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                                {error && (
+                                    <p className="text-red-500 text-sm mt-1">{error}</p>
                                 )}
                             </div>
                         )}
@@ -158,12 +236,12 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
                             type="submit"
                             className="w-full py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors font-medium"
                         >
-                            {mode === 'login' ? '로그인' : '가입하기'}
+                            {mode === 'signin' ? '로그인' : '가입하기'}
                         </button>
                     </form>
 
                     {/* Social Login Buttons - Only for Signup */}
-                    {mode === 'signup' && (
+                    {mode === 'signin' && (
                         <div className="mt-6 space-y-3">
                             <div className="relative">
                                 <div className="absolute inset-0 flex items-center">
@@ -201,12 +279,12 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
 
                     <div className="mt-6 text-center">
                         <p className="text-sm text-[#6b5d4f]">
-                            {mode === 'login' ? '계정이 없으신가요? ' : '이미 계정이 있으신가요? '}
+                            {mode === 'signin' ? '계정이 없으신가요? ' : '이미 계정이 있으신가요? '}
                             <button
                                 className="text-[#3d3226] underline hover:text-[#5d4a36]"
                                 onClick={switchMode}
                             >
-                                {mode === 'login' ? '회원가입' : '로그인'}
+                                {mode === 'signin' ? '회원가입' : '로그인'}
                             </button>
                         </p>
                     </div>
