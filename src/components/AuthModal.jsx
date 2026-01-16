@@ -1,9 +1,10 @@
 import { X } from 'lucide-react';
-import { useState } from 'react';
-import { useSignin, useSignup } from '../../apis/generated/user-auth-controller/user-auth-controller';
-import { getPrincipal } from '../../apis/generated/user-account-controller/user-account-controller';
+import { useEffect, useState } from 'react';
+import { useSignin, useSignup } from '../apis/generated/user-auth-controller/user-auth-controller';
+import { getPrincipal } from '../apis/generated/user-account-controller/user-account-controller';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
-export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }) {
+export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange, socialData }) {
     const { mutateAsync: signupMutate } = useSignup();
     const { mutateAsync: signinMutate } = useSignin();
     const [email, setEmail] = useState('');
@@ -12,6 +13,18 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
     const [username, setUsername] = useState('');
     const [error, setError] = useState('');
 
+    useEffect(() => {
+        console.log("socialData : ",socialData);
+        if (socialData) {
+            setEmail(socialData?.email);
+            setUsername(socialData?.username);
+            // You might want to pre-fill other fields or lock email input
+        } else {
+             // Reset fields when not in social signup mode if needed, 
+             // but usually better to rely on useState initial values on mount or manual clear
+        }
+    }, [socialData]);
+    
     const passwordRegex =
         /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_]).{8,16}$/;
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
@@ -62,7 +75,11 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
             const data = {
                 email,
                 password,
-                username
+                username,
+                ...(socialData && {
+                    oauth2Id: socialData.providerUserId,
+                    provider: socialData.provider
+                })
             }
 
             signupMutate({ data }).then((response) => {
@@ -138,6 +155,13 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
     const handleSocialLogin = (provider) => {
         // TODO: Implement social login
         console.log(`${provider} login clicked`);
+        if(provider === 'google') {
+            window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+        } else if(provider === 'naver') {
+            window.location.href = 'http://localhost:8080/oauth2/authorization/naver';
+        } else if(provider === 'kakao') {
+            window.location.href = 'http://localhost:8080/oauth2/authorization/kakao';
+        }
     };
 
     const switchMode = () => {

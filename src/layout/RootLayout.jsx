@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Header } from "../components/Header";
-import { AuthModal } from "../pages/auth-page/AuthModal";
+import { AuthModal } from "../components/AuthModal";
 
 export default function RootLayout() {
     const navigate = useNavigate();

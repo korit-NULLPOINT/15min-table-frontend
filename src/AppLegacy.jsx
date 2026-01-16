@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { TopRecipes } from "./components/TopRecipes";
 import { HighRatedSlider } from "./components/HighRatedSlider";
-import { AuthModal } from "./pages/auth-page/AuthModal";
+import { AuthModal } from "./components/AuthModal";
 import { UserProfile } from "./components/UserProfile";
 import { RecipeDetail } from "./components/RecipeDetail";
 import { RecipeWrite } from "./components/RecipeWrite";
