@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Header } from "./components/Header";
 import { TopRecipes } from "./components/TopRecipes";
 import { HighRatedSlider } from "./components/HighRatedSlider";
-import { AuthModal } from "./pages/auth-page/AuthModal";
+
 import { UserProfile } from "./components/UserProfile";
 import { RecipeDetail } from "./components/RecipeDetail";
 import { RecipeWrite } from "./components/RecipeWrite";
@@ -15,6 +15,7 @@ import { RecipeBoard } from "./components/RecipeBoard";
 import { FollowList } from "./components/FollowList";
 import { OtherUserProfile } from "./components/OtherUserProfile";
 import { recipeDetailsMap } from "./utils/recipeData";
+import { AuthModal } from "./components/AuthModal";
 
 export default function App() {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
