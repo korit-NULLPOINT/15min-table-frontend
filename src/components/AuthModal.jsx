@@ -1,7 +1,7 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
-import { useSignin, useSignup } from '../../apis/generated/user-auth-controller/user-auth-controller';
-import { getPrincipal } from '../../apis/generated/user-account-controller/user-account-controller';
+import { useSignin, useSignup } from '../apis/generated/user-auth-controller/user-auth-controller';
+import { getPrincipal } from '../apis/generated/user-account-controller/user-account-controller';
 
 export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }) {
     const { mutateAsync: signupMutate } = useSignup();
