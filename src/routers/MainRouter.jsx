@@ -6,8 +6,11 @@ import RootLayout from '../layout/RootLayout';
 import HomePage from '../pages/home/home-page/HomePage';
 import MyPageRouter from './MypageRouter';
 import OtherUserProfilePage from '../pages/users/other-user-profile-page/OtherUserProfilePage';
+import OAuth2Page from '../pages/auth-page/OAuth2Page';
 
 export default function MainRouter() {
+
+    
     return (
         <Routes>
             <Route element={<RootLayout />}>

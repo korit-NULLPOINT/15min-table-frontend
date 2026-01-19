@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { ArrowLeft, User as UserIcon } from 'lucide-react';
+import {
+    otherUserCommunityPosts,
+    otherUserRecipePosts,
+} from '../utils/recipeData';
 
 export function OtherUserProfile({
     userId,
@@ -15,46 +19,8 @@ export function OtherUserProfile({
     const displayName = username?.trim() ? username : `사용자#${userId ?? '?'}`;
 
     // Mock user posts (추후 API로 교체)
-    const userRecipePosts = [
-        {
-            id: 1,
-            title: '초간단 김치볶음밥',
-            date: '2026.01.10',
-            thumbnail:
-                'https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?w=400',
-        },
-        {
-            id: 2,
-            title: '크림 파스타 레시피',
-            date: '2026.01.08',
-            thumbnail:
-                'https://images.unsplash.com/photo-1587740907856-997a958a68ac?w=400',
-        },
-        {
-            id: 3,
-            title: '5분만에 완성 덮밥',
-            date: '2026.01.05',
-            thumbnail:
-                'https://images.unsplash.com/photo-1763844668895-6931b4e09458?w=400',
-        },
-    ];
-
-    const userCommunityPosts = [
-        {
-            id: 101,
-            title: '자취 꿀템 공유합니다',
-            date: '2026.01.12',
-            views: 245,
-            comments: 12,
-        },
-        {
-            id: 102,
-            title: '요즘 뭐 해먹고 사나요?',
-            date: '2026.01.09',
-            views: 189,
-            comments: 8,
-        },
-    ];
+    const userRecipePosts = otherUserRecipePosts;
+    const userCommunityPosts = otherUserCommunityPosts;
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">

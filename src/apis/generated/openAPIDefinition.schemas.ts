@@ -5,189 +5,378 @@
  * OpenAPI spec version: v0
  */
 export interface ModifyRecipeReqDto {
-    mainCategoryId?: number;
-    subCategoryId?: number;
-    title?: string;
-    intro?: string;
-    thumbnailImgUrl?: string;
-    ingredients?: string;
-    ingredientImgUrl?: string;
-    steps?: string;
+  mainCategoryId?: number;
+  subCategoryId?: number;
+  title?: string;
+  intro?: string;
+  thumbnailImgUrl?: string;
+  ingredients?: string;
+  ingredientImgUrl?: string;
+  steps?: string;
+}
+
+export interface ApiRespDtoVoid {
+  status?: string;
+  message?: string;
+  data?: unknown;
 }
 
 export interface SignupReqDto {
-    email?: string;
-    password?: string;
-    username?: string;
+  email?: string;
+  password?: string;
+  username?: string;
 }
 
 export interface SigninReqDto {
-    email?: string;
-    password?: string;
+  email?: string;
+  password?: string;
+}
+
+export interface ApiRespDtoString {
+  status?: string;
+  message?: string;
+  data?: string;
 }
 
 export interface ChangeUsernameReqDto {
-    userId?: number;
-    username?: string;
+  userId?: number;
+  username?: string;
 }
 
 export interface ChangeProfileImgReqDto {
-    userId?: number;
-    profileImgUrl?: string;
+  userId?: number;
+  profileImgUrl?: string;
 }
 
 export interface ChangePasswordReqDto {
-    userId?: number;
-    password?: string;
-    newPassword?: string;
+  userId?: number;
+  password?: string;
+  newPassword?: string;
 }
 
 export interface AddRecipeHashtagsReqDto {
-    recipeId?: number;
-    hashtagNames?: string[];
+  recipeId?: number;
+  hashtagNames?: string[];
+}
+
+export interface HashtagRespDto {
+  hashtagId?: number;
+  name?: string;
+}
+
+export interface ApiRespDtoListHashtagRespDto {
+  status?: string;
+  message?: string;
+  data?: HashtagRespDto[];
 }
 
 export interface UpsertRatingReqDto {
-    recipeId?: number;
-    rating?: number;
+  recipeId?: number;
+  rating?: number;
+}
+
+export interface RecipeRatingRespDto {
+  recipeRatingId?: number;
+  recipeId?: number;
+  userId?: number;
+  rating?: number;
+  createDt?: string;
+  updateDt?: string;
+}
+
+export interface ApiRespDtoRecipeRatingRespDto {
+  status?: string;
+  message?: string;
+  data?: RecipeRatingRespDto;
 }
 
 export interface OAuth2SignupReqDto {
-    email?: string;
-    password?: string;
-    username?: string;
-    provider?: string;
-    providerUserId?: string;
+  email?: string;
+  password?: string;
+  username?: string;
+  provider?: string;
+  providerUserId?: string;
 }
 
 export interface OAuth2MergeReqDto {
-    email?: string;
-    password?: string;
-    provider?: string;
-    providerUserId?: string;
+  email?: string;
+  password?: string;
+  provider?: string;
+  providerUserId?: string;
 }
 
 export interface AddCommentReqDto {
-    recipeId?: number;
-    content?: string;
+  recipeId?: number;
+  content?: string;
+}
+
+export interface Comment {
+  commentId?: number;
+  recipeId?: number;
+  userId?: number;
+  content?: string;
+  createDt?: string;
+  updateDt?: string;
+}
+
+export interface ApiRespDtoComment {
+  status?: string;
+  message?: string;
+  data?: Comment;
 }
 
 export interface BoardCreateReqDto {
-    title?: string;
-    boardTypeId?: number;
+  title?: string;
+  boardTypeId?: number;
 }
 
 export interface AddRecipeReqDto {
-    mainCategoryId?: number;
-    subCategoryId?: number;
-    title?: string;
-    intro?: string;
-    thumbnailImgUrl?: string;
-    ingredients?: string;
-    ingredientImgUrl?: string;
-    steps?: string;
+  mainCategoryId?: number;
+  subCategoryId?: number;
+  title?: string;
+  intro?: string;
+  thumbnailImgUrl?: string;
+  ingredients?: string;
+  ingredientImgUrl?: string;
+  steps?: string;
 }
 
-export type ModifyRecipe200 = { [key: string]: unknown };
+export interface ApiRespDtoInteger {
+  status?: string;
+  message?: string;
+  data?: number;
+}
 
-export type Signup200 = { [key: string]: unknown };
+export interface Role {
+  roleId?: number;
+  roleName?: string;
+  roleNameKor?: string;
+}
 
-export type Signin200 = { [key: string]: unknown };
+export interface UserRole {
+  userRoleId?: number;
+  userId?: number;
+  roleId?: number;
+  createDt?: string;
+  updateDt?: string;
+  role?: Role;
+}
 
-export type Withdraw200 = { [key: string]: unknown };
+export interface GrantedAuthority {
+  authority?: string;
+}
 
-export type ChangeUsername200 = { [key: string]: unknown };
+export interface PrincipalUser {
+  userId?: number;
+  email?: string;
+  username?: string;
+  profileImgUrl?: string;
+  status?: string;
+  userRoles?: UserRole[];
+  authorities?: GrantedAuthority[];
+  enabled?: boolean;
+  accountNonExpired?: boolean;
+  credentialsNonExpired?: boolean;
+  accountNonLocked?: boolean;
+}
 
-export type ChangeProfileImg200 = { [key: string]: unknown };
+export interface ApiRespDtoPrincipalUser {
+  status?: string;
+  message?: string;
+  data?: PrincipalUser;
+}
 
-export type ChangePassword200 = { [key: string]: unknown };
+export interface RatingSummaryRespDto {
+  avgRating?: number;
+  countRating?: number;
+}
 
-export type AddRecipeHashtags200 = { [key: string]: unknown };
+export interface ApiRespDtoRatingSummaryRespDto {
+  status?: string;
+  message?: string;
+  data?: RatingSummaryRespDto;
+}
 
-export type UpsertRating200 = { [key: string]: unknown };
+export interface NotificationRespDto {
+  notificationId?: number;
+  actorUserId?: number;
+  actorUsername?: string;
+  notificationType?: string;
+  recipeId?: number;
+  isRead?: number;
+  createDt?: string;
+}
 
-export type DeleteRating200 = { [key: string]: unknown };
+export interface ApiRespDtoListNotificationRespDto {
+  status?: string;
+  message?: string;
+  data?: NotificationRespDto[];
+}
 
-export type Signup1200 = { [key: string]: unknown };
+export interface FollowStatusRespDto {
+  following?: boolean;
+}
 
-export type Merge200 = { [key: string]: unknown };
+export interface ApiRespDtoFollowStatusRespDto {
+  status?: string;
+  message?: string;
+  data?: FollowStatusRespDto;
+}
 
-export type MarkAsRead200 = { [key: string]: unknown };
+export interface FollowRespDto {
+  followId?: number;
+  userId?: number;
+  username?: string;
+  profileImgUrl?: string;
+  createDt?: string;
+}
 
-export type MarkAllAsRead200 = { [key: string]: unknown };
+export interface ApiRespDtoListFollowRespDto {
+  status?: string;
+  message?: string;
+  data?: FollowRespDto[];
+}
 
-export type Follow200 = { [key: string]: unknown };
+export interface CommentRespDto {
+  commentId?: number;
+  recipeId?: number;
+  userId?: number;
+  content?: string;
+  createDt?: string;
+  updateDt?: string;
+}
 
-export type Unfollow200 = { [key: string]: unknown };
+export interface ApiRespDtoListCommentRespDto {
+  status?: string;
+  message?: string;
+  data?: CommentRespDto[];
+}
 
-export type DeleteComment200 = { [key: string]: unknown };
+export interface ApiRespDtoBoolean {
+  status?: string;
+  message?: string;
+  data?: boolean;
+}
 
-export type AddComment200 = { [key: string]: unknown };
+export interface BookmarkRespDto {
+  recipeId?: number;
+  createDt?: string;
+}
 
-export type ExistsByRecipeId200 = { [key: string]: unknown };
+export interface ApiRespDtoListBookmarkRespDto {
+  status?: string;
+  message?: string;
+  data?: BookmarkRespDto[];
+}
 
-export type AddBookmark200 = { [key: string]: unknown };
+export interface BoardType {
+  boardTypeId?: number;
+  boardTypeName?: string;
+  boardTypeNameKor?: string;
+}
 
-export type DeleteBookmark200 = { [key: string]: unknown };
+export interface Board {
+  boardId?: number;
+  title?: string;
+  boardTypeId?: number;
+  createDt?: string;
+  updateDt?: string;
+  boardType?: BoardType;
+}
 
-export type GetBoardList200 = { [key: string]: unknown };
+export interface ApiRespDtoListBoard {
+  status?: string;
+  message?: string;
+  data?: Board[];
+}
 
-export type AddBoard200 = { [key: string]: unknown };
+export interface RecipeListRespDto {
+  recipeId?: number;
+  thumbnailImgUrl?: string;
+  viewCount?: number;
+  avgRating?: number;
+  title?: string;
+  username?: string;
+}
 
-export type AddRecipe200 = { [key: string]: unknown };
+export interface RecipeListPageRespDto {
+  items?: RecipeListRespDto[];
+  totalCount?: number;
+  page?: number;
+  size?: number;
+}
 
-export type ChangeUsername1200 = { [key: string]: unknown };
+export interface ApiRespDtoRecipeListPageRespDto {
+  status?: string;
+  message?: string;
+  data?: RecipeListPageRespDto;
+}
 
-export type ChangePassword1200 = { [key: string]: unknown };
+export interface RecipeDetailRespDto {
+  recipeId?: number;
+  boardId?: number;
+  mainCategoryId?: number;
+  subCategoryId?: number;
+  userId?: number;
+  username?: string;
+  title?: string;
+  intro?: string;
+  thumbnailImgUrl?: string;
+  ingredients?: string;
+  ingredientImgUrl?: string;
+  steps?: string;
+  viewCount?: number;
+  createDt?: string;
+  updateDt?: string;
+  avgRating?: number;
+  ratingCount?: number;
+  commentCount?: number;
+  hashtags?: HashtagRespDto[];
+}
 
-export type GetPrincipal200 = { [key: string]: unknown };
+export interface ApiRespDtoRecipeDetailRespDto {
+  status?: string;
+  message?: string;
+  data?: RecipeDetailRespDto;
+}
+
+export interface User {
+  userId?: number;
+  email?: string;
+  username?: string;
+  profileImgUrl?: string;
+  createDt?: string;
+  updateDt?: string;
+  status?: string;
+  withdrawDt?: string;
+  deleteDt?: string;
+  userRoles?: UserRole[];
+  active?: boolean;
+}
+
+export interface ApiRespDtoUser {
+  status?: string;
+  message?: string;
+  data?: User;
+}
+
+export interface ApiRespDtoListUser {
+  status?: string;
+  message?: string;
+  data?: User[];
+}
 
 export type SearchHashtagsParams = {
-    keyword: string;
+keyword: string;
 };
-
-export type SearchHashtags200 = { [key: string]: unknown };
-
-export type GetHashtagsByRecipeId200 = { [key: string]: unknown };
-
-export type GetSummary200 = { [key: string]: unknown };
-
-export type GetRating200 = { [key: string]: unknown };
 
 export type GetNotificationsParams = {
-    cursor?: number;
-    size?: number;
+cursor?: number;
+size?: number;
 };
-
-export type GetNotifications200 = { [key: string]: unknown };
-
-export type GetUnreadCount200 = { [key: string]: unknown };
-
-export type GetFollowStatus200 = { [key: string]: unknown };
-
-export type GetFollowings200 = { [key: string]: unknown };
-
-export type GetFollowers200 = { [key: string]: unknown };
-
-export type GetMyCommentList200 = { [key: string]: unknown };
-
-export type GetCommentListByRecipeId200 = { [key: string]: unknown };
-
-export type GetBookmarkListByUserId200 = { [key: string]: unknown };
 
 export type GetRecipeListParams = {
-    page?: number;
-    size?: number;
+page?: number;
+size?: number;
 };
 
-export type GetRecipeList200 = { [key: string]: unknown };
-
-export type GetRecipeDetail200 = { [key: string]: unknown };
-
-export type GetUserByUsername200 = { [key: string]: unknown };
-
-export type GetUserList200 = { [key: string]: unknown };
-
-export type RemoveBoard200 = { [key: string]: unknown };
-
-export type RemoveRecipe200 = { [key: string]: unknown };

@@ -1,63 +1,9 @@
 import { Star, ChevronLeft, ChevronRight, Award } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { highRatedRecipes } from '../utils/recipeData';
 
-const highRatedRecipes = [
-    {
-        id: 1,
-        title: '얼큰한 김치찌개',
-        author: '김치러버',
-        rating: 5.0,
-        reviews: 342,
-        image: 'https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrb3JlYW4lMjBmb29kJTIwcmVjaXBlfGVufDF8fHx8MTc2Nzc2MjY5Mnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '자취생 필수 메뉴! 간단하고 맛있는 김치찌개',
-    },
-    {
-        id: 2,
-        title: '로제 파스타',
-        author: '파스타킹',
-        rating: 4.9,
-        reviews: 287,
-        image: 'https://images.unsplash.com/photo-1587740907856-997a958a68ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYXN0YSUyMGNvb2tpbmd8ZW58MXx8fHwxNzY3NjkzODg1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '레스토랑 맛을 집에서! 초간단 로제 파스타',
-    },
-    {
-        id: 3,
-        title: '참치 마요 덮밥',
-        author: '덮밥마스터',
-        rating: 4.9,
-        reviews: 421,
-        image: 'https://images.unsplash.com/photo-1628521061262-19b5cdb7eee5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyaWNlJTIwYm93bHxlbnwxfHx8fDE3Njc3NDA1ODZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '5분이면 충분! 간편하고 맛있는 한끼',
-    },
-    {
-        id: 4,
-        title: '라면 업그레이드',
-        author: '라면장인',
-        rating: 4.8,
-        reviews: 563,
-        image: 'https://images.unsplash.com/photo-1627900440398-5db32dba8db1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxub29kbGVzJTIwcmFtZW58ZW58MXx8fHwxNzY3NzYyNjk0fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '평범한 라면을 특별하게 만드는 비법',
-    },
-    {
-        id: 5,
-        title: '뚝배기 된장찌개',
-        author: '집밥요리사',
-        rating: 5.0,
-        reviews: 298,
-        image: 'https://images.unsplash.com/photo-1560684352-8497838a2229?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb3VwJTIwc3Rld3xlbnwxfHx8fDE3Njc3NjI2OTV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '엄마 손맛 그대로! 따뜻한 된장찌개',
-    },
-    {
-        id: 6,
-        title: '에그 토스트',
-        author: '아침요리',
-        rating: 4.9,
-        reviews: 412,
-        image: 'https://images.unsplash.com/photo-1689020353604-8041221e1273?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmVha2Zhc3QlMjB0b2FzdHxlbnwxfHx8fDE3Njc3MDM4ODF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '든든한 아침을 위한 에그 토스트',
-    },
-];
+
 
 export function HighRatedSlider({ onRecipeClick }) {
     const scrollContainerRef = useRef(null);

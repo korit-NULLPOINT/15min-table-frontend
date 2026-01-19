@@ -132,6 +132,7 @@ export function AuthModal({
                 } else {
                     // 일반 로그인
                     const data = { email, password };
+                    console.log(data);
                     response = await signinMutate({ data });
                 }
 
@@ -141,13 +142,8 @@ export function AuthModal({
                      // Assuming response.data is the token string based on existing code logic
                     localStorage.setItem('AccessToken', response.data);
 
-                    const principalResponse = await getPrincipal();
-                    console.log('Login successful:', {
-                        email: principalResponse.data.email,
-                        username: principalResponse.data.username,
-                    });
                     if (onAuthSuccess)
-                        onAuthSuccess(principalResponse.data.username);
+                        onAuthSuccess();
                     onClose();
                 } else {
                      alert(response.message || '로그인에 실패했습니다.');
@@ -171,18 +167,10 @@ export function AuthModal({
     };
 
     const handleSocialLogin = (provider) => {
-        // TODO: Implement social login
         console.log(`${provider} login clicked`);
-        if (provider === 'google') {
-            window.location.href =
-                'http://localhost:8080/oauth2/authorization/google';
-        } else if (provider === 'naver') {
-            window.location.href =
-                'http://localhost:8080/oauth2/authorization/naver';
-        } else if (provider === 'kakao') {
-            window.location.href =
-                'http://localhost:8080/oauth2/authorization/kakao';
-        }
+        const backendUrl = 'http://localhost:8080';
+        const targetUrl = `${backendUrl}/oauth2/authorization/${provider}`;
+        window.location.href = targetUrl;
     };
 
     const switchMode = () => {

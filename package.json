@@ -8,7 +8,7 @@
         "build": "vite build",
         "lint": "eslint .",
         "preview": "vite preview",
-        "codegen": "orval --config ./configs/orval.config.ts"
+        "codegen": "orval --config ./configs/orval.config.js"
     },
     "dependencies": {
         "@emotion/react": "^11.14.0",
@@ -25,7 +25,7 @@
         "react-spinners": "^0.17.0",
         "tailwindcss": "^4.1.18",
         "uuid": "^13.0.0",
-        "zustand": "^5.0.9"
+        "zustand": "^5.0.10"
     },
     "devDependencies": {
         "@eslint/js": "^9.39.1",

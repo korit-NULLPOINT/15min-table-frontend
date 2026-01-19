@@ -9,12 +9,12 @@ const COMMUNITY_BOARD_ID = 2;
 export default function MyProfilePage() {
     const navigate = useNavigate();
 
-    const username = localStorage.getItem('userNickname') || '';
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
+    
     useEffect(() => {
-        if (!isLoggedIn) navigate('/');
-    }, [isLoggedIn, navigate]);
+        const token = localStorage.getItem('AccessToken');
+        if (!token) navigate('/');
+    }, [navigate]);
 
     const onNavigate = (key) => {
         if (key === 'home') navigate('/');
@@ -32,7 +32,7 @@ export default function MyProfilePage() {
     // ✅ 내가 쓴 커뮤니티/댓글 -> 커뮤니티 상세
     // const onCommunityPostClick = (postId) => {
     //     navigate(`/boards/${COMMUNITY_BOARD_ID}/free/${postId}`);
-    // };
+    //   };
 
     // (선택) 수정 라우트도 붙일 거면
     const onEditRecipe = (recipeId) => {
@@ -46,14 +46,11 @@ export default function MyProfilePage() {
     // ✅ 로그아웃도 마이페이지 버튼이 있으면 연결
     const onLogout = () => {
         localStorage.removeItem('AccessToken');
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('userNickname');
         navigate('/');
     };
 
     return (
         <UserProfile
-            username={username}
             onNavigate={onNavigate}
             onFollowersClick={onFollowersClick}
             onFollowingClick={onFollowingClick}
