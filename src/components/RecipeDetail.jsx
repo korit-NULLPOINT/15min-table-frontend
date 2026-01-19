@@ -267,8 +267,7 @@ export function RecipeDetail({
                 {/* Back Button */}
                 <button
                     onClick={() => onNavigate('home')}
-                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
-                >
+                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md">
                     <ArrowLeft size={20} />
                     목록으로 돌아가기
                 </button>
@@ -294,11 +293,14 @@ export function RecipeDetail({
                                 <UserIcon size={18} />
                                 <span
                                     className="cursor-pointer hover:underline"
-                                    onClick={() =>
-                                        onAuthorClick &&
-                                        onAuthorClick(recipe.author)
-                                    }
-                                >
+                                    onClick={() => {
+                                        const authorId = recipe.authorId;
+                                        if (!authorId) return; // authorId 없으면 아무것도 안 함(또는 alert)
+                                        onAuthorClick?.(
+                                            authorId,
+                                            recipe.author,
+                                        );
+                                    }}>
                                     {recipe.author}
                                 </span>
                             </div>
@@ -330,8 +332,7 @@ export function RecipeDetail({
                                     <button
                                         key={star}
                                         onClick={() => handleRatingClick(star)}
-                                        className="transition-transform hover:scale-110"
-                                    >
+                                        className="transition-transform hover:scale-110">
                                         <Star
                                             size={32}
                                             fill={
@@ -363,8 +364,7 @@ export function RecipeDetail({
                                     isFavorited
                                         ? 'bg-blue-100 border-blue-500 text-blue-700'
                                         : 'border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226]'
-                                }`}
-                            >
+                                }`}>
                                 <Bookmark
                                     size={20}
                                     fill={isFavorited ? 'currentColor' : 'none'}
@@ -390,8 +390,7 @@ export function RecipeDetail({
                         <h2 className="text-2xl text-[#3d3226]">재료</h2>
                         <button
                             onClick={handleAIStoreMap}
-                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md"
-                        >
+                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md">
                             <Sparkles size={16} />내 근처 재료 찾기
                         </button>
                     </div>
@@ -400,8 +399,7 @@ export function RecipeDetail({
                         {recipe.ingredients.map((ingredient, index) => (
                             <li
                                 key={index}
-                                className="flex items-start gap-3 text-[#6b5d4f]"
-                            >
+                                className="flex items-start gap-3 text-[#6b5d4f]">
                                 <span className="w-2 h-2 bg-[#3d3226] rounded-full mt-2 flex-shrink-0" />
                                 <span className="text-lg">{ingredient}</span>
                             </li>
@@ -425,8 +423,7 @@ export function RecipeDetail({
                                 {nearbyStores.map((store) => (
                                     <div
                                         key={store.id}
-                                        className="p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors cursor-pointer"
-                                    >
+                                        className="p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors cursor-pointer">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 mb-1">
@@ -465,8 +462,7 @@ export function RecipeDetail({
                                                         store.address,
                                                     )
                                                 }
-                                                className="px-4 py-2 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors text-sm"
-                                            >
+                                                className="px-4 py-2 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors text-sm">
                                                 길찾기
                                             </button>
                                         </div>
@@ -511,8 +507,7 @@ export function RecipeDetail({
                         {mockHashtags.map((tag) => (
                             <button
                                 key={tag}
-                                className="px-4 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors"
-                            >
+                                className="px-4 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors">
                                 #{tag}
                             </button>
                         ))}
@@ -551,8 +546,7 @@ export function RecipeDetail({
                                                         comment.id,
                                                     )
                                                 }
-                                                className="ml-2 text-red-500"
-                                            >
+                                                className="ml-2 text-red-500">
                                                 <Trash2 size={16} />
                                             </button>
                                         )}
@@ -573,8 +567,7 @@ export function RecipeDetail({
                         />
                         <button
                             onClick={handleCommentSubmit}
-                            className="mt-4 px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5c4c40] transition-colors"
-                        >
+                            className="mt-4 px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5c4c40] transition-colors">
                             댓글 작성
                         </button>
                     </div>
@@ -589,8 +582,7 @@ export function RecipeDetail({
                             <h3 className="text-xl">우편번호 찾기</h3>
                             <button
                                 onClick={handleZipcodeModalClose}
-                                className="hover:bg-[#5d4a36] p-1 rounded transition-colors"
-                            >
+                                className="hover:bg-[#5d4a36] p-1 rounded transition-colors">
                                 <X size={24} />
                             </button>
                         </div>
@@ -604,8 +596,7 @@ export function RecipeDetail({
                                 {/* Daum Postcode Button */}
                                 <button
                                     onClick={handleDaumPostcode}
-                                    className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors flex items-center justify-center gap-2 shadow-md"
-                                >
+                                    className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors flex items-center justify-center gap-2 shadow-md">
                                     <Search size={20} />
                                     주소 검색
                                 </button>
@@ -657,14 +648,12 @@ export function RecipeDetail({
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowEmailWarning(false)}
-                                    className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] text-[#3d3226] rounded-md hover:border-[#3d3226] transition-colors"
-                                >
+                                    className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] text-[#3d3226] rounded-md hover:border-[#3d3226] transition-colors">
                                     취소
                                 </button>
                                 <button
                                     onClick={handleGoToProfile}
-                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-md"
-                                >
+                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-md">
                                     이메일 인증하기
                                 </button>
                             </div>

@@ -17,6 +17,7 @@ export function Header({
     username,
     onRandomRecipe,
     onNotificationClick,
+    onLogout,
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -171,33 +172,6 @@ export function Header({
         setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
     };
 
-    const mainCategories = [
-        '고기류',
-        '해산물',
-        '계란',
-        '밥 / 면',
-        '김치 / 발효식품',
-        '두부 / 콩류',
-        '가공식품',
-        '냉동식품',
-        '채소',
-        '간편식 / 즉석식품',
-    ];
-
-    const subCategories = [
-        '5분 요리',
-        '전자레인지',
-        '재료 3개 이하',
-        '불 없이 요리',
-        '혼밥 / 한 그릇',
-    ];
-
-    const handleCategoryClick = (category) => {
-        setIsSidebarOpen(false);
-        // TODO: Filter by category
-        console.log('Category clicked:', category);
-    };
-
     return (
         <>
             <header className="fixed top-0 left-0 right-0 bg-[#f5f1eb] border-b-2 border-[#3d3226] z-50">
@@ -207,15 +181,13 @@ export function Header({
                         <button
                             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                             className="p-2 hover:bg-[#e5dfd5] rounded-lg transition-colors"
-                            aria-label="메뉴"
-                        >
+                            aria-label="메뉴">
                             <Menu size={24} className="text-[#3d3226]" />
                         </button>
 
                         <button
                             onClick={() => onNavigate?.('home')}
-                            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                        >
+                            className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                             {/* Logo: Plate with 15 and utensils */}
                             <div className="relative w-12 h-12 flex items-center justify-center">
                                 {/* Outer circle - plate/table */}
@@ -252,15 +224,13 @@ export function Header({
                             <>
                                 <button
                                     onClick={() => onNavigate?.('write')}
-                                    className="flex items-center gap-2 px-5 py-2 bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36] transition-colors rounded-md"
-                                >
+                                    className="flex items-center gap-2 px-5 py-2 bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36] transition-colors rounded-md">
                                     <PenSquare size={20} />
                                     글쓰기
                                 </button>
                                 <button
                                     onClick={() => onNavigate?.('profile')}
-                                    className="flex items-center gap-2 px-5 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
-                                >
+                                    className="flex items-center gap-2 px-5 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md">
                                     <User size={20} />
                                     {username || '내 프로필'}
                                 </button>
@@ -268,8 +238,7 @@ export function Header({
                                     onClick={() =>
                                         setShowNotifications(!showNotifications)
                                     }
-                                    className="relative"
-                                >
+                                    className="relative">
                                     <Bell
                                         size={20}
                                         className="text-[#3d3226] hover:text-[#5d4a36] transition-colors"
@@ -285,14 +254,12 @@ export function Header({
                             <>
                                 <button
                                     onClick={() => onOpenAuth('signin')}
-                                    className="px-6 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
-                                >
+                                    className="px-6 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md">
                                     로그인
                                 </button>
                                 <button
                                     onClick={() => onOpenAuth('signup')}
-                                    className="px-6 py-2 bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36] transition-colors rounded-md"
-                                >
+                                    className="px-6 py-2 bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36] transition-colors rounded-md">
                                     회원가입
                                 </button>
                             </>
@@ -313,8 +280,7 @@ export function Header({
             <div
                 className={`fixed top-0 left-0 h-full w-80 bg-[#f5f1eb] border-r-2 border-[#3d3226] z-50 transform transition-transform duration-300 overflow-y-auto ${
                     isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                }`}
-            >
+                }`}>
                 <div className="p-6">
                     {/* Close Button */}
                     <div className="flex items-center justify-between mb-6">
@@ -323,8 +289,7 @@ export function Header({
                         </h2>
                         <button
                             onClick={() => setIsSidebarOpen(false)}
-                            className="p-2 hover:bg-[#e5dfd5] rounded-lg transition-colors"
-                        >
+                            className="p-2 hover:bg-[#e5dfd5] rounded-lg transition-colors">
                             <X size={24} className="text-[#3d3226]" />
                         </button>
                     </div>
@@ -338,8 +303,7 @@ export function Header({
                                     onNavigate?.('board');
                                     setIsSidebarOpen(false);
                                 }}
-                                className="w-full text-left px-4 py-4 bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36] transition-colors rounded-md text-lg font-medium"
-                            >
+                                className="w-full text-left px-4 py-4 bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36] transition-colors rounded-md text-lg font-medium">
                                 📋 레시피 게시판
                             </button>
                         </div>
@@ -351,8 +315,7 @@ export function Header({
                                     onNavigate?.('community');
                                     setIsSidebarOpen(false);
                                 }}
-                                className="w-full text-left px-4 py-4 bg-[#5d4a36] text-[#f5f1eb] hover:bg-[#3d3226] transition-colors rounded-md text-lg font-medium"
-                            >
+                                className="w-full text-left px-4 py-4 bg-[#5d4a36] text-[#f5f1eb] hover:bg-[#3d3226] transition-colors rounded-md text-lg font-medium">
                                 💬 커뮤니티
                             </button>
                         </div>
@@ -364,8 +327,7 @@ export function Header({
                             onRandomRecipe?.();
                             setIsSidebarOpen(false);
                         }}
-                        className="mt-12 mb-12 flex flex-col items-center py-8 bg-white/50 rounded-lg border-2 border-[#d4cbbf] w-full hover:bg-white/80 hover:border-[#3d3226] transition-all hover:shadow-lg group"
-                    >
+                        className="mt-12 mb-12 flex flex-col items-center py-8 bg-white/50 rounded-lg border-2 border-[#d4cbbf] w-full hover:bg-white/80 hover:border-[#3d3226] transition-all hover:shadow-lg group">
                         {/* Large decorative logo */}
                         <div className="relative w-32 h-32 mb-4">
                             {/* Outer decorative circle - vintage plate */}
@@ -376,8 +338,7 @@ export function Header({
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <span
                                     className="text-5xl font-bold text-[#3d3226] relative z-10 group-hover:scale-110 transition-transform"
-                                    style={{ fontFamily: 'serif' }}
-                                >
+                                    style={{ fontFamily: 'serif' }}>
                                     15
                                 </span>
                             </div>
@@ -412,15 +373,25 @@ export function Header({
                     {/* Bottom Auth Buttons */}
                     <div className="absolute bottom-0 left-0 right-0 p-6 bg-[#f5f1eb] border-t-2 border-[#d4cbbf]">
                         {isLoggedIn ? (
-                            <button
-                                onClick={() => {
-                                    onNavigate?.('profile');
-                                    setIsSidebarOpen(false);
-                                }}
-                                className="w-full px-4 py-3 bg-white border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md font-medium"
-                            >
-                                👤 마이페이지
-                            </button>
+                            <div className="space-y-3">
+                                <button
+                                    onClick={() => {
+                                        onNavigate?.('profile');
+                                        setIsSidebarOpen(false);
+                                    }}
+                                    className="w-full px-4 py-3 bg-white border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md font-medium">
+                                    👤 마이페이지
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        onLogout?.(); // ✅ 로그아웃 실행
+                                        setIsSidebarOpen(false);
+                                    }}
+                                    className="w-full px-4 py-3 bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-[#f5f1eb] transition-colors rounded-md font-medium">
+                                    🚪 로그아웃
+                                </button>
+                            </div>
                         ) : (
                             <div className="space-y-3">
                                 <button
@@ -428,8 +399,7 @@ export function Header({
                                         onOpenAuth('signin');
                                         setIsSidebarOpen(false);
                                     }}
-                                    className="w-full px-4 py-3 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md font-medium"
-                                >
+                                    className="w-full px-4 py-3 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md font-medium">
                                     로그인
                                 </button>
                                 <button
@@ -437,8 +407,7 @@ export function Header({
                                         onOpenAuth('signup');
                                         setIsSidebarOpen(false);
                                     }}
-                                    className="w-full px-4 py-3 bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36] transition-colors rounded-md font-medium"
-                                >
+                                    className="w-full px-4 py-3 bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36] transition-colors rounded-md font-medium">
                                     회원가입
                                 </button>
                             </div>
@@ -451,8 +420,7 @@ export function Header({
             {showNotifications && (
                 <div
                     className="fixed top-16 right-6 bg-[#f5f1eb] border-2 border-[#3d3226] rounded-lg shadow-lg z-50 w-96 max-h-[80vh] flex flex-col"
-                    ref={notificationRef}
-                >
+                    ref={notificationRef}>
                     <div className="p-4 border-b-2 border-[#d4cbbf] flex items-center justify-between">
                         <h3 className="text-xl font-serif text-[#3d3226]">
                             알림
@@ -460,8 +428,7 @@ export function Header({
                         {unreadCount > 0 && (
                             <button
                                 onClick={handleMarkAllAsRead}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 transition-colors rounded-md text-xs font-medium shadow-sm"
-                            >
+                                className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 transition-colors rounded-md text-xs font-medium shadow-sm">
                                 <CheckCheck size={14} />
                                 <span>모두 읽기</span>
                             </button>
@@ -469,8 +436,7 @@ export function Header({
                     </div>
 
                     <div
-                        className={`flex-1 overflow-y-auto p-4 ${showAllNotifications ? 'max-h-[calc(80vh-200px)]' : ''}`}
-                    >
+                        className={`flex-1 overflow-y-auto p-4 ${showAllNotifications ? 'max-h-[calc(80vh-200px)]' : ''}`}>
                         <div className="space-y-2">
                             {(showAllNotifications
                                 ? notifications
@@ -482,8 +448,7 @@ export function Header({
                                         notification.isRead
                                             ? 'bg-white border-[#e5dfd5]'
                                             : 'bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200'
-                                    }`}
-                                >
+                                    }`}>
                                     <div className="flex items-start gap-3 py-3 px-4 relative">
                                         {/* Checkbox */}
                                         <button
@@ -497,8 +462,7 @@ export function Header({
                                                 notification.isRead
                                                     ? 'bg-gradient-to-r from-emerald-500 to-teal-600 border-emerald-600'
                                                     : 'bg-white border-[#d4cbbf] hover:border-emerald-400'
-                                            }`}
-                                        >
+                                            }`}>
                                             {notification.isRead && (
                                                 <CheckCircle2
                                                     size={14}
@@ -513,15 +477,13 @@ export function Header({
                                                     notification,
                                                 )
                                             }
-                                            className="flex items-start gap-3 flex-1 cursor-pointer"
-                                        >
+                                            className="flex items-start gap-3 flex-1 cursor-pointer">
                                             <div
                                                 className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                                                     notification.isRead
                                                         ? 'bg-[#d4cbbf]'
                                                         : 'bg-gradient-to-r from-emerald-400 to-teal-500'
-                                                }`}
-                                            >
+                                                }`}>
                                                 {notification.type ===
                                                 'follow' ? (
                                                     <User
@@ -549,8 +511,7 @@ export function Header({
                                                         notification.isRead
                                                             ? 'text-[#6b5d4f]'
                                                             : 'text-[#3d3226]'
-                                                    }`}
-                                                >
+                                                    }`}>
                                                     {notification.type ===
                                                     'follow'
                                                         ? `${notification.userName}님이 당신을 팔로우했습니다.`
@@ -575,8 +536,7 @@ export function Header({
                                         !showAllNotifications,
                                     )
                                 }
-                                className="w-full px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 transition-colors rounded-md text-sm font-medium flex items-center justify-center gap-2 shadow-md"
-                            >
+                                className="w-full px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 transition-colors rounded-md text-sm font-medium flex items-center justify-center gap-2 shadow-md">
                                 <span>
                                     {showAllNotifications ? '닫기' : '더보기'}
                                 </span>

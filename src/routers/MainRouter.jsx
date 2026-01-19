@@ -1,16 +1,11 @@
 // src/routers/MainRouter.jsx
-import {
-    Route,
-    RouterProvider,
-    Routes,
-    useSearchParams,
-} from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import AppLegacy from '../AppLegacy';
 import BoardsRouter from './BoardsRouter';
 import RootLayout from '../layout/RootLayout';
 import HomePage from '../pages/home/home-page/HomePage';
-import { useState, useEffect } from 'react';
-import OAuth2Page from '../pages/auth-page/OAuth2Page';
+import MyPageRouter from './MypageRouter';
+import OtherUserProfilePage from '../pages/users/other-user-profile-page/OtherUserProfilePage';
 
 export default function MainRouter() {
     return (
@@ -18,6 +13,8 @@ export default function MainRouter() {
             <Route element={<RootLayout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/boards/*" element={<BoardsRouter />} />
+                <Route path="/me/*" element={<MyPageRouter />} />
+                <Route path="/users/:userId" element={<OtherUserProfilePage />} />
                 <Route
                     path="/auth/oauth2/*"
                     element={<OAuth2Page />}

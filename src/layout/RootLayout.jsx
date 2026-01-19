@@ -34,6 +34,17 @@ export default function RootLayout() {
         }
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem('AccessToken');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userNickname');
+
+        setIsLoggedIn(false);
+        setUserNickname('');
+
+        navigate('/');
+    };
+
     const handleNavigate = (pageKey) => {
         if (pageKey === 'home') navigate('/');
         if (pageKey === 'board') navigate('/boards/1/recipe');
@@ -51,6 +62,7 @@ export default function RootLayout() {
                 username={userNickname} // ✅ (중요) userNickname -> username으로 내려주기
                 onRandomRecipe={() => {}}
                 onNotificationClick={() => {}}
+                onLogout={handleLogout}
             />
 
             <Outlet />

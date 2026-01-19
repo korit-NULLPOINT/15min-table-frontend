@@ -24,8 +24,7 @@ export default function RecipeDetailPage() {
                 </h2>
                 <button
                     className="mt-4 px-4 py-2 rounded bg-[#3d3226] text-[#f5f1eb]"
-                    onClick={() => navigate(`/boards/${boardId}/recipe`)}
-                >
+                    onClick={() => navigate(`/boards/${boardId}/recipe`)}>
                     목록으로
                 </button>
             </div>
@@ -41,7 +40,11 @@ export default function RecipeDetailPage() {
             isLoggedIn={false}
             onOpenAuth={() => {}}
             currentUserNickname=""
-            onAuthorClick={() => {}}
+            onAuthorClick={(authorUserId, authorName) => {
+                navigate(`/users/${authorUserId}`, {
+                    state: { username: authorName },
+                });
+            }}
         />
     );
 }
