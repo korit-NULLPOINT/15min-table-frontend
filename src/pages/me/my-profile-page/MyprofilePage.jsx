@@ -43,6 +43,9 @@ export default function MyProfilePage() {
     //     navigate(`/boards/${COMMUNITY_BOARD_ID}/free/${postId}/edit`);
     //   };
 
+    // ✅ 비밀번호 변경
+    const onChangePasswordClick = () => navigate('/me/change/password');
+
     // ✅ 로그아웃도 마이페이지 버튼이 있으면 연결
     const onLogout = () => {
         localStorage.removeItem('AccessToken');
@@ -58,6 +61,7 @@ export default function MyProfilePage() {
             // onCommunityPostClick={onCommunityPostClick}
             onEditRecipe={onEditRecipe}
             // onEditCommunityPost={onEditCommunityPost}
+            onChangePasswordClick={onChangePasswordClick}
             onLogout={onLogout}
         />
     );
