@@ -147,6 +147,24 @@ export interface ApiRespDtoInteger {
   data?: number;
 }
 
+export interface AiHashtagReqDto {
+  title?: string;
+  intro?: string;
+  ingredients?: string;
+  steps?: string;
+  limit?: number;
+}
+
+export interface AiHashtagRespDto {
+  hashtags?: string[];
+}
+
+export interface ApiRespDtoAiHashtagRespDto {
+  status?: string;
+  message?: string;
+  data?: AiHashtagRespDto;
+}
+
 export interface Role {
   roleId?: number;
   roleName?: string;
