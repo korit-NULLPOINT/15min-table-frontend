@@ -15,9 +15,27 @@ const communityPosts = {
 혹시 요리 초보 분들은 어떻게 연습하셨나요? 
 추천하는 요리나 꿀팁 있으면 공유 부탁드립니다!`,
         comments: [
-            { id: 1, author: '요리고수', date: '2026.01.12', content: '처음엔 저도 그랬어요! 간단한 요리부터 시작하시는 게 좋아요. 김치볶음밥이나 라면같은 거 먼저 마스터하세요!' },
-            { id: 2, author: '자취5년차', date: '2026.01.12', content: '양념 비율은 계량스푼 필수입니다. 대충 넣으면 맛이 달라져요~' },
-            { id: 3, author: '파스타킹', date: '2026.01.12', content: '유튜브에서 백종원님 레시피 따라하면 실패 확률이 낮아요!' },
+            {
+                id: 1,
+                author: '요리고수',
+                date: '2026.01.12',
+                content:
+                    '처음엔 저도 그랬어요! 간단한 요리부터 시작하시는 게 좋아요. 김치볶음밥이나 라면같은 거 먼저 마스터하세요!',
+            },
+            {
+                id: 2,
+                author: '자취5년차',
+                date: '2026.01.12',
+                content:
+                    '양념 비율은 계량스푼 필수입니다. 대충 넣으면 맛이 달라져요~',
+            },
+            {
+                id: 3,
+                author: '파스타킹',
+                date: '2026.01.12',
+                content:
+                    '유튜브에서 백종원님 레시피 따라하면 실패 확률이 낮아요!',
+            },
         ],
     },
     2: {
@@ -34,8 +52,20 @@ const communityPosts = {
 
 다들 어떻게 장보기 하시나요?`,
         comments: [
-            { id: 1, author: '절약왕', date: '2026.01.11', content: '저는 장보기 전에 냉장고 정리부터 해요. 중복 구매 방지!' },
-            { id: 2, author: '쿠폰러버', date: '2026.01.11', content: '마트 앱 할인 쿠폰 진짜 중요하죠! 10% 할인도 쌓이면 큰돈이에요' },
+            {
+                id: 1,
+                author: '절약왕',
+                date: '2026.01.11',
+                content:
+                    '저는 장보기 전에 냉장고 정리부터 해요. 중복 구매 방지!',
+            },
+            {
+                id: 2,
+                author: '쿠폰러버',
+                date: '2026.01.11',
+                content:
+                    '마트 앱 할인 쿠폰 진짜 중요하죠! 10% 할인도 쌓이면 큰돈이에요',
+            },
         ],
     },
     3: {
@@ -48,8 +78,20 @@ const communityPosts = {
 혼밥하기 좋은 식당이나 메뉴 추천 부탁드립니다!
 서울 강남 쪽이면 더 좋구요~`,
         comments: [
-            { id: 1, author: '혼밥고수', date: '2026.01.10', content: '라면집이나 국밥집 추천드려요. 혼자 오는 사람 많아서 눈치 안 보여요!' },
-            { id: 2, author: '맛집탐방', date: '2026.01.10', content: '강남역 근처 덮밥집들 많아요. 카운터석도 있어서 편해요' },
+            {
+                id: 1,
+                author: '혼밥고수',
+                date: '2026.01.10',
+                content:
+                    '라면집이나 국밥집 추천드려요. 혼자 오는 사람 많아서 눈치 안 보여요!',
+            },
+            {
+                id: 2,
+                author: '맛집탐방',
+                date: '2026.01.10',
+                content:
+                    '강남역 근처 덮밥집들 많아요. 카운터석도 있어서 편해요',
+            },
         ],
     },
     4: {
@@ -62,8 +104,19 @@ const communityPosts = {
 음식물도 자꾸 상하고... 
 다들 냉장고 정리 어떻게 하시나요? 보관 팁 있으면 알려주세요!`,
         comments: [
-            { id: 1, author: '깔끔이', date: '2026.01.09', content: '저는 밀폐용기에 날짜 스티커 붙여요. 언제 산 건지 확인하기 좋아요!' },
-            { id: 2, author: '정리고수', date: '2026.01.09', content: '채소는 키친타올로 감싸서 보관하면 오래가요~' },
+            {
+                id: 1,
+                author: '깔끔이',
+                date: '2026.01.09',
+                content:
+                    '저는 밀폐용기에 날짜 스티커 붙여요. 언제 산 건지 확인하기 좋아요!',
+            },
+            {
+                id: 2,
+                author: '정리고수',
+                date: '2026.01.09',
+                content: '채소는 키친타올로 감싸서 보관하면 오래가요~',
+            },
         ],
     },
     5: {
@@ -87,16 +140,35 @@ const communityPosts = {
 
 이 정도면 웬만한 요리는 다 가능해요!`,
         comments: [
-            { id: 1, author: '신입자취생', date: '2026.01.08', content: '감사합니다! 이제 막 자취 시작하는데 딱 필요한 정보네요' },
-            { id: 2, author: '요리러버', date: '2026.01.08', content: '에어프라이어는 진짜 필수템이에요! 기름 안 써서 건강에도 좋아요' },
-            { id: 3, author: '알뜰왕', date: '2026.01.08', content: '다이소에서 조리도구 사면 저렴해요~' },
+            {
+                id: 1,
+                author: '신입자취생',
+                date: '2026.01.08',
+                content:
+                    '감사합니다! 이제 막 자취 시작하는데 딱 필요한 정보네요',
+            },
+            {
+                id: 2,
+                author: '요리러버',
+                date: '2026.01.08',
+                content:
+                    '에어프라이어는 진짜 필수템이에요! 기름 안 써서 건강에도 좋아요',
+            },
+            {
+                id: 3,
+                author: '알뜰왕',
+                date: '2026.01.08',
+                content: '다이소에서 조리도구 사면 저렴해요~',
+            },
         ],
     },
 };
 
 export function CommunityDetail({ postId, onNavigate, username }) {
     const [newComment, setNewComment] = useState('');
-    const [comments, setComments] = useState(communityPosts[postId]?.comments || []);
+    const [comments, setComments] = useState(
+        communityPosts[postId]?.comments || [],
+    );
 
     const post = communityPosts[postId];
 
@@ -112,7 +184,9 @@ export function CommunityDetail({ postId, onNavigate, username }) {
                         목록으로 돌아가기
                     </button>
                     <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8 text-center">
-                        <p className="text-[#6b5d4f]">게시글을 찾을 수 없습니다.</p>
+                        <p className="text-[#6b5d4f]">
+                            게시글을 찾을 수 없습니다.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -134,7 +208,9 @@ export function CommunityDetail({ postId, onNavigate, username }) {
     };
 
     const handleDeleteComment = (commentId) => {
-        setComments(prevComments => prevComments.filter(comment => comment.id !== commentId));
+        setComments((prevComments) =>
+            prevComments.filter((comment) => comment.id !== commentId),
+        );
     };
 
     return (
@@ -187,24 +263,38 @@ export function CommunityDetail({ postId, onNavigate, username }) {
                             <div key={comment.id} className="relative p-6">
                                 <div className="flex items-start gap-3 mb-2">
                                     <div className="w-8 h-8 bg-[#d4cbbf] rounded-full flex items-center justify-center flex-shrink-0">
-                                        <User size={16} className="text-[#3d3226]" />
+                                        <User
+                                            size={16}
+                                            className="text-[#3d3226]"
+                                        />
                                     </div>
                                     <div className="flex-1 pr-8">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-medium text-[#3d3226]">{comment.author}</span>
-                                            <span className="text-sm text-[#6b5d4f]">{comment.date}</span>
+                                            <span className="font-medium text-[#3d3226]">
+                                                {comment.author}
+                                            </span>
+                                            <span className="text-sm text-[#6b5d4f]">
+                                                {comment.date}
+                                            </span>
                                         </div>
-                                        <p className="text-[#3d3226]">{comment.content}</p>
+                                        <p className="text-[#3d3226]">
+                                            {comment.content}
+                                        </p>
                                     </div>
-                                    {username && username === comment.author && (
-                                        <button
-                                            onClick={() => handleDeleteComment(comment.id)}
-                                            className="absolute top-4 right-4 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
-                                            title="댓글 삭제"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    )}
+                                    {username &&
+                                        username === comment.author && (
+                                            <button
+                                                onClick={() =>
+                                                    handleDeleteComment(
+                                                        comment.id,
+                                                    )
+                                                }
+                                                className="absolute top-4 right-4 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                                                title="댓글 삭제"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
                                 </div>
                             </div>
                         ))}

@@ -4,402 +4,548 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult
+    DataTag,
+    DefinedInitialDataOptions,
+    DefinedUseQueryResult,
+    MutationFunction,
+    QueryClient,
+    QueryFunction,
+    QueryKey,
+    UndefinedInitialDataOptions,
+    UseMutationOptions,
+    UseMutationResult,
+    UseQueryOptions,
+    UseQueryResult,
 } from '@tanstack/react-query';
 
-import type {
-  AddCommentReqDto
-} from '../openAPIDefinition.schemas';
+import type { AddCommentReqDto } from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-
-
 export type deleteCommentResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type deleteCommentResponseSuccess = (deleteCommentResponse200) & {
-  headers: Headers;
+    data: Blob;
+    status: 200;
 };
-;
 
-export type deleteCommentResponse = (deleteCommentResponseSuccess)
+export type deleteCommentResponseSuccess = deleteCommentResponse200 & {
+    headers: Headers;
+};
+export type deleteCommentResponse = deleteCommentResponseSuccess;
 
-export const getDeleteCommentUrl = (commentId: number,) => {
+export const getDeleteCommentUrl = (commentId: number) => {
+    return `/comment/delete/${commentId}`;
+};
 
+export const deleteComment = async (
+    commentId: number,
+    options?: RequestInit,
+): Promise<deleteCommentResponse> => {
+    return customInstance<deleteCommentResponse>(
+        getDeleteCommentUrl(commentId),
+        {
+            ...options,
+            method: 'POST',
+        },
+    );
+};
 
-  
-
-  return `/comment/delete/${commentId}`
-}
-
-export const deleteComment = async (commentId: number, options?: RequestInit): Promise<deleteCommentResponse> => {
-  
-  return customInstance<deleteCommentResponse>(getDeleteCommentUrl(commentId),
-  {      
-    ...options,
-    method: 'POST'
-    
-    
-  }
-);}
-
-
-
-
-export const getDeleteCommentMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{commentId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{commentId: number}, TContext> => {
-
-const mutationKey = ['deleteComment'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteComment>>, {commentId: number}> = (props) => {
-          const {commentId} = props ?? {};
-
-          return  deleteComment(commentId,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteCommentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteComment>>>
-    
-    export type DeleteCommentMutationError = unknown
-
-    export const useDeleteComment = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{commentId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getDeleteCommentMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof deleteComment>>,
         TError,
-        {commentId: number},
+        { commentId: number },
         TContext
-      > => {
-      return useMutation(getDeleteCommentMutationOptions(options), queryClient);
-    }
-    export type addCommentResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type addCommentResponseSuccess = (addCommentResponse200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof deleteComment>>,
+    TError,
+    { commentId: number },
+    TContext
+> => {
+    const mutationKey = ['deleteComment'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type addCommentResponse = (addCommentResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof deleteComment>>,
+        { commentId: number }
+    > = (props) => {
+        const { commentId } = props ?? {};
+
+        return deleteComment(commentId, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteCommentMutationResult = NonNullable<
+    Awaited<ReturnType<typeof deleteComment>>
+>;
+
+export type DeleteCommentMutationError = unknown;
+
+export const useDeleteComment = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof deleteComment>>,
+            TError,
+            { commentId: number },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof deleteComment>>,
+    TError,
+    { commentId: number },
+    TContext
+> => {
+    return useMutation(getDeleteCommentMutationOptions(options), queryClient);
+};
+export type addCommentResponse200 = {
+    data: Blob;
+    status: 200;
+};
+
+export type addCommentResponseSuccess = addCommentResponse200 & {
+    headers: Headers;
+};
+export type addCommentResponse = addCommentResponseSuccess;
 
 export const getAddCommentUrl = () => {
+    return `/comment/add`;
+};
 
+export const addComment = async (
+    addCommentReqDto: AddCommentReqDto,
+    options?: RequestInit,
+): Promise<addCommentResponse> => {
+    return customInstance<addCommentResponse>(getAddCommentUrl(), {
+        ...options,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(addCommentReqDto),
+    });
+};
 
-  
-
-  return `/comment/add`
-}
-
-export const addComment = async (addCommentReqDto: AddCommentReqDto, options?: RequestInit): Promise<addCommentResponse> => {
-  
-  return customInstance<addCommentResponse>(getAddCommentUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      addCommentReqDto,)
-  }
-);}
-
-
-
-
-export const getAddCommentMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addComment>>, TError,{data: AddCommentReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof addComment>>, TError,{data: AddCommentReqDto}, TContext> => {
-
-const mutationKey = ['addComment'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addComment>>, {data: AddCommentReqDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  addComment(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AddCommentMutationResult = NonNullable<Awaited<ReturnType<typeof addComment>>>
-    export type AddCommentMutationBody = AddCommentReqDto
-    export type AddCommentMutationError = unknown
-
-    export const useAddComment = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addComment>>, TError,{data: AddCommentReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getAddCommentMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof addComment>>,
         TError,
-        {data: AddCommentReqDto},
+        { data: AddCommentReqDto },
         TContext
-      > => {
-      return useMutation(getAddCommentMutationOptions(options), queryClient);
-    }
-    export type getMyCommentListResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type getMyCommentListResponseSuccess = (getMyCommentListResponse200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof addComment>>,
+    TError,
+    { data: AddCommentReqDto },
+    TContext
+> => {
+    const mutationKey = ['addComment'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type getMyCommentListResponse = (getMyCommentListResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof addComment>>,
+        { data: AddCommentReqDto }
+    > = (props) => {
+        const { data } = props ?? {};
+
+        return addComment(data, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type AddCommentMutationResult = NonNullable<
+    Awaited<ReturnType<typeof addComment>>
+>;
+export type AddCommentMutationBody = AddCommentReqDto;
+export type AddCommentMutationError = unknown;
+
+export const useAddComment = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof addComment>>,
+            TError,
+            { data: AddCommentReqDto },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof addComment>>,
+    TError,
+    { data: AddCommentReqDto },
+    TContext
+> => {
+    return useMutation(getAddCommentMutationOptions(options), queryClient);
+};
+export type getMyCommentListResponse200 = {
+    data: Blob;
+    status: 200;
+};
+
+export type getMyCommentListResponseSuccess = getMyCommentListResponse200 & {
+    headers: Headers;
+};
+export type getMyCommentListResponse = getMyCommentListResponseSuccess;
 
 export const getGetMyCommentListUrl = () => {
+    return `/comment/my/list`;
+};
 
-
-  
-
-  return `/comment/my/list`
-}
-
-export const getMyCommentList = async ( options?: RequestInit): Promise<getMyCommentListResponse> => {
-  
-  return customInstance<getMyCommentListResponse>(getGetMyCommentListUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
-
-
-
+export const getMyCommentList = async (
+    options?: RequestInit,
+): Promise<getMyCommentListResponse> => {
+    return customInstance<getMyCommentListResponse>(getGetMyCommentListUrl(), {
+        ...options,
+        method: 'GET',
+    });
+};
 
 export const getGetMyCommentListQueryKey = () => {
-    return [
-    `/comment/my/list`
-    ] as const;
-    }
+    return [`/comment/my/list`] as const;
+};
 
-    
-export const getGetMyCommentListQueryOptions = <TData = Awaited<ReturnType<typeof getMyCommentList>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyCommentList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
+export const getGetMyCommentListQueryOptions = <
+    TData = Awaited<ReturnType<typeof getMyCommentList>>,
+    TError = unknown,
+>(options?: {
+    query?: Partial<
+        UseQueryOptions<
+            Awaited<ReturnType<typeof getMyCommentList>>,
+            TError,
+            TData
+        >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+    const queryKey = queryOptions?.queryKey ?? getGetMyCommentListQueryKey();
 
+    const queryFn: QueryFunction<
+        Awaited<ReturnType<typeof getMyCommentList>>
+    > = ({ signal }) => getMyCommentList({ signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getGetMyCommentListQueryKey();
+    return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+        Awaited<ReturnType<typeof getMyCommentList>>,
+        TError,
+        TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-  
+export type GetMyCommentListQueryResult = NonNullable<
+    Awaited<ReturnType<typeof getMyCommentList>>
+>;
+export type GetMyCommentListQueryError = unknown;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyCommentList>>> = ({ signal }) => getMyCommentList({ signal, ...requestOptions });
+export function useGetMyCommentList<
+    TData = Awaited<ReturnType<typeof getMyCommentList>>,
+    TError = unknown,
+>(
+    options: {
+        query: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getMyCommentList>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                DefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getMyCommentList>>,
+                    TError,
+                    Awaited<ReturnType<typeof getMyCommentList>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetMyCommentList<
+    TData = Awaited<ReturnType<typeof getMyCommentList>>,
+    TError = unknown,
+>(
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getMyCommentList>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                UndefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getMyCommentList>>,
+                    TError,
+                    Awaited<ReturnType<typeof getMyCommentList>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetMyCommentList<
+    TData = Awaited<ReturnType<typeof getMyCommentList>>,
+    TError = unknown,
+>(
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getMyCommentList>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-      
+export function useGetMyCommentList<
+    TData = Awaited<ReturnType<typeof getMyCommentList>>,
+    TError = unknown,
+>(
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getMyCommentList>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+} {
+    const queryOptions = getGetMyCommentListQueryOptions(options);
 
-      
+    const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+        TData,
+        TError
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyCommentList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+    return { ...query, queryKey: queryOptions.queryKey };
 }
-
-export type GetMyCommentListQueryResult = NonNullable<Awaited<ReturnType<typeof getMyCommentList>>>
-export type GetMyCommentListQueryError = unknown
-
-
-export function useGetMyCommentList<TData = Awaited<ReturnType<typeof getMyCommentList>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyCommentList>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMyCommentList>>,
-          TError,
-          Awaited<ReturnType<typeof getMyCommentList>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetMyCommentList<TData = Awaited<ReturnType<typeof getMyCommentList>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyCommentList>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getMyCommentList>>,
-          TError,
-          Awaited<ReturnType<typeof getMyCommentList>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetMyCommentList<TData = Awaited<ReturnType<typeof getMyCommentList>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyCommentList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetMyCommentList<TData = Awaited<ReturnType<typeof getMyCommentList>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyCommentList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetMyCommentListQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
 
 export type getCommentListByRecipeIdResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type getCommentListByRecipeIdResponseSuccess = (getCommentListByRecipeIdResponse200) & {
-  headers: Headers;
+    data: Blob;
+    status: 200;
 };
-;
 
-export type getCommentListByRecipeIdResponse = (getCommentListByRecipeIdResponseSuccess)
+export type getCommentListByRecipeIdResponseSuccess =
+    getCommentListByRecipeIdResponse200 & {
+        headers: Headers;
+    };
+export type getCommentListByRecipeIdResponse =
+    getCommentListByRecipeIdResponseSuccess;
 
-export const getGetCommentListByRecipeIdUrl = (recipeId: number,) => {
+export const getGetCommentListByRecipeIdUrl = (recipeId: number) => {
+    return `/comment/list/${recipeId}`;
+};
 
+export const getCommentListByRecipeId = async (
+    recipeId: number,
+    options?: RequestInit,
+): Promise<getCommentListByRecipeIdResponse> => {
+    return customInstance<getCommentListByRecipeIdResponse>(
+        getGetCommentListByRecipeIdUrl(recipeId),
+        {
+            ...options,
+            method: 'GET',
+        },
+    );
+};
 
-  
+export const getGetCommentListByRecipeIdQueryKey = (recipeId?: number) => {
+    return [`/comment/list/${recipeId}`] as const;
+};
 
-  return `/comment/list/${recipeId}`
-}
-
-export const getCommentListByRecipeId = async (recipeId: number, options?: RequestInit): Promise<getCommentListByRecipeIdResponse> => {
-  
-  return customInstance<getCommentListByRecipeIdResponse>(getGetCommentListByRecipeIdUrl(recipeId),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
-
-
-
-
-export const getGetCommentListByRecipeIdQueryKey = (recipeId?: number,) => {
-    return [
-    `/comment/list/${recipeId}`
-    ] as const;
-    }
-
-    
-export const getGetCommentListByRecipeIdQueryOptions = <TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError = unknown>(recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetCommentListByRecipeIdQueryOptions = <
+    TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
 ) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+    const queryKey =
+        queryOptions?.queryKey ?? getGetCommentListByRecipeIdQueryKey(recipeId);
 
+    const queryFn: QueryFunction<
+        Awaited<ReturnType<typeof getCommentListByRecipeId>>
+    > = ({ signal }) =>
+        getCommentListByRecipeId(recipeId, { signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getGetCommentListByRecipeIdQueryKey(recipeId);
+    return {
+        queryKey,
+        queryFn,
+        enabled: !!recipeId,
+        ...queryOptions,
+    } as UseQueryOptions<
+        Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+        TError,
+        TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-  
+export type GetCommentListByRecipeIdQueryResult = NonNullable<
+    Awaited<ReturnType<typeof getCommentListByRecipeId>>
+>;
+export type GetCommentListByRecipeIdQueryError = unknown;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommentListByRecipeId>>> = ({ signal }) => getCommentListByRecipeId(recipeId, { signal, ...requestOptions });
+export function useGetCommentListByRecipeId<
+    TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options: {
+        query: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                DefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+                    TError,
+                    Awaited<ReturnType<typeof getCommentListByRecipeId>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCommentListByRecipeId<
+    TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                UndefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+                    TError,
+                    Awaited<ReturnType<typeof getCommentListByRecipeId>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCommentListByRecipeId<
+    TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-      
+export function useGetCommentListByRecipeId<
+    TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+} {
+    const queryOptions = getGetCommentListByRecipeIdQueryOptions(
+        recipeId,
+        options,
+    );
 
-      
+    const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+        TData,
+        TError
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-   return  { queryKey, queryFn, enabled: !!(recipeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+    return { ...query, queryKey: queryOptions.queryKey };
 }
-
-export type GetCommentListByRecipeIdQueryResult = NonNullable<Awaited<ReturnType<typeof getCommentListByRecipeId>>>
-export type GetCommentListByRecipeIdQueryError = unknown
-
-
-export function useGetCommentListByRecipeId<TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError = unknown>(
- recipeId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCommentListByRecipeId>>,
-          TError,
-          Awaited<ReturnType<typeof getCommentListByRecipeId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommentListByRecipeId<TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCommentListByRecipeId>>,
-          TError,
-          Awaited<ReturnType<typeof getCommentListByRecipeId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommentListByRecipeId<TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetCommentListByRecipeId<TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetCommentListByRecipeIdQueryOptions(recipeId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-

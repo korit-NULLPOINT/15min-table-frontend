@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
-import { TopRecipes } from "../../../components/TopRecipes";
-import { HighRatedSlider } from "../../../components/HighRatedSlider";
+import { useNavigate } from 'react-router-dom';
+import { TopRecipes } from '../../../components/TopRecipes';
+import { HighRatedSlider } from '../../../components/HighRatedSlider';
 
 export default function HomePage() {
     const navigate = useNavigate();
@@ -17,7 +17,8 @@ export default function HomePage() {
                 <div className="text-center mb-4">
                     <h2
                         className="text-5xl mb-4 text-[#3d3226] font-serif"
-                        style={{ letterSpacing: "0.02em" }}>
+                        style={{ letterSpacing: '0.02em' }}
+                    >
                         15분이면 충분한
                         <br />
                         <span className="text-6xl" style={{ fontWeight: 500 }}>

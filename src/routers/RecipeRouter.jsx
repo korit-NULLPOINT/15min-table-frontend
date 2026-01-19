@@ -1,8 +1,8 @@
-import { Route, Routes } from "react-router-dom";
-import RecipeListPage from "../pages/boards/recipe/recipe-list-page/RecipeListPage";
-import RecipeDetailPage from "../pages/boards/recipe/recipe-detail-page/RecipeDetailPage";
-import RecipeWritePage from "../pages/boards/recipe/recipe-write-page/RecipeWritePage";
-import RecipeEditPage from "../pages/boards/recipe/recipe-edit-page/RecipeEditPage";
+import { Route, Routes } from 'react-router-dom';
+import RecipeListPage from '../pages/boards/recipe/recipe-list-page/RecipeListPage';
+import RecipeDetailPage from '../pages/boards/recipe/recipe-detail-page/RecipeDetailPage';
+import RecipeWritePage from '../pages/boards/recipe/recipe-write-page/RecipeWritePage';
+import RecipeEditPage from '../pages/boards/recipe/recipe-edit-page/RecipeEditPage';
 
 export default function RecipeRouter() {
     return (

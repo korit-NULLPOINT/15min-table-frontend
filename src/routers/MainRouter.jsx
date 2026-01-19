@@ -15,6 +15,10 @@ export default function MainRouter() {
                 <Route path="/boards/*" element={<BoardsRouter />} />
                 <Route path="/me/*" element={<MyPageRouter />} />
                 <Route path="/users/:userId" element={<OtherUserProfilePage />} />
+                <Route
+                    path="/auth/oauth2/*"
+                    element={<OAuth2Page />}
+                />
             </Route>
 
             {/* 기존 해시 기반 앱은 홈에서만 유지 */}

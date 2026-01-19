@@ -4,333 +4,497 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult
+    DataTag,
+    DefinedInitialDataOptions,
+    DefinedUseQueryResult,
+    MutationFunction,
+    QueryClient,
+    QueryFunction,
+    QueryKey,
+    UndefinedInitialDataOptions,
+    UseMutationOptions,
+    UseMutationResult,
+    UseQueryOptions,
+    UseQueryResult,
 } from '@tanstack/react-query';
 
 import type {
-  AddRecipeHashtagsReqDto,
-  SearchHashtagsParams
+    AddRecipeHashtagsReqDto,
+    SearchHashtagsParams,
 } from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-
-
 export type addRecipeHashtagsResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type addRecipeHashtagsResponseSuccess = (addRecipeHashtagsResponse200) & {
-  headers: Headers;
+    data: Blob;
+    status: 200;
 };
-;
 
-export type addRecipeHashtagsResponse = (addRecipeHashtagsResponseSuccess)
+export type addRecipeHashtagsResponseSuccess = addRecipeHashtagsResponse200 & {
+    headers: Headers;
+};
+export type addRecipeHashtagsResponse = addRecipeHashtagsResponseSuccess;
 
 export const getAddRecipeHashtagsUrl = () => {
+    return `/recipe-hashtag/add`;
+};
 
+export const addRecipeHashtags = async (
+    addRecipeHashtagsReqDto: AddRecipeHashtagsReqDto,
+    options?: RequestInit,
+): Promise<addRecipeHashtagsResponse> => {
+    return customInstance<addRecipeHashtagsResponse>(
+        getAddRecipeHashtagsUrl(),
+        {
+            ...options,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...options?.headers,
+            },
+            body: JSON.stringify(addRecipeHashtagsReqDto),
+        },
+    );
+};
 
-  
-
-  return `/recipe-hashtag/add`
-}
-
-export const addRecipeHashtags = async (addRecipeHashtagsReqDto: AddRecipeHashtagsReqDto, options?: RequestInit): Promise<addRecipeHashtagsResponse> => {
-  
-  return customInstance<addRecipeHashtagsResponse>(getAddRecipeHashtagsUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      addRecipeHashtagsReqDto,)
-  }
-);}
-
-
-
-
-export const getAddRecipeHashtagsMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addRecipeHashtags>>, TError,{data: AddRecipeHashtagsReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof addRecipeHashtags>>, TError,{data: AddRecipeHashtagsReqDto}, TContext> => {
-
-const mutationKey = ['addRecipeHashtags'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addRecipeHashtags>>, {data: AddRecipeHashtagsReqDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  addRecipeHashtags(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AddRecipeHashtagsMutationResult = NonNullable<Awaited<ReturnType<typeof addRecipeHashtags>>>
-    export type AddRecipeHashtagsMutationBody = AddRecipeHashtagsReqDto
-    export type AddRecipeHashtagsMutationError = unknown
-
-    export const useAddRecipeHashtags = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addRecipeHashtags>>, TError,{data: AddRecipeHashtagsReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getAddRecipeHashtagsMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof addRecipeHashtags>>,
         TError,
-        {data: AddRecipeHashtagsReqDto},
+        { data: AddRecipeHashtagsReqDto },
         TContext
-      > => {
-      return useMutation(getAddRecipeHashtagsMutationOptions(options), queryClient);
-    }
-    export type searchHashtagsResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type searchHashtagsResponseSuccess = (searchHashtagsResponse200) & {
-  headers: Headers;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof addRecipeHashtags>>,
+    TError,
+    { data: AddRecipeHashtagsReqDto },
+    TContext
+> => {
+    const mutationKey = ['addRecipeHashtags'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof addRecipeHashtags>>,
+        { data: AddRecipeHashtagsReqDto }
+    > = (props) => {
+        const { data } = props ?? {};
+
+        return addRecipeHashtags(data, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
 };
-;
 
-export type searchHashtagsResponse = (searchHashtagsResponseSuccess)
+export type AddRecipeHashtagsMutationResult = NonNullable<
+    Awaited<ReturnType<typeof addRecipeHashtags>>
+>;
+export type AddRecipeHashtagsMutationBody = AddRecipeHashtagsReqDto;
+export type AddRecipeHashtagsMutationError = unknown;
 
-export const getSearchHashtagsUrl = (params: SearchHashtagsParams,) => {
-  const normalizedParams = new URLSearchParams();
+export const useAddRecipeHashtags = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof addRecipeHashtags>>,
+            TError,
+            { data: AddRecipeHashtagsReqDto },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof addRecipeHashtags>>,
+    TError,
+    { data: AddRecipeHashtagsReqDto },
+    TContext
+> => {
+    return useMutation(
+        getAddRecipeHashtagsMutationOptions(options),
+        queryClient,
+    );
+};
+export type searchHashtagsResponse200 = {
+    data: Blob;
+    status: 200;
+};
 
-  Object.entries(params || {}).forEach(([key, value]) => {
-    
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
-    }
-  });
+export type searchHashtagsResponseSuccess = searchHashtagsResponse200 & {
+    headers: Headers;
+};
+export type searchHashtagsResponse = searchHashtagsResponseSuccess;
 
-  const stringifiedParams = normalizedParams.toString();
+export const getSearchHashtagsUrl = (params: SearchHashtagsParams) => {
+    const normalizedParams = new URLSearchParams();
 
-  return stringifiedParams.length > 0 ? `/recipe-hashtag/search?${stringifiedParams}` : `/recipe-hashtag/search`
-}
+    Object.entries(params || {}).forEach(([key, value]) => {
+        if (value !== undefined) {
+            normalizedParams.append(
+                key,
+                value === null ? 'null' : value.toString(),
+            );
+        }
+    });
 
-export const searchHashtags = async (params: SearchHashtagsParams, options?: RequestInit): Promise<searchHashtagsResponse> => {
-  
-  return customInstance<searchHashtagsResponse>(getSearchHashtagsUrl(params),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
+    const stringifiedParams = normalizedParams.toString();
 
+    return stringifiedParams.length > 0
+        ? `/recipe-hashtag/search?${stringifiedParams}`
+        : `/recipe-hashtag/search`;
+};
 
+export const searchHashtags = async (
+    params: SearchHashtagsParams,
+    options?: RequestInit,
+): Promise<searchHashtagsResponse> => {
+    return customInstance<searchHashtagsResponse>(
+        getSearchHashtagsUrl(params),
+        {
+            ...options,
+            method: 'GET',
+        },
+    );
+};
 
+export const getSearchHashtagsQueryKey = (params?: SearchHashtagsParams) => {
+    return [`/recipe-hashtag/search`, ...(params ? [params] : [])] as const;
+};
 
-
-export const getSearchHashtagsQueryKey = (params?: SearchHashtagsParams,) => {
-    return [
-    `/recipe-hashtag/search`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-    
-export const getSearchHashtagsQueryOptions = <TData = Awaited<ReturnType<typeof searchHashtags>>, TError = unknown>(params: SearchHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchHashtags>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getSearchHashtagsQueryOptions = <
+    TData = Awaited<ReturnType<typeof searchHashtags>>,
+    TError = unknown,
+>(
+    params: SearchHashtagsParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof searchHashtags>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
 ) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+    const queryKey =
+        queryOptions?.queryKey ?? getSearchHashtagsQueryKey(params);
 
+    const queryFn: QueryFunction<
+        Awaited<ReturnType<typeof searchHashtags>>
+    > = ({ signal }) => searchHashtags(params, { signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getSearchHashtagsQueryKey(params);
+    return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+        Awaited<ReturnType<typeof searchHashtags>>,
+        TError,
+        TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-  
+export type SearchHashtagsQueryResult = NonNullable<
+    Awaited<ReturnType<typeof searchHashtags>>
+>;
+export type SearchHashtagsQueryError = unknown;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchHashtags>>> = ({ signal }) => searchHashtags(params, { signal, ...requestOptions });
+export function useSearchHashtags<
+    TData = Awaited<ReturnType<typeof searchHashtags>>,
+    TError = unknown,
+>(
+    params: SearchHashtagsParams,
+    options: {
+        query: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof searchHashtags>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                DefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof searchHashtags>>,
+                    TError,
+                    Awaited<ReturnType<typeof searchHashtags>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useSearchHashtags<
+    TData = Awaited<ReturnType<typeof searchHashtags>>,
+    TError = unknown,
+>(
+    params: SearchHashtagsParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof searchHashtags>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                UndefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof searchHashtags>>,
+                    TError,
+                    Awaited<ReturnType<typeof searchHashtags>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useSearchHashtags<
+    TData = Awaited<ReturnType<typeof searchHashtags>>,
+    TError = unknown,
+>(
+    params: SearchHashtagsParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof searchHashtags>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-      
+export function useSearchHashtags<
+    TData = Awaited<ReturnType<typeof searchHashtags>>,
+    TError = unknown,
+>(
+    params: SearchHashtagsParams,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof searchHashtags>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+} {
+    const queryOptions = getSearchHashtagsQueryOptions(params, options);
 
-      
+    const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+        TData,
+        TError
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchHashtags>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+    return { ...query, queryKey: queryOptions.queryKey };
 }
-
-export type SearchHashtagsQueryResult = NonNullable<Awaited<ReturnType<typeof searchHashtags>>>
-export type SearchHashtagsQueryError = unknown
-
-
-export function useSearchHashtags<TData = Awaited<ReturnType<typeof searchHashtags>>, TError = unknown>(
- params: SearchHashtagsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchHashtags>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof searchHashtags>>,
-          TError,
-          Awaited<ReturnType<typeof searchHashtags>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearchHashtags<TData = Awaited<ReturnType<typeof searchHashtags>>, TError = unknown>(
- params: SearchHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchHashtags>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof searchHashtags>>,
-          TError,
-          Awaited<ReturnType<typeof searchHashtags>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useSearchHashtags<TData = Awaited<ReturnType<typeof searchHashtags>>, TError = unknown>(
- params: SearchHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchHashtags>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useSearchHashtags<TData = Awaited<ReturnType<typeof searchHashtags>>, TError = unknown>(
- params: SearchHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchHashtags>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getSearchHashtagsQueryOptions(params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
 
 export type getHashtagsByRecipeIdResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type getHashtagsByRecipeIdResponseSuccess = (getHashtagsByRecipeIdResponse200) & {
-  headers: Headers;
+    data: Blob;
+    status: 200;
 };
-;
 
-export type getHashtagsByRecipeIdResponse = (getHashtagsByRecipeIdResponseSuccess)
+export type getHashtagsByRecipeIdResponseSuccess =
+    getHashtagsByRecipeIdResponse200 & {
+        headers: Headers;
+    };
+export type getHashtagsByRecipeIdResponse =
+    getHashtagsByRecipeIdResponseSuccess;
 
-export const getGetHashtagsByRecipeIdUrl = (recipeId: number,) => {
+export const getGetHashtagsByRecipeIdUrl = (recipeId: number) => {
+    return `/recipe-hashtag/list/${recipeId}`;
+};
 
+export const getHashtagsByRecipeId = async (
+    recipeId: number,
+    options?: RequestInit,
+): Promise<getHashtagsByRecipeIdResponse> => {
+    return customInstance<getHashtagsByRecipeIdResponse>(
+        getGetHashtagsByRecipeIdUrl(recipeId),
+        {
+            ...options,
+            method: 'GET',
+        },
+    );
+};
 
-  
+export const getGetHashtagsByRecipeIdQueryKey = (recipeId?: number) => {
+    return [`/recipe-hashtag/list/${recipeId}`] as const;
+};
 
-  return `/recipe-hashtag/list/${recipeId}`
-}
-
-export const getHashtagsByRecipeId = async (recipeId: number, options?: RequestInit): Promise<getHashtagsByRecipeIdResponse> => {
-  
-  return customInstance<getHashtagsByRecipeIdResponse>(getGetHashtagsByRecipeIdUrl(recipeId),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
-
-
-
-
-export const getGetHashtagsByRecipeIdQueryKey = (recipeId?: number,) => {
-    return [
-    `/recipe-hashtag/list/${recipeId}`
-    ] as const;
-    }
-
-    
-export const getGetHashtagsByRecipeIdQueryOptions = <TData = Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError = unknown>(recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetHashtagsByRecipeIdQueryOptions = <
+    TData = Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
 ) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+    const queryKey =
+        queryOptions?.queryKey ?? getGetHashtagsByRecipeIdQueryKey(recipeId);
 
+    const queryFn: QueryFunction<
+        Awaited<ReturnType<typeof getHashtagsByRecipeId>>
+    > = ({ signal }) =>
+        getHashtagsByRecipeId(recipeId, { signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getGetHashtagsByRecipeIdQueryKey(recipeId);
+    return {
+        queryKey,
+        queryFn,
+        enabled: !!recipeId,
+        ...queryOptions,
+    } as UseQueryOptions<
+        Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+        TError,
+        TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-  
+export type GetHashtagsByRecipeIdQueryResult = NonNullable<
+    Awaited<ReturnType<typeof getHashtagsByRecipeId>>
+>;
+export type GetHashtagsByRecipeIdQueryError = unknown;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHashtagsByRecipeId>>> = ({ signal }) => getHashtagsByRecipeId(recipeId, { signal, ...requestOptions });
+export function useGetHashtagsByRecipeId<
+    TData = Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options: {
+        query: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                DefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+                    TError,
+                    Awaited<ReturnType<typeof getHashtagsByRecipeId>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetHashtagsByRecipeId<
+    TData = Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                UndefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+                    TError,
+                    Awaited<ReturnType<typeof getHashtagsByRecipeId>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetHashtagsByRecipeId<
+    TData = Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-      
+export function useGetHashtagsByRecipeId<
+    TData = Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+} {
+    const queryOptions = getGetHashtagsByRecipeIdQueryOptions(
+        recipeId,
+        options,
+    );
 
-      
+    const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+        TData,
+        TError
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-   return  { queryKey, queryFn, enabled: !!(recipeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+    return { ...query, queryKey: queryOptions.queryKey };
 }
-
-export type GetHashtagsByRecipeIdQueryResult = NonNullable<Awaited<ReturnType<typeof getHashtagsByRecipeId>>>
-export type GetHashtagsByRecipeIdQueryError = unknown
-
-
-export function useGetHashtagsByRecipeId<TData = Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError = unknown>(
- recipeId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
-          TError,
-          Awaited<ReturnType<typeof getHashtagsByRecipeId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetHashtagsByRecipeId<TData = Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getHashtagsByRecipeId>>,
-          TError,
-          Awaited<ReturnType<typeof getHashtagsByRecipeId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetHashtagsByRecipeId<TData = Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetHashtagsByRecipeId<TData = Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHashtagsByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetHashtagsByRecipeIdQueryOptions(recipeId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-

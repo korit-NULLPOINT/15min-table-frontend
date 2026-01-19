@@ -4,397 +4,545 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult
+    DataTag,
+    DefinedInitialDataOptions,
+    DefinedUseQueryResult,
+    MutationFunction,
+    QueryClient,
+    QueryFunction,
+    QueryKey,
+    UndefinedInitialDataOptions,
+    UseMutationOptions,
+    UseMutationResult,
+    UseQueryOptions,
+    UseQueryResult,
 } from '@tanstack/react-query';
 
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-
-
 export type existsByRecipeIdResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type existsByRecipeIdResponseSuccess = (existsByRecipeIdResponse200) & {
-  headers: Headers;
+    data: Blob;
+    status: 200;
 };
-;
 
-export type existsByRecipeIdResponse = (existsByRecipeIdResponseSuccess)
+export type existsByRecipeIdResponseSuccess = existsByRecipeIdResponse200 & {
+    headers: Headers;
+};
+export type existsByRecipeIdResponse = existsByRecipeIdResponseSuccess;
 
-export const getExistsByRecipeIdUrl = (recipeId: number,) => {
+export const getExistsByRecipeIdUrl = (recipeId: number) => {
+    return `/bookmark/${recipeId}`;
+};
 
+export const existsByRecipeId = async (
+    recipeId: number,
+    options?: RequestInit,
+): Promise<existsByRecipeIdResponse> => {
+    return customInstance<existsByRecipeIdResponse>(
+        getExistsByRecipeIdUrl(recipeId),
+        {
+            ...options,
+            method: 'GET',
+        },
+    );
+};
 
-  
+export const getExistsByRecipeIdQueryKey = (recipeId?: number) => {
+    return [`/bookmark/${recipeId}`] as const;
+};
 
-  return `/bookmark/${recipeId}`
-}
-
-export const existsByRecipeId = async (recipeId: number, options?: RequestInit): Promise<existsByRecipeIdResponse> => {
-  
-  return customInstance<existsByRecipeIdResponse>(getExistsByRecipeIdUrl(recipeId),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
-
-
-
-
-export const getExistsByRecipeIdQueryKey = (recipeId?: number,) => {
-    return [
-    `/bookmark/${recipeId}`
-    ] as const;
-    }
-
-    
-export const getExistsByRecipeIdQueryOptions = <TData = Awaited<ReturnType<typeof existsByRecipeId>>, TError = unknown>(recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof existsByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getExistsByRecipeIdQueryOptions = <
+    TData = Awaited<ReturnType<typeof existsByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof existsByRecipeId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
 ) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+    const queryKey =
+        queryOptions?.queryKey ?? getExistsByRecipeIdQueryKey(recipeId);
 
+    const queryFn: QueryFunction<
+        Awaited<ReturnType<typeof existsByRecipeId>>
+    > = ({ signal }) =>
+        existsByRecipeId(recipeId, { signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getExistsByRecipeIdQueryKey(recipeId);
+    return {
+        queryKey,
+        queryFn,
+        enabled: !!recipeId,
+        ...queryOptions,
+    } as UseQueryOptions<
+        Awaited<ReturnType<typeof existsByRecipeId>>,
+        TError,
+        TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-  
+export type ExistsByRecipeIdQueryResult = NonNullable<
+    Awaited<ReturnType<typeof existsByRecipeId>>
+>;
+export type ExistsByRecipeIdQueryError = unknown;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof existsByRecipeId>>> = ({ signal }) => existsByRecipeId(recipeId, { signal, ...requestOptions });
+export function useExistsByRecipeId<
+    TData = Awaited<ReturnType<typeof existsByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options: {
+        query: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof existsByRecipeId>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                DefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof existsByRecipeId>>,
+                    TError,
+                    Awaited<ReturnType<typeof existsByRecipeId>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useExistsByRecipeId<
+    TData = Awaited<ReturnType<typeof existsByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof existsByRecipeId>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                UndefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof existsByRecipeId>>,
+                    TError,
+                    Awaited<ReturnType<typeof existsByRecipeId>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useExistsByRecipeId<
+    TData = Awaited<ReturnType<typeof existsByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof existsByRecipeId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-      
+export function useExistsByRecipeId<
+    TData = Awaited<ReturnType<typeof existsByRecipeId>>,
+    TError = unknown,
+>(
+    recipeId: number,
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof existsByRecipeId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+} {
+    const queryOptions = getExistsByRecipeIdQueryOptions(recipeId, options);
 
-      
+    const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+        TData,
+        TError
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-   return  { queryKey, queryFn, enabled: !!(recipeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof existsByRecipeId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+    return { ...query, queryKey: queryOptions.queryKey };
 }
-
-export type ExistsByRecipeIdQueryResult = NonNullable<Awaited<ReturnType<typeof existsByRecipeId>>>
-export type ExistsByRecipeIdQueryError = unknown
-
-
-export function useExistsByRecipeId<TData = Awaited<ReturnType<typeof existsByRecipeId>>, TError = unknown>(
- recipeId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof existsByRecipeId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof existsByRecipeId>>,
-          TError,
-          Awaited<ReturnType<typeof existsByRecipeId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useExistsByRecipeId<TData = Awaited<ReturnType<typeof existsByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof existsByRecipeId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof existsByRecipeId>>,
-          TError,
-          Awaited<ReturnType<typeof existsByRecipeId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useExistsByRecipeId<TData = Awaited<ReturnType<typeof existsByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof existsByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useExistsByRecipeId<TData = Awaited<ReturnType<typeof existsByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof existsByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getExistsByRecipeIdQueryOptions(recipeId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
 
 export type addBookmarkResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type addBookmarkResponseSuccess = (addBookmarkResponse200) & {
-  headers: Headers;
+    data: Blob;
+    status: 200;
 };
-;
 
-export type addBookmarkResponse = (addBookmarkResponseSuccess)
+export type addBookmarkResponseSuccess = addBookmarkResponse200 & {
+    headers: Headers;
+};
+export type addBookmarkResponse = addBookmarkResponseSuccess;
 
-export const getAddBookmarkUrl = (recipeId: number,) => {
+export const getAddBookmarkUrl = (recipeId: number) => {
+    return `/bookmark/${recipeId}`;
+};
 
+export const addBookmark = async (
+    recipeId: number,
+    options?: RequestInit,
+): Promise<addBookmarkResponse> => {
+    return customInstance<addBookmarkResponse>(getAddBookmarkUrl(recipeId), {
+        ...options,
+        method: 'POST',
+    });
+};
 
-  
-
-  return `/bookmark/${recipeId}`
-}
-
-export const addBookmark = async (recipeId: number, options?: RequestInit): Promise<addBookmarkResponse> => {
-  
-  return customInstance<addBookmarkResponse>(getAddBookmarkUrl(recipeId),
-  {      
-    ...options,
-    method: 'POST'
-    
-    
-  }
-);}
-
-
-
-
-export const getAddBookmarkMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addBookmark>>, TError,{recipeId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof addBookmark>>, TError,{recipeId: number}, TContext> => {
-
-const mutationKey = ['addBookmark'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addBookmark>>, {recipeId: number}> = (props) => {
-          const {recipeId} = props ?? {};
-
-          return  addBookmark(recipeId,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AddBookmarkMutationResult = NonNullable<Awaited<ReturnType<typeof addBookmark>>>
-    
-    export type AddBookmarkMutationError = unknown
-
-    export const useAddBookmark = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addBookmark>>, TError,{recipeId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getAddBookmarkMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof addBookmark>>,
         TError,
-        {recipeId: number},
+        { recipeId: number },
         TContext
-      > => {
-      return useMutation(getAddBookmarkMutationOptions(options), queryClient);
-    }
-    export type deleteBookmarkResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type deleteBookmarkResponseSuccess = (deleteBookmarkResponse200) & {
-  headers: Headers;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof addBookmark>>,
+    TError,
+    { recipeId: number },
+    TContext
+> => {
+    const mutationKey = ['addBookmark'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof addBookmark>>,
+        { recipeId: number }
+    > = (props) => {
+        const { recipeId } = props ?? {};
+
+        return addBookmark(recipeId, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
 };
-;
 
-export type deleteBookmarkResponse = (deleteBookmarkResponseSuccess)
+export type AddBookmarkMutationResult = NonNullable<
+    Awaited<ReturnType<typeof addBookmark>>
+>;
 
-export const getDeleteBookmarkUrl = (recipeId: number,) => {
+export type AddBookmarkMutationError = unknown;
 
+export const useAddBookmark = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof addBookmark>>,
+            TError,
+            { recipeId: number },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof addBookmark>>,
+    TError,
+    { recipeId: number },
+    TContext
+> => {
+    return useMutation(getAddBookmarkMutationOptions(options), queryClient);
+};
+export type deleteBookmarkResponse200 = {
+    data: Blob;
+    status: 200;
+};
 
-  
+export type deleteBookmarkResponseSuccess = deleteBookmarkResponse200 & {
+    headers: Headers;
+};
+export type deleteBookmarkResponse = deleteBookmarkResponseSuccess;
 
-  return `/bookmark/${recipeId}`
-}
+export const getDeleteBookmarkUrl = (recipeId: number) => {
+    return `/bookmark/${recipeId}`;
+};
 
-export const deleteBookmark = async (recipeId: number, options?: RequestInit): Promise<deleteBookmarkResponse> => {
-  
-  return customInstance<deleteBookmarkResponse>(getDeleteBookmarkUrl(recipeId),
-  {      
-    ...options,
-    method: 'DELETE'
-    
-    
-  }
-);}
+export const deleteBookmark = async (
+    recipeId: number,
+    options?: RequestInit,
+): Promise<deleteBookmarkResponse> => {
+    return customInstance<deleteBookmarkResponse>(
+        getDeleteBookmarkUrl(recipeId),
+        {
+            ...options,
+            method: 'DELETE',
+        },
+    );
+};
 
-
-
-
-export const getDeleteBookmarkMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteBookmark>>, TError,{recipeId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteBookmark>>, TError,{recipeId: number}, TContext> => {
-
-const mutationKey = ['deleteBookmark'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteBookmark>>, {recipeId: number}> = (props) => {
-          const {recipeId} = props ?? {};
-
-          return  deleteBookmark(recipeId,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteBookmarkMutationResult = NonNullable<Awaited<ReturnType<typeof deleteBookmark>>>
-    
-    export type DeleteBookmarkMutationError = unknown
-
-    export const useDeleteBookmark = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteBookmark>>, TError,{recipeId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getDeleteBookmarkMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof deleteBookmark>>,
         TError,
-        {recipeId: number},
+        { recipeId: number },
         TContext
-      > => {
-      return useMutation(getDeleteBookmarkMutationOptions(options), queryClient);
-    }
-    export type getBookmarkListByUserIdResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type getBookmarkListByUserIdResponseSuccess = (getBookmarkListByUserIdResponse200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof deleteBookmark>>,
+    TError,
+    { recipeId: number },
+    TContext
+> => {
+    const mutationKey = ['deleteBookmark'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type getBookmarkListByUserIdResponse = (getBookmarkListByUserIdResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof deleteBookmark>>,
+        { recipeId: number }
+    > = (props) => {
+        const { recipeId } = props ?? {};
+
+        return deleteBookmark(recipeId, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteBookmarkMutationResult = NonNullable<
+    Awaited<ReturnType<typeof deleteBookmark>>
+>;
+
+export type DeleteBookmarkMutationError = unknown;
+
+export const useDeleteBookmark = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof deleteBookmark>>,
+            TError,
+            { recipeId: number },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof deleteBookmark>>,
+    TError,
+    { recipeId: number },
+    TContext
+> => {
+    return useMutation(getDeleteBookmarkMutationOptions(options), queryClient);
+};
+export type getBookmarkListByUserIdResponse200 = {
+    data: Blob;
+    status: 200;
+};
+
+export type getBookmarkListByUserIdResponseSuccess =
+    getBookmarkListByUserIdResponse200 & {
+        headers: Headers;
+    };
+export type getBookmarkListByUserIdResponse =
+    getBookmarkListByUserIdResponseSuccess;
 
 export const getGetBookmarkListByUserIdUrl = () => {
+    return `/bookmark/my`;
+};
 
-
-  
-
-  return `/bookmark/my`
-}
-
-export const getBookmarkListByUserId = async ( options?: RequestInit): Promise<getBookmarkListByUserIdResponse> => {
-  
-  return customInstance<getBookmarkListByUserIdResponse>(getGetBookmarkListByUserIdUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
-
-
-
+export const getBookmarkListByUserId = async (
+    options?: RequestInit,
+): Promise<getBookmarkListByUserIdResponse> => {
+    return customInstance<getBookmarkListByUserIdResponse>(
+        getGetBookmarkListByUserIdUrl(),
+        {
+            ...options,
+            method: 'GET',
+        },
+    );
+};
 
 export const getGetBookmarkListByUserIdQueryKey = () => {
-    return [
-    `/bookmark/my`
-    ] as const;
-    }
+    return [`/bookmark/my`] as const;
+};
 
-    
-export const getGetBookmarkListByUserIdQueryOptions = <TData = Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
+export const getGetBookmarkListByUserIdQueryOptions = <
+    TData = Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+    TError = unknown,
+>(options?: {
+    query?: Partial<
+        UseQueryOptions<
+            Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+            TError,
+            TData
+        >
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+    const queryKey =
+        queryOptions?.queryKey ?? getGetBookmarkListByUserIdQueryKey();
 
+    const queryFn: QueryFunction<
+        Awaited<ReturnType<typeof getBookmarkListByUserId>>
+    > = ({ signal }) => getBookmarkListByUserId({ signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getGetBookmarkListByUserIdQueryKey();
+    return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+        Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+        TError,
+        TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-  
+export type GetBookmarkListByUserIdQueryResult = NonNullable<
+    Awaited<ReturnType<typeof getBookmarkListByUserId>>
+>;
+export type GetBookmarkListByUserIdQueryError = unknown;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBookmarkListByUserId>>> = ({ signal }) => getBookmarkListByUserId({ signal, ...requestOptions });
+export function useGetBookmarkListByUserId<
+    TData = Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+    TError = unknown,
+>(
+    options: {
+        query: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                DefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+                    TError,
+                    Awaited<ReturnType<typeof getBookmarkListByUserId>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetBookmarkListByUserId<
+    TData = Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+    TError = unknown,
+>(
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                UndefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+                    TError,
+                    Awaited<ReturnType<typeof getBookmarkListByUserId>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetBookmarkListByUserId<
+    TData = Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+    TError = unknown,
+>(
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-      
+export function useGetBookmarkListByUserId<
+    TData = Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+    TError = unknown,
+>(
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getBookmarkListByUserId>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+} {
+    const queryOptions = getGetBookmarkListByUserIdQueryOptions(options);
 
-      
+    const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+        TData,
+        TError
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+    return { ...query, queryKey: queryOptions.queryKey };
 }
-
-export type GetBookmarkListByUserIdQueryResult = NonNullable<Awaited<ReturnType<typeof getBookmarkListByUserId>>>
-export type GetBookmarkListByUserIdQueryError = unknown
-
-
-export function useGetBookmarkListByUserId<TData = Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getBookmarkListByUserId>>,
-          TError,
-          Awaited<ReturnType<typeof getBookmarkListByUserId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetBookmarkListByUserId<TData = Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getBookmarkListByUserId>>,
-          TError,
-          Awaited<ReturnType<typeof getBookmarkListByUserId>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetBookmarkListByUserId<TData = Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetBookmarkListByUserId<TData = Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBookmarkListByUserId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetBookmarkListByUserIdQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-

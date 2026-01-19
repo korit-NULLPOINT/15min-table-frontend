@@ -5,87 +5,87 @@
  * OpenAPI spec version: v0
  */
 export interface ModifyRecipeReqDto {
-  mainCategoryId?: number;
-  subCategoryId?: number;
-  title?: string;
-  intro?: string;
-  thumbnailImgUrl?: string;
-  ingredients?: string;
-  ingredientImgUrl?: string;
-  steps?: string;
+    mainCategoryId?: number;
+    subCategoryId?: number;
+    title?: string;
+    intro?: string;
+    thumbnailImgUrl?: string;
+    ingredients?: string;
+    ingredientImgUrl?: string;
+    steps?: string;
 }
 
 export interface SignupReqDto {
-  email?: string;
-  password?: string;
-  username?: string;
+    email?: string;
+    password?: string;
+    username?: string;
 }
 
 export interface SigninReqDto {
-  email?: string;
-  password?: string;
+    email?: string;
+    password?: string;
 }
 
 export interface ChangeUsernameReqDto {
-  userId?: number;
-  username?: string;
+    userId?: number;
+    username?: string;
 }
 
 export interface ChangeProfileImgReqDto {
-  userId?: number;
-  profileImgUrl?: string;
+    userId?: number;
+    profileImgUrl?: string;
 }
 
 export interface ChangePasswordReqDto {
-  userId?: number;
-  password?: string;
-  newPassword?: string;
+    userId?: number;
+    password?: string;
+    newPassword?: string;
 }
 
 export interface AddRecipeHashtagsReqDto {
-  recipeId?: number;
-  hashtagNames?: string[];
+    recipeId?: number;
+    hashtagNames?: string[];
 }
 
 export interface UpsertRatingReqDto {
-  recipeId?: number;
-  rating?: number;
+    recipeId?: number;
+    rating?: number;
 }
 
 export interface OAuth2SignupReqDto {
-  email?: string;
-  password?: string;
-  username?: string;
-  provider?: string;
-  providerUserId?: string;
+    email?: string;
+    password?: string;
+    username?: string;
+    provider?: string;
+    providerUserId?: string;
 }
 
 export interface OAuth2MergeReqDto {
-  email?: string;
-  password?: string;
-  provider?: string;
-  providerUserId?: string;
+    email?: string;
+    password?: string;
+    provider?: string;
+    providerUserId?: string;
 }
 
 export interface AddCommentReqDto {
-  recipeId?: number;
-  content?: string;
+    recipeId?: number;
+    content?: string;
 }
 
 export interface BoardCreateReqDto {
-  title?: string;
-  boardTypeId?: number;
+    title?: string;
+    boardTypeId?: number;
 }
 
 export interface AddRecipeReqDto {
-  mainCategoryId?: number;
-  subCategoryId?: number;
-  title?: string;
-  intro?: string;
-  thumbnailImgUrl?: string;
-  ingredients?: string;
-  ingredientImgUrl?: string;
-  steps?: string;
+    mainCategoryId?: number;
+    subCategoryId?: number;
+    title?: string;
+    intro?: string;
+    thumbnailImgUrl?: string;
+    ingredients?: string;
+    ingredientImgUrl?: string;
+    steps?: string;
 }
 
 export type ModifyRecipe200 = { [key: string]: unknown };
@@ -143,7 +143,7 @@ export type ChangePassword1200 = { [key: string]: unknown };
 export type GetPrincipal200 = { [key: string]: unknown };
 
 export type SearchHashtagsParams = {
-keyword: string;
+    keyword: string;
 };
 
 export type SearchHashtags200 = { [key: string]: unknown };
@@ -155,8 +155,8 @@ export type GetSummary200 = { [key: string]: unknown };
 export type GetRating200 = { [key: string]: unknown };
 
 export type GetNotificationsParams = {
-cursor?: number;
-size?: number;
+    cursor?: number;
+    size?: number;
 };
 
 export type GetNotifications200 = { [key: string]: unknown };
@@ -176,8 +176,8 @@ export type GetCommentListByRecipeId200 = { [key: string]: unknown };
 export type GetBookmarkListByUserId200 = { [key: string]: unknown };
 
 export type GetRecipeListParams = {
-page?: number;
-size?: number;
+    page?: number;
+    size?: number;
 };
 
 export type GetRecipeList200 = { [key: string]: unknown };
@@ -191,4 +191,3 @@ export type GetUserList200 = { [key: string]: unknown };
 export type RemoveBoard200 = { [key: string]: unknown };
 
 export type RemoveRecipe200 = { [key: string]: unknown };
-

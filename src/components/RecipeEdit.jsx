@@ -1,27 +1,27 @@
-import { useState, useRef } from "react";
-import { ArrowLeft, Upload, Plus, X, Sparkles } from "lucide-react";
+import { useState, useRef } from 'react';
+import { ArrowLeft, Upload, Plus, X, Sparkles } from 'lucide-react';
 
 export function RecipeEdit({ onNavigate, recipeId }) {
-    const [title, setTitle] = useState("초간단 김치볶음밥");
+    const [title, setTitle] = useState('초간단 김치볶음밥');
     const [completedImage, setCompletedImage] = useState(
-        "https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?w=400"
+        'https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?w=400',
     );
-    const [ingredientsImage, setIngredientsImage] = useState("");
+    const [ingredientsImage, setIngredientsImage] = useState('');
     const [ingredients, setIngredients] = useState([
-        "김치 200g",
-        "밥 1공기",
-        "참기름 1큰술",
-        "식용유 약간",
+        '김치 200g',
+        '밥 1공기',
+        '참기름 1큰술',
+        '식용유 약간',
     ]);
     const [cookingMethod, setCookingMethod] = useState(
-        "1. 팬에 식용유를 두르고 김치를 볶는다.\n2. 밥을 넣고 함께 볶는다.\n3. 참기름을 넣고 마무리한다."
+        '1. 팬에 식용유를 두르고 김치를 볶는다.\n2. 밥을 넣고 함께 볶는다.\n3. 참기름을 넣고 마무리한다.',
     );
     const [hashtags, setHashtags] = useState([
-        "15분요리",
-        "간단레시피",
-        "자취생",
+        '15분요리',
+        '간단레시피',
+        '자취생',
     ]);
-    const [newHashtag, setNewHashtag] = useState("");
+    const [newHashtag, setNewHashtag] = useState('');
 
     const completedImageRef = useRef(null);
     const ingredientsImageRef = useRef(null);
@@ -32,9 +32,9 @@ export function RecipeEdit({ onNavigate, recipeId }) {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const imageData = reader.result;
-                if (type === "completed") {
+                if (type === 'completed') {
                     setCompletedImage(imageData);
-                } else if (type === "ingredients") {
+                } else if (type === 'ingredients') {
                     setIngredientsImage(imageData);
                 }
             };
@@ -43,10 +43,10 @@ export function RecipeEdit({ onNavigate, recipeId }) {
     };
 
     const handleRemoveImage = (type, index) => {
-        if (type === "completed") {
-            setCompletedImage("");
-        } else if (type === "ingredients") {
-            setIngredientsImage("");
+        if (type === 'completed') {
+            setCompletedImage('');
+        } else if (type === 'ingredients') {
+            setIngredientsImage('');
         }
     };
 
@@ -57,10 +57,10 @@ export function RecipeEdit({ onNavigate, recipeId }) {
     };
 
     const handleIngredientKeyDown = (e, index) => {
-        if (e.key === "Enter") {
+        if (e.key === 'Enter') {
             e.preventDefault();
             if (index === ingredients.length - 1 && ingredients[index].trim()) {
-                setIngredients([...ingredients, ""]);
+                setIngredients([...ingredients, '']);
             }
         }
     };
@@ -73,7 +73,7 @@ export function RecipeEdit({ onNavigate, recipeId }) {
 
     const generateAIHashtags = () => {
         // Mock AI hashtag generation
-        const aiHashtags = ["15분요리", "간단레시피", "자취생필수", "초간단"];
+        const aiHashtags = ['15분요리', '간단레시피', '자취생필수', '초간단'];
         setHashtags([
             ...hashtags,
             ...aiHashtags.filter((tag) => !hashtags.includes(tag)),
@@ -83,7 +83,7 @@ export function RecipeEdit({ onNavigate, recipeId }) {
     const addHashtag = () => {
         if (newHashtag.trim() && !hashtags.includes(newHashtag.trim())) {
             setHashtags([...hashtags, newHashtag.trim()]);
-            setNewHashtag("");
+            setNewHashtag('');
         }
     };
 
@@ -102,16 +102,17 @@ export function RecipeEdit({ onNavigate, recipeId }) {
             cookingMethod,
             hashtags,
         });
-        alert("레시피가 수정되었습니다!");
-        onNavigate("profile");
+        alert('레시피가 수정되었습니다!');
+        onNavigate('profile');
     };
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
-                    onClick={() => onNavigate("profile")}
-                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md">
+                    onClick={() => onNavigate('profile')}
+                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
+                >
                     <ArrowLeft size={20} />
                     돌아가기
                 </button>
@@ -158,27 +159,29 @@ export function RecipeEdit({ onNavigate, recipeId }) {
                                     onClick={() =>
                                         completedImageRef.current?.click()
                                     }
-                                    className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors">
+                                    className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors"
+                                >
                                     <Upload size={20} />
                                     {completedImage
-                                        ? "사진 변경"
-                                        : "사진 업로드"}
+                                        ? '사진 변경'
+                                        : '사진 업로드'}
                                 </button>
                                 <input
                                     ref={completedImageRef}
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) =>
-                                        handleImageUpload(e, "completed")
+                                        handleImageUpload(e, 'completed')
                                     }
                                     className="hidden"
                                 />
                                 {completedImage && (
                                     <button
                                         onClick={() =>
-                                            handleRemoveImage("completed")
+                                            handleRemoveImage('completed')
                                         }
-                                        className="p-3 text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                                        className="p-3 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                    >
                                         <X size={20} />
                                     </button>
                                 )}
@@ -202,27 +205,29 @@ export function RecipeEdit({ onNavigate, recipeId }) {
                                     onClick={() =>
                                         ingredientsImageRef.current?.click()
                                     }
-                                    className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors">
+                                    className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors"
+                                >
                                     <Upload size={20} />
                                     {ingredientsImage
-                                        ? "사진 변경"
-                                        : "사진 업로드"}
+                                        ? '사진 변경'
+                                        : '사진 업로드'}
                                 </button>
                                 <input
                                     ref={ingredientsImageRef}
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) =>
-                                        handleImageUpload(e, "ingredients")
+                                        handleImageUpload(e, 'ingredients')
                                     }
                                     className="hidden"
                                 />
                                 {ingredientsImage && (
                                     <button
                                         onClick={() =>
-                                            handleRemoveImage("ingredients")
+                                            handleRemoveImage('ingredients')
                                         }
-                                        className="p-3 text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                                        className="p-3 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                    >
                                         <X size={20} />
                                     </button>
                                 )}
@@ -243,13 +248,13 @@ export function RecipeEdit({ onNavigate, recipeId }) {
                                             onChange={(e) =>
                                                 handleIngredientChange(
                                                     index,
-                                                    e.target.value
+                                                    e.target.value,
                                                 )
                                             }
                                             onKeyDown={(e) =>
                                                 handleIngredientKeyDown(
                                                     e,
-                                                    index
+                                                    index,
                                                 )
                                             }
                                             className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none"
@@ -260,7 +265,8 @@ export function RecipeEdit({ onNavigate, recipeId }) {
                                                 onClick={() =>
                                                     removeIngredient(index)
                                                 }
-                                                className="p-3 text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                                                className="p-3 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                            >
                                                 <X size={20} />
                                             </button>
                                         )}
@@ -293,7 +299,8 @@ export function RecipeEdit({ onNavigate, recipeId }) {
                                 </label>
                                 <button
                                     onClick={generateAIHashtags}
-                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md">
+                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md"
+                                >
                                     <Sparkles size={16} />
                                     AI 해시태그 생성
                                 </button>
@@ -307,7 +314,7 @@ export function RecipeEdit({ onNavigate, recipeId }) {
                                         setNewHashtag(e.target.value)
                                     }
                                     onKeyDown={(e) =>
-                                        e.key === "Enter" &&
+                                        e.key === 'Enter' &&
                                         (e.preventDefault(), addHashtag())
                                     }
                                     className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none"
@@ -315,7 +322,8 @@ export function RecipeEdit({ onNavigate, recipeId }) {
                                 />
                                 <button
                                     onClick={addHashtag}
-                                    className="px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors">
+                                    className="px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors"
+                                >
                                     <Plus size={20} />
                                 </button>
                             </div>
@@ -324,11 +332,13 @@ export function RecipeEdit({ onNavigate, recipeId }) {
                                 {hashtags.map((tag) => (
                                     <span
                                         key={tag}
-                                        className="flex items-center gap-2 px-3 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border border-[#d4cbbf]">
+                                        className="flex items-center gap-2 px-3 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border border-[#d4cbbf]"
+                                    >
                                         #{tag}
                                         <button
                                             onClick={() => removeHashtag(tag)}
-                                            className="hover:text-red-600 transition-colors">
+                                            className="hover:text-red-600 transition-colors"
+                                        >
                                             <X size={16} />
                                         </button>
                                     </span>
@@ -339,7 +349,8 @@ export function RecipeEdit({ onNavigate, recipeId }) {
                         {/* Submit Button */}
                         <button
                             onClick={handleSubmit}
-                            className="w-full py-4 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors font-medium text-lg">
+                            className="w-full py-4 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors font-medium text-lg"
+                        >
                             레시피 수정 완료
                         </button>
                     </div>

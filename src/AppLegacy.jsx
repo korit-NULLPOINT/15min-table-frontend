@@ -19,49 +19,49 @@ import { AuthModal } from "./components/AuthModal";
 
 export default function App() {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [authMode, setAuthMode] = useState("login");
+    const [authMode, setAuthMode] = useState('login');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userNickname, setUserNickname] = useState("");
-    const [currentPage, setCurrentPage] = useState("home");
+    const [userNickname, setUserNickname] = useState('');
+    const [currentPage, setCurrentPage] = useState('home');
     const [selectedRecipeId, setSelectedRecipeId] = useState(null);
     const [selectedPostId, setSelectedPostId] = useState(null);
     const [editingRecipeId, setEditingRecipeId] = useState(null);
-    const [otherUserName, setOtherUserName] = useState("");
+    const [otherUserName, setOtherUserName] = useState('');
 
     // Handle browser back/forward buttons
     useEffect(() => {
         const handlePopState = () => {
-            const path = window.location.hash.slice(1) || "home";
+            const path = window.location.hash.slice(1) || 'home';
             if (
-                path === "home" ||
-                path === "profile" ||
-                path === "recipe" ||
-                path === "write" ||
-                path === "edit" ||
-                path === "community" ||
-                path === "communityWrite" ||
-                path === "communityDetail" ||
-                path === "communityEdit" ||
-                path === "board" ||
-                path === "followers" ||
-                path === "following" ||
-                path === "otherProfile"
+                path === 'home' ||
+                path === 'profile' ||
+                path === 'recipe' ||
+                path === 'write' ||
+                path === 'edit' ||
+                path === 'community' ||
+                path === 'communityWrite' ||
+                path === 'communityDetail' ||
+                path === 'communityEdit' ||
+                path === 'board' ||
+                path === 'followers' ||
+                path === 'following' ||
+                path === 'otherProfile'
             ) {
                 setCurrentPage(path);
             }
         };
 
-        window.addEventListener("popstate", handlePopState);
-        return () => window.removeEventListener("popstate", handlePopState);
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
     }, []);
 
     // Load saved user data on mount
     useEffect(() => {
-        const savedNickname = localStorage.getItem("userNickname");
-        const savedLoginState = localStorage.getItem("isLoggedIn");
+        const savedNickname = localStorage.getItem('userNickname');
+        const savedLoginState = localStorage.getItem('isLoggedIn');
 
         if (savedNickname) setUserNickname(savedNickname);
-        if (savedLoginState === "true") setIsLoggedIn(true);
+        if (savedLoginState === 'true') setIsLoggedIn(true);
     }, []);
 
     const openAuthModal = (mode) => {
@@ -71,11 +71,11 @@ export default function App() {
 
     const handleAuthSuccess = (nickname) => {
         setIsLoggedIn(true);
-        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem('isLoggedIn', 'true');
 
         if (nickname) {
             setUserNickname(nickname);
-            localStorage.setItem("userNickname", nickname);
+            localStorage.setItem('userNickname', nickname);
         }
     };
 
@@ -86,33 +86,33 @@ export default function App() {
     const handleNavigate = (page) => {
         setCurrentPage(page);
         setSelectedRecipeId(null);
-        window.history.pushState({}, "", `#${page}`);
+        window.history.pushState({}, '', `#${page}`);
     };
 
     const handleRecipeClick = (recipeId) => {
         setSelectedRecipeId(recipeId);
-        setCurrentPage("recipe");
-        window.history.pushState({}, "", "#recipe");
+        setCurrentPage('recipe');
+        window.history.pushState({}, '', '#recipe');
     };
 
     const handleOpenAuthForFeature = () => {
-        openAuthModal("login");
+        openAuthModal('login');
     };
 
     const handleLogout = () => {
         setIsLoggedIn(false);
-        setUserNickname("");
-        localStorage.removeItem("isLoggedIn");
-        localStorage.removeItem("userNickname");
-        setCurrentPage("home");
-        window.history.pushState({}, "", "#home");
+        setUserNickname('');
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userNickname');
+        setCurrentPage('home');
+        window.history.pushState({}, '', '#home');
     };
 
     const handleRandomRecipe = () => {
         // Get all available recipe IDs from recipeDetailsMap and localStorage
         const defaultRecipeIds = Object.keys(recipeDetailsMap).map(Number);
         const savedRecipes = JSON.parse(
-            localStorage.getItem("recipes") || "[]"
+            localStorage.getItem('recipes') || '[]',
         );
         const savedRecipeIds = savedRecipes.map((r) => r.id);
 
@@ -131,43 +131,43 @@ export default function App() {
 
     const handlePostClick = (postId) => {
         setSelectedPostId(postId);
-        setCurrentPage("communityDetail");
-        window.history.pushState({}, "", "#communityDetail");
+        setCurrentPage('communityDetail');
+        window.history.pushState({}, '', '#communityDetail');
     };
 
     const handleEditRecipe = (recipeId) => {
         setEditingRecipeId(recipeId);
-        setCurrentPage("edit");
-        window.history.pushState({}, "", "#edit");
+        setCurrentPage('edit');
+        window.history.pushState({}, '', '#edit');
     };
 
     const handleFollowersClick = () => {
-        setCurrentPage("followers");
-        window.history.pushState({}, "", "#followers");
+        setCurrentPage('followers');
+        window.history.pushState({}, '', '#followers');
     };
 
     const handleFollowingClick = () => {
-        setCurrentPage("following");
-        window.history.pushState({}, "", "#following");
+        setCurrentPage('following');
+        window.history.pushState({}, '', '#following');
     };
 
     const handleUserClick = (userId, userName) => {
         setOtherUserName(userName);
-        setCurrentPage("otherProfile");
-        window.history.pushState({}, "", "#otherProfile");
+        setCurrentPage('otherProfile');
+        window.history.pushState({}, '', '#otherProfile');
     };
 
     const handleAuthorClick = (authorName) => {
         setOtherUserName(authorName);
-        setCurrentPage("otherProfile");
-        window.history.pushState({}, "", "#otherProfile");
+        setCurrentPage('otherProfile');
+        window.history.pushState({}, '', '#otherProfile');
     };
 
     const handleNotificationClick = (notification) => {
-        if (notification.type === "follow") {
+        if (notification.type === 'follow') {
             // 팔로우 알림 - 해당 유저의 프로필로 이동
             handleAuthorClick(notification.userName);
-        } else if (notification.type === "post") {
+        } else if (notification.type === 'post') {
             // 게시글 등록 알림 - 해당 레시피로 이동
             // Mock: 실제로는 notification.postId를 사용
             handleRecipeClick(1); // 임시로 ID 1번 레시피로 이동
@@ -176,20 +176,20 @@ export default function App() {
 
     const handleCommunityPostClick = (postId) => {
         setSelectedPostId(postId);
-        setCurrentPage("communityDetail");
-        window.history.pushState({}, "", "#communityDetail");
+        setCurrentPage('communityDetail');
+        window.history.pushState({}, '', '#communityDetail');
     };
 
     const handleEditCommunityPost = (postId) => {
         setSelectedPostId(postId);
-        setCurrentPage("communityEdit");
-        window.history.pushState({}, "", "#communityEdit");
+        setCurrentPage('communityEdit');
+        window.history.pushState({}, '', '#communityEdit');
     };
 
     const selectedRecipe = selectedRecipeId
         ? recipeDetailsMap[selectedRecipeId] ||
-          JSON.parse(localStorage.getItem("recipes") || "[]").find(
-              (r) => r.id === selectedRecipeId
+          JSON.parse(localStorage.getItem('recipes') || '[]').find(
+              (r) => r.id === selectedRecipeId,
           )
         : null;
 
@@ -204,19 +204,21 @@ export default function App() {
                 onNotificationClick={handleNotificationClick}
             />
 
-            {currentPage === "home" && (
+            {currentPage === 'home' && (
                 <main className="pt-20">
                     {/* Hero Section */}
                     <section className="px-6 py-8 max-w-7xl mx-auto">
                         <div className="text-center mb-4">
                             <h2
                                 className="text-5xl mb-4 text-[#3d3226] font-serif"
-                                style={{ letterSpacing: "0.02em" }}>
+                                style={{ letterSpacing: '0.02em' }}
+                            >
                                 15분이면 충분한
                                 <br />
                                 <span
                                     className="text-6xl"
-                                    style={{ fontWeight: 500 }}>
+                                    style={{ fontWeight: 500 }}
+                                >
                                     식탁 위의 행복
                                 </span>
                             </h2>
@@ -242,7 +244,7 @@ export default function App() {
                 </main>
             )}
 
-            {currentPage === "profile" && isLoggedIn && (
+            {currentPage === 'profile' && isLoggedIn && (
                 <UserProfile
                     onNavigate={handleNavigate}
                     onRecipeClick={handleRecipeClick}
@@ -256,7 +258,7 @@ export default function App() {
                 />
             )}
 
-            {currentPage === "recipe" && selectedRecipe && (
+            {currentPage === 'recipe' && selectedRecipe && (
                 <RecipeDetail
                     recipe={selectedRecipe}
                     onNavigate={handleNavigate}
@@ -267,29 +269,29 @@ export default function App() {
                 />
             )}
 
-            {currentPage === "write" && isLoggedIn && (
+            {currentPage === 'write' && isLoggedIn && (
                 <RecipeWrite onNavigate={handleNavigate} />
             )}
 
-            {currentPage === "edit" && isLoggedIn && editingRecipeId && (
+            {currentPage === 'edit' && isLoggedIn && editingRecipeId && (
                 <RecipeEdit
                     onNavigate={handleNavigate}
                     recipeId={editingRecipeId}
                 />
             )}
 
-            {currentPage === "community" && (
+            {currentPage === 'community' && (
                 <Community
                     onNavigate={handleNavigate}
                     onPostClick={handlePostClick}
                 />
             )}
 
-            {currentPage === "communityWrite" && isLoggedIn && (
+            {currentPage === 'communityWrite' && isLoggedIn && (
                 <CommunityWrite onNavigate={handleNavigate} />
             )}
 
-            {currentPage === "communityDetail" && selectedPostId && (
+            {currentPage === 'communityDetail' && selectedPostId && (
                 <CommunityDetail
                     postId={selectedPostId}
                     onNavigate={handleNavigate}
@@ -297,7 +299,7 @@ export default function App() {
                 />
             )}
 
-            {currentPage === "communityEdit" && selectedPostId && (
+            {currentPage === 'communityEdit' && selectedPostId && (
                 <CommunityEdit
                     postId={selectedPostId}
                     onNavigate={handleNavigate}
@@ -305,7 +307,7 @@ export default function App() {
                 />
             )}
 
-            {currentPage === "board" && (
+            {currentPage === 'board' && (
                 <RecipeBoard
                     onNavigate={handleNavigate}
                     onRecipeClick={handleRecipeClick}
@@ -314,7 +316,7 @@ export default function App() {
                 />
             )}
 
-            {currentPage === "followers" && isLoggedIn && (
+            {currentPage === 'followers' && isLoggedIn && (
                 <FollowList
                     onNavigate={handleNavigate}
                     type="followers"
@@ -322,7 +324,7 @@ export default function App() {
                 />
             )}
 
-            {currentPage === "following" && isLoggedIn && (
+            {currentPage === 'following' && isLoggedIn && (
                 <FollowList
                     onNavigate={handleNavigate}
                     type="following"
@@ -330,7 +332,7 @@ export default function App() {
                 />
             )}
 
-            {currentPage === "otherProfile" && otherUserName && (
+            {currentPage === 'otherProfile' && otherUserName && (
                 <OtherUserProfile
                     userName={otherUserName}
                     onNavigate={handleNavigate}
@@ -338,7 +340,7 @@ export default function App() {
                 />
             )}
 
-            {currentPage === "home" && (
+            {currentPage === 'home' && (
                 <footer className="bg-[#3d3226] text-[#f5f1eb] py-8 mt-20">
                     <div className="max-w-7xl mx-auto px-6 text-center">
                         <p className="text-sm">

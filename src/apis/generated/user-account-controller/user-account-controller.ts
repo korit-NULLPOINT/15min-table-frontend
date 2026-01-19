@@ -4,455 +4,541 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useMutation,
-  useQuery
-} from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
-  MutationFunction,
-  QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult
+    DataTag,
+    DefinedInitialDataOptions,
+    DefinedUseQueryResult,
+    MutationFunction,
+    QueryClient,
+    QueryFunction,
+    QueryKey,
+    UndefinedInitialDataOptions,
+    UseMutationOptions,
+    UseMutationResult,
+    UseQueryOptions,
+    UseQueryResult,
 } from '@tanstack/react-query';
 
 import type {
-  ChangePasswordReqDto,
-  ChangeProfileImgReqDto,
-  ChangeUsernameReqDto
+    ChangePasswordReqDto,
+    ChangeProfileImgReqDto,
+    ChangeUsernameReqDto,
 } from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-
-
 export type withdrawResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type withdrawResponseSuccess = (withdrawResponse200) & {
-  headers: Headers;
+    data: Blob;
+    status: 200;
 };
-;
 
-export type withdrawResponse = (withdrawResponseSuccess)
+export type withdrawResponseSuccess = withdrawResponse200 & {
+    headers: Headers;
+};
+export type withdrawResponse = withdrawResponseSuccess;
 
 export const getWithdrawUrl = () => {
+    return `/user/account/withdraw`;
+};
 
+export const withdraw = async (
+    options?: RequestInit,
+): Promise<withdrawResponse> => {
+    return customInstance<withdrawResponse>(getWithdrawUrl(), {
+        ...options,
+        method: 'POST',
+    });
+};
 
-  
-
-  return `/user/account/withdraw`
-}
-
-export const withdraw = async ( options?: RequestInit): Promise<withdrawResponse> => {
-  
-  return customInstance<withdrawResponse>(getWithdrawUrl(),
-  {      
-    ...options,
-    method: 'POST'
-    
-    
-  }
-);}
-
-
-
-
-export const getWithdrawMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof withdraw>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof withdraw>>, TError,void, TContext> => {
-
-const mutationKey = ['withdraw'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof withdraw>>, void> = () => {
-          
-
-          return  withdraw(requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type WithdrawMutationResult = NonNullable<Awaited<ReturnType<typeof withdraw>>>
-    
-    export type WithdrawMutationError = unknown
-
-    export const useWithdraw = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof withdraw>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getWithdrawMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof withdraw>>,
         TError,
         void,
         TContext
-      > => {
-      return useMutation(getWithdrawMutationOptions(options), queryClient);
-    }
-    export type changeUsernameResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type changeUsernameResponseSuccess = (changeUsernameResponse200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof withdraw>>,
+    TError,
+    void,
+    TContext
+> => {
+    const mutationKey = ['withdraw'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type changeUsernameResponse = (changeUsernameResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof withdraw>>,
+        void
+    > = () => {
+        return withdraw(requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type WithdrawMutationResult = NonNullable<
+    Awaited<ReturnType<typeof withdraw>>
+>;
+
+export type WithdrawMutationError = unknown;
+
+export const useWithdraw = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof withdraw>>,
+            TError,
+            void,
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof withdraw>>,
+    TError,
+    void,
+    TContext
+> => {
+    return useMutation(getWithdrawMutationOptions(options), queryClient);
+};
+export type changeUsernameResponse200 = {
+    data: Blob;
+    status: 200;
+};
+
+export type changeUsernameResponseSuccess = changeUsernameResponse200 & {
+    headers: Headers;
+};
+export type changeUsernameResponse = changeUsernameResponseSuccess;
 
 export const getChangeUsernameUrl = () => {
+    return `/user/account/change/username`;
+};
 
+export const changeUsername = async (
+    changeUsernameReqDto: ChangeUsernameReqDto,
+    options?: RequestInit,
+): Promise<changeUsernameResponse> => {
+    return customInstance<changeUsernameResponse>(getChangeUsernameUrl(), {
+        ...options,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(changeUsernameReqDto),
+    });
+};
 
-  
-
-  return `/user/account/change/username`
-}
-
-export const changeUsername = async (changeUsernameReqDto: ChangeUsernameReqDto, options?: RequestInit): Promise<changeUsernameResponse> => {
-  
-  return customInstance<changeUsernameResponse>(getChangeUsernameUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      changeUsernameReqDto,)
-  }
-);}
-
-
-
-
-export const getChangeUsernameMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changeUsername>>, TError,{data: ChangeUsernameReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof changeUsername>>, TError,{data: ChangeUsernameReqDto}, TContext> => {
-
-const mutationKey = ['changeUsername'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof changeUsername>>, {data: ChangeUsernameReqDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  changeUsername(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ChangeUsernameMutationResult = NonNullable<Awaited<ReturnType<typeof changeUsername>>>
-    export type ChangeUsernameMutationBody = ChangeUsernameReqDto
-    export type ChangeUsernameMutationError = unknown
-
-    export const useChangeUsername = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changeUsername>>, TError,{data: ChangeUsernameReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getChangeUsernameMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof changeUsername>>,
         TError,
-        {data: ChangeUsernameReqDto},
+        { data: ChangeUsernameReqDto },
         TContext
-      > => {
-      return useMutation(getChangeUsernameMutationOptions(options), queryClient);
-    }
-    export type changeProfileImgResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type changeProfileImgResponseSuccess = (changeProfileImgResponse200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof changeUsername>>,
+    TError,
+    { data: ChangeUsernameReqDto },
+    TContext
+> => {
+    const mutationKey = ['changeUsername'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type changeProfileImgResponse = (changeProfileImgResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof changeUsername>>,
+        { data: ChangeUsernameReqDto }
+    > = (props) => {
+        const { data } = props ?? {};
+
+        return changeUsername(data, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type ChangeUsernameMutationResult = NonNullable<
+    Awaited<ReturnType<typeof changeUsername>>
+>;
+export type ChangeUsernameMutationBody = ChangeUsernameReqDto;
+export type ChangeUsernameMutationError = unknown;
+
+export const useChangeUsername = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof changeUsername>>,
+            TError,
+            { data: ChangeUsernameReqDto },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof changeUsername>>,
+    TError,
+    { data: ChangeUsernameReqDto },
+    TContext
+> => {
+    return useMutation(getChangeUsernameMutationOptions(options), queryClient);
+};
+export type changeProfileImgResponse200 = {
+    data: Blob;
+    status: 200;
+};
+
+export type changeProfileImgResponseSuccess = changeProfileImgResponse200 & {
+    headers: Headers;
+};
+export type changeProfileImgResponse = changeProfileImgResponseSuccess;
 
 export const getChangeProfileImgUrl = () => {
+    return `/user/account/change/profileImg`;
+};
 
+export const changeProfileImg = async (
+    changeProfileImgReqDto: ChangeProfileImgReqDto,
+    options?: RequestInit,
+): Promise<changeProfileImgResponse> => {
+    return customInstance<changeProfileImgResponse>(getChangeProfileImgUrl(), {
+        ...options,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(changeProfileImgReqDto),
+    });
+};
 
-  
-
-  return `/user/account/change/profileImg`
-}
-
-export const changeProfileImg = async (changeProfileImgReqDto: ChangeProfileImgReqDto, options?: RequestInit): Promise<changeProfileImgResponse> => {
-  
-  return customInstance<changeProfileImgResponse>(getChangeProfileImgUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      changeProfileImgReqDto,)
-  }
-);}
-
-
-
-
-export const getChangeProfileImgMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changeProfileImg>>, TError,{data: ChangeProfileImgReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof changeProfileImg>>, TError,{data: ChangeProfileImgReqDto}, TContext> => {
-
-const mutationKey = ['changeProfileImg'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof changeProfileImg>>, {data: ChangeProfileImgReqDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  changeProfileImg(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ChangeProfileImgMutationResult = NonNullable<Awaited<ReturnType<typeof changeProfileImg>>>
-    export type ChangeProfileImgMutationBody = ChangeProfileImgReqDto
-    export type ChangeProfileImgMutationError = unknown
-
-    export const useChangeProfileImg = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changeProfileImg>>, TError,{data: ChangeProfileImgReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getChangeProfileImgMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof changeProfileImg>>,
         TError,
-        {data: ChangeProfileImgReqDto},
+        { data: ChangeProfileImgReqDto },
         TContext
-      > => {
-      return useMutation(getChangeProfileImgMutationOptions(options), queryClient);
-    }
-    export type changePasswordResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type changePasswordResponseSuccess = (changePasswordResponse200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof changeProfileImg>>,
+    TError,
+    { data: ChangeProfileImgReqDto },
+    TContext
+> => {
+    const mutationKey = ['changeProfileImg'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type changePasswordResponse = (changePasswordResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof changeProfileImg>>,
+        { data: ChangeProfileImgReqDto }
+    > = (props) => {
+        const { data } = props ?? {};
+
+        return changeProfileImg(data, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type ChangeProfileImgMutationResult = NonNullable<
+    Awaited<ReturnType<typeof changeProfileImg>>
+>;
+export type ChangeProfileImgMutationBody = ChangeProfileImgReqDto;
+export type ChangeProfileImgMutationError = unknown;
+
+export const useChangeProfileImg = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof changeProfileImg>>,
+            TError,
+            { data: ChangeProfileImgReqDto },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof changeProfileImg>>,
+    TError,
+    { data: ChangeProfileImgReqDto },
+    TContext
+> => {
+    return useMutation(
+        getChangeProfileImgMutationOptions(options),
+        queryClient,
+    );
+};
+export type changePasswordResponse200 = {
+    data: Blob;
+    status: 200;
+};
+
+export type changePasswordResponseSuccess = changePasswordResponse200 & {
+    headers: Headers;
+};
+export type changePasswordResponse = changePasswordResponseSuccess;
 
 export const getChangePasswordUrl = () => {
+    return `/user/account/change/password`;
+};
 
+export const changePassword = async (
+    changePasswordReqDto: ChangePasswordReqDto,
+    options?: RequestInit,
+): Promise<changePasswordResponse> => {
+    return customInstance<changePasswordResponse>(getChangePasswordUrl(), {
+        ...options,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(changePasswordReqDto),
+    });
+};
 
-  
-
-  return `/user/account/change/password`
-}
-
-export const changePassword = async (changePasswordReqDto: ChangePasswordReqDto, options?: RequestInit): Promise<changePasswordResponse> => {
-  
-  return customInstance<changePasswordResponse>(getChangePasswordUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      changePasswordReqDto,)
-  }
-);}
-
-
-
-
-export const getChangePasswordMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changePassword>>, TError,{data: ChangePasswordReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof changePassword>>, TError,{data: ChangePasswordReqDto}, TContext> => {
-
-const mutationKey = ['changePassword'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof changePassword>>, {data: ChangePasswordReqDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  changePassword(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ChangePasswordMutationResult = NonNullable<Awaited<ReturnType<typeof changePassword>>>
-    export type ChangePasswordMutationBody = ChangePasswordReqDto
-    export type ChangePasswordMutationError = unknown
-
-    export const useChangePassword = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changePassword>>, TError,{data: ChangePasswordReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getChangePasswordMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof changePassword>>,
         TError,
-        {data: ChangePasswordReqDto},
+        { data: ChangePasswordReqDto },
         TContext
-      > => {
-      return useMutation(getChangePasswordMutationOptions(options), queryClient);
-    }
-    export type getPrincipalResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type getPrincipalResponseSuccess = (getPrincipalResponse200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof changePassword>>,
+    TError,
+    { data: ChangePasswordReqDto },
+    TContext
+> => {
+    const mutationKey = ['changePassword'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type getPrincipalResponse = (getPrincipalResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof changePassword>>,
+        { data: ChangePasswordReqDto }
+    > = (props) => {
+        const { data } = props ?? {};
+
+        return changePassword(data, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type ChangePasswordMutationResult = NonNullable<
+    Awaited<ReturnType<typeof changePassword>>
+>;
+export type ChangePasswordMutationBody = ChangePasswordReqDto;
+export type ChangePasswordMutationError = unknown;
+
+export const useChangePassword = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof changePassword>>,
+            TError,
+            { data: ChangePasswordReqDto },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof changePassword>>,
+    TError,
+    { data: ChangePasswordReqDto },
+    TContext
+> => {
+    return useMutation(getChangePasswordMutationOptions(options), queryClient);
+};
+export type getPrincipalResponse200 = {
+    data: Blob;
+    status: 200;
+};
+
+export type getPrincipalResponseSuccess = getPrincipalResponse200 & {
+    headers: Headers;
+};
+export type getPrincipalResponse = getPrincipalResponseSuccess;
 
 export const getGetPrincipalUrl = () => {
+    return `/user/account/principal`;
+};
 
-
-  
-
-  return `/user/account/principal`
-}
-
-export const getPrincipal = async ( options?: RequestInit): Promise<getPrincipalResponse> => {
-  
-  return customInstance<getPrincipalResponse>(getGetPrincipalUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-
-
-
-
+export const getPrincipal = async (
+    options?: RequestInit,
+): Promise<getPrincipalResponse> => {
+    return customInstance<getPrincipalResponse>(getGetPrincipalUrl(), {
+        ...options,
+        method: 'GET',
+    });
+};
 
 export const getGetPrincipalQueryKey = () => {
-    return [
-    `/user/account/principal`
-    ] as const;
-    }
+    return [`/user/account/principal`] as const;
+};
 
-    
-export const getGetPrincipalQueryOptions = <TData = Awaited<ReturnType<typeof getPrincipal>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPrincipal>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
+export const getGetPrincipalQueryOptions = <
+    TData = Awaited<ReturnType<typeof getPrincipal>>,
+    TError = unknown,
+>(options?: {
+    query?: Partial<
+        UseQueryOptions<Awaited<ReturnType<typeof getPrincipal>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}) => {
+    const { query: queryOptions, request: requestOptions } = options ?? {};
 
-const {query: queryOptions, request: requestOptions} = options ?? {};
+    const queryKey = queryOptions?.queryKey ?? getGetPrincipalQueryKey();
 
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPrincipal>>> = ({
+        signal,
+    }) => getPrincipal({ signal, ...requestOptions });
 
-  const queryKey =  queryOptions?.queryKey ?? getGetPrincipalQueryKey();
+    return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+        Awaited<ReturnType<typeof getPrincipal>>,
+        TError,
+        TData
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
 
-  
+export type GetPrincipalQueryResult = NonNullable<
+    Awaited<ReturnType<typeof getPrincipal>>
+>;
+export type GetPrincipalQueryError = unknown;
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPrincipal>>> = ({ signal }) => getPrincipal({ signal, ...requestOptions });
+export function useGetPrincipal<
+    TData = Awaited<ReturnType<typeof getPrincipal>>,
+    TError = unknown,
+>(
+    options: {
+        query: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getPrincipal>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                DefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getPrincipal>>,
+                    TError,
+                    Awaited<ReturnType<typeof getPrincipal>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetPrincipal<
+    TData = Awaited<ReturnType<typeof getPrincipal>>,
+    TError = unknown,
+>(
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getPrincipal>>,
+                TError,
+                TData
+            >
+        > &
+            Pick<
+                UndefinedInitialDataOptions<
+                    Awaited<ReturnType<typeof getPrincipal>>,
+                    TError,
+                    Awaited<ReturnType<typeof getPrincipal>>
+                >,
+                'initialData'
+            >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetPrincipal<
+    TData = Awaited<ReturnType<typeof getPrincipal>>,
+    TError = unknown,
+>(
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getPrincipal>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+};
 
-      
+export function useGetPrincipal<
+    TData = Awaited<ReturnType<typeof getPrincipal>>,
+    TError = unknown,
+>(
+    options?: {
+        query?: Partial<
+            UseQueryOptions<
+                Awaited<ReturnType<typeof getPrincipal>>,
+                TError,
+                TData
+            >
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+} {
+    const queryOptions = getGetPrincipalQueryOptions(options);
 
-      
+    const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+        TData,
+        TError
+    > & { queryKey: DataTag<QueryKey, TData, TError> };
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPrincipal>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+    return { ...query, queryKey: queryOptions.queryKey };
 }
-
-export type GetPrincipalQueryResult = NonNullable<Awaited<ReturnType<typeof getPrincipal>>>
-export type GetPrincipalQueryError = unknown
-
-
-export function useGetPrincipal<TData = Awaited<ReturnType<typeof getPrincipal>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPrincipal>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPrincipal>>,
-          TError,
-          Awaited<ReturnType<typeof getPrincipal>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPrincipal<TData = Awaited<ReturnType<typeof getPrincipal>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPrincipal>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPrincipal>>,
-          TError,
-          Awaited<ReturnType<typeof getPrincipal>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPrincipal<TData = Awaited<ReturnType<typeof getPrincipal>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPrincipal>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetPrincipal<TData = Awaited<ReturnType<typeof getPrincipal>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPrincipal>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetPrincipalQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
