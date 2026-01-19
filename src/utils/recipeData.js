@@ -8,7 +8,8 @@ export const recipeDetailsMap = {
         cookTime: '15분',
         rating: 4.8,
         image: 'https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrb3JlYW4lMjBmb29kJTIwcmVjaXBlfGVufDF8fHx8MTc2Nzc2MjY5Mnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '남은 김치로 간단하게 만드는 자취생 필수 메뉴! 밥만 있으면 5분 만에 뚝딱 완성되는 초간단 김치볶음밥입니다.',
+        description:
+            '남은 김치로 간단하게 만드는 자취생 필수 메뉴! 밥만 있으면 5분 만에 뚝딱 완성되는 초간단 김치볶음밥입니다.',
         ingredients: [
             '밥 1공기',
             '김치 1/2컵',
@@ -34,7 +35,8 @@ export const recipeDetailsMap = {
         cookTime: '20분',
         rating: 4.9,
         image: 'https://images.unsplash.com/photo-1587740907856-997a958a68ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYXN0YSUyMGNvb2tpbmd8ZW58MXx8fHwxNzY3NjkzODg1fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '레스토랑 못지않은 크리미한 로제 파스타를 집에서 간단하게! 생크림과 토마토소스의 환상적인 조합을 즐겨보세요.',
+        description:
+            '레스토랑 못지않은 크리미한 로제 파스타를 집에서 간단하게! 생크림과 토마토소스의 환상적인 조합을 즐겨보세요.',
         ingredients: [
             '스파게티 면 100g',
             '베이컨 3줄',
@@ -63,7 +65,8 @@ export const recipeDetailsMap = {
         views: '10.5K',
         cookTime: '5분',
         image: 'https://images.unsplash.com/photo-1628521061262-19b5cdb7eee5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyaWNlJTIwYm93bHxlbnwxfHx8fDE3Njc3NDA1ODZ8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '참치캔만 있으면 5분 안에 완성되는 간편하고 맛있는 한 그릇 요리! 바쁜 아침이나 야식으로 제격입니다.',
+        description:
+            '참치캔만 있으면 5분 안에 완성되는 간편하고 맛있는 한 그릇 요리! 바쁜 아침이나 야식으로 제격입니다.',
         ingredients: [
             '밥 1공기',
             '참치캔 1개',
@@ -89,7 +92,8 @@ export const recipeDetailsMap = {
         views: '9.2K',
         cookTime: '10분',
         image: 'https://images.unsplash.com/photo-1627900440398-5db32dba8db1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxub29kbGVzJTIwcmFtZW58ZW58MXx8fHwxNzY3NzYyNjk0fDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '평범한 라면을 특별하게! 간단한 재료 추가로 훨씬 더 맛있고 영양가 있는 라면을 만들어보세요.',
+        description:
+            '평범한 라면을 특별하게! 간단한 재료 추가로 훨씬 더 맛있고 영양가 있는 라면을 만들어보세요.',
         ingredients: [
             '라면 1개',
             '계란 1개',
@@ -113,7 +117,8 @@ export const recipeDetailsMap = {
         views: '8.7K',
         cookTime: '20분',
         image: 'https://images.unsplash.com/photo-1560684352-8497838a2229?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzb3VwJTIwc3Rld3xlbnwxfHx8fDE3Njc3NjI2OTV8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '엄마가 끓여주시던 그 맛! 따뜻하고 구수한 된장찌개로 한 끼 든든하게 해결하세요.',
+        description:
+            '엄마가 끓여주시던 그 맛! 따뜻하고 구수한 된장찌개로 한 끼 든든하게 해결하세요.',
         ingredients: [
             '된장 2큰술',
             '두부 1/2모',
@@ -141,7 +146,8 @@ export const recipeDetailsMap = {
         views: '7.9K',
         cookTime: '8분',
         image: 'https://images.unsplash.com/photo-1689020353604-8041221e1273?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmVha2Zhc3QlMjB0b2FzdHxlbnwxfHx8fDE3Njc3MDM4ODF8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-        description: '든든한 아침 식사로 완벽한 에그 토스트! 간단하지만 영양 만점인 한 끼를 만들어보세요.',
+        description:
+            '든든한 아침 식사로 완벽한 에그 토스트! 간단하지만 영양 만점인 한 끼를 만들어보세요.',
         ingredients: [
             '식빵 2장',
             '계란 2개',

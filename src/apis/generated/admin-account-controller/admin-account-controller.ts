@@ -4,186 +4,202 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useMutation
-} from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import type {
-  MutationFunction,
-  QueryClient,
-  UseMutationOptions,
-  UseMutationResult
+    MutationFunction,
+    QueryClient,
+    UseMutationOptions,
+    UseMutationResult,
 } from '@tanstack/react-query';
 
 import type {
-  ChangePasswordReqDto,
-  ChangeUsernameReqDto
+    ChangePasswordReqDto,
+    ChangeUsernameReqDto,
 } from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-
-
 export type changeUsername1Response200 = {
-  data: Blob
-  status: 200
-}
-    
-export type changeUsername1ResponseSuccess = (changeUsername1Response200) & {
-  headers: Headers;
+    data: Blob;
+    status: 200;
 };
-;
 
-export type changeUsername1Response = (changeUsername1ResponseSuccess)
+export type changeUsername1ResponseSuccess = changeUsername1Response200 & {
+    headers: Headers;
+};
+export type changeUsername1Response = changeUsername1ResponseSuccess;
 
 export const getChangeUsername1Url = () => {
+    return `/admin/account/change/username`;
+};
 
+export const changeUsername1 = async (
+    changeUsernameReqDto: ChangeUsernameReqDto,
+    options?: RequestInit,
+): Promise<changeUsername1Response> => {
+    return customInstance<changeUsername1Response>(getChangeUsername1Url(), {
+        ...options,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(changeUsernameReqDto),
+    });
+};
 
-  
-
-  return `/admin/account/change/username`
-}
-
-export const changeUsername1 = async (changeUsernameReqDto: ChangeUsernameReqDto, options?: RequestInit): Promise<changeUsername1Response> => {
-  
-  return customInstance<changeUsername1Response>(getChangeUsername1Url(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      changeUsernameReqDto,)
-  }
-);}
-
-
-
-
-export const getChangeUsername1MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changeUsername1>>, TError,{data: ChangeUsernameReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof changeUsername1>>, TError,{data: ChangeUsernameReqDto}, TContext> => {
-
-const mutationKey = ['changeUsername1'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof changeUsername1>>, {data: ChangeUsernameReqDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  changeUsername1(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ChangeUsername1MutationResult = NonNullable<Awaited<ReturnType<typeof changeUsername1>>>
-    export type ChangeUsername1MutationBody = ChangeUsernameReqDto
-    export type ChangeUsername1MutationError = unknown
-
-    export const useChangeUsername1 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changeUsername1>>, TError,{data: ChangeUsernameReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getChangeUsername1MutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof changeUsername1>>,
         TError,
-        {data: ChangeUsernameReqDto},
+        { data: ChangeUsernameReqDto },
         TContext
-      > => {
-      return useMutation(getChangeUsername1MutationOptions(options), queryClient);
-    }
-    export type changePassword1Response200 = {
-  data: Blob
-  status: 200
-}
-    
-export type changePassword1ResponseSuccess = (changePassword1Response200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof changeUsername1>>,
+    TError,
+    { data: ChangeUsernameReqDto },
+    TContext
+> => {
+    const mutationKey = ['changeUsername1'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type changePassword1Response = (changePassword1ResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof changeUsername1>>,
+        { data: ChangeUsernameReqDto }
+    > = (props) => {
+        const { data } = props ?? {};
+
+        return changeUsername1(data, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type ChangeUsername1MutationResult = NonNullable<
+    Awaited<ReturnType<typeof changeUsername1>>
+>;
+export type ChangeUsername1MutationBody = ChangeUsernameReqDto;
+export type ChangeUsername1MutationError = unknown;
+
+export const useChangeUsername1 = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof changeUsername1>>,
+            TError,
+            { data: ChangeUsernameReqDto },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof changeUsername1>>,
+    TError,
+    { data: ChangeUsernameReqDto },
+    TContext
+> => {
+    return useMutation(getChangeUsername1MutationOptions(options), queryClient);
+};
+export type changePassword1Response200 = {
+    data: Blob;
+    status: 200;
+};
+
+export type changePassword1ResponseSuccess = changePassword1Response200 & {
+    headers: Headers;
+};
+export type changePassword1Response = changePassword1ResponseSuccess;
 
 export const getChangePassword1Url = () => {
+    return `/admin/account/change/password`;
+};
 
+export const changePassword1 = async (
+    changePasswordReqDto: ChangePasswordReqDto,
+    options?: RequestInit,
+): Promise<changePassword1Response> => {
+    return customInstance<changePassword1Response>(getChangePassword1Url(), {
+        ...options,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(changePasswordReqDto),
+    });
+};
 
-  
-
-  return `/admin/account/change/password`
-}
-
-export const changePassword1 = async (changePasswordReqDto: ChangePasswordReqDto, options?: RequestInit): Promise<changePassword1Response> => {
-  
-  return customInstance<changePassword1Response>(getChangePassword1Url(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      changePasswordReqDto,)
-  }
-);}
-
-
-
-
-export const getChangePassword1MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changePassword1>>, TError,{data: ChangePasswordReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof changePassword1>>, TError,{data: ChangePasswordReqDto}, TContext> => {
-
-const mutationKey = ['changePassword1'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof changePassword1>>, {data: ChangePasswordReqDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  changePassword1(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type ChangePassword1MutationResult = NonNullable<Awaited<ReturnType<typeof changePassword1>>>
-    export type ChangePassword1MutationBody = ChangePasswordReqDto
-    export type ChangePassword1MutationError = unknown
-
-    export const useChangePassword1 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof changePassword1>>, TError,{data: ChangePasswordReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getChangePassword1MutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof changePassword1>>,
         TError,
-        {data: ChangePasswordReqDto},
+        { data: ChangePasswordReqDto },
         TContext
-      > => {
-      return useMutation(getChangePassword1MutationOptions(options), queryClient);
-    }
-    
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof changePassword1>>,
+    TError,
+    { data: ChangePasswordReqDto },
+    TContext
+> => {
+    const mutationKey = ['changePassword1'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof changePassword1>>,
+        { data: ChangePasswordReqDto }
+    > = (props) => {
+        const { data } = props ?? {};
+
+        return changePassword1(data, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type ChangePassword1MutationResult = NonNullable<
+    Awaited<ReturnType<typeof changePassword1>>
+>;
+export type ChangePassword1MutationBody = ChangePasswordReqDto;
+export type ChangePassword1MutationError = unknown;
+
+export const useChangePassword1 = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof changePassword1>>,
+            TError,
+            { data: ChangePasswordReqDto },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof changePassword1>>,
+    TError,
+    { data: ChangePasswordReqDto },
+    TContext
+> => {
+    return useMutation(getChangePassword1MutationOptions(options), queryClient);
+};

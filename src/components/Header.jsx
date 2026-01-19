@@ -1,58 +1,174 @@
 import { useState, useRef, useEffect } from 'react';
-import { Menu, X, User, PenSquare, Bell, CheckCircle2, ChevronDown, CheckCheck } from 'lucide-react';
+import {
+    Menu,
+    X,
+    User,
+    PenSquare,
+    Bell,
+    CheckCircle2,
+    ChevronDown,
+    CheckCheck,
+} from 'lucide-react';
 
-export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, onRandomRecipe, onNotificationClick }) {
+export function Header({
+    onOpenAuth,
+    onNavigate,
+    isLoggedIn = false,
+    username,
+    onRandomRecipe,
+    onNotificationClick,
+}) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showAllNotifications, setShowAllNotifications] = useState(false);
     const [notifications, setNotifications] = useState([
-        { id: 1, type: 'follow', userName: '요리왕김치', userImage: '', timestamp: '5분 전', isRead: false },
-        { id: 2, type: 'post', userName: '자취생24', userImage: '', postTitle: '초간단 김치볶음밥', timestamp: '1시간 전', isRead: false },
-        { id: 3, type: 'post', userName: '혼밥러버', userImage: '', postTitle: '5분만에 완성하는 덮밥', timestamp: '2시간 전', isRead: false },
-        { id: 4, type: 'follow', userName: '파스타사랑', userImage: '', timestamp: '3시간 전', isRead: false },
-        { id: 5, type: 'post', userName: '라면킹', userImage: '', postTitle: '라면 맛있게 끓이는 법', timestamp: '5시간 전', isRead: false },
-        { id: 6, type: 'post', userName: '냉장고털이', userImage: '', postTitle: '냉장고 파먹기 레시피', timestamp: '6시간 전', isRead: true },
-        { id: 7, type: 'follow', userName: '자취요정', userImage: '', timestamp: '8시간 전', isRead: true },
-        { id: 8, type: 'post', userName: '간편식덕후', userImage: '', postTitle: '전자레인지로 5분 요리', timestamp: '10시간 전', isRead: true },
-        { id: 9, type: 'post', userName: '요리초보', userImage: '', postTitle: '불 없이 요리하기', timestamp: '12시간 전', isRead: true },
-        { id: 10, type: 'follow', userName: '혼자밥먹자', userImage: '', timestamp: '1일 전', isRead: true },
-        { id: 11, type: 'post', userName: '김치러버', userImage: '', postTitle: '김치찌개 황금 레시피', timestamp: '1일 전', isRead: true },
-        { id: 12, type: 'post', userName: '달걀마스터', userImage: '', postTitle: '달걀 요리 10가지', timestamp: '2일 전', isRead: true },
+        {
+            id: 1,
+            type: 'follow',
+            userName: '요리왕김치',
+            userImage: '',
+            timestamp: '5분 전',
+            isRead: false,
+        },
+        {
+            id: 2,
+            type: 'post',
+            userName: '자취생24',
+            userImage: '',
+            postTitle: '초간단 김치볶음밥',
+            timestamp: '1시간 전',
+            isRead: false,
+        },
+        {
+            id: 3,
+            type: 'post',
+            userName: '혼밥러버',
+            userImage: '',
+            postTitle: '5분만에 완성하는 덮밥',
+            timestamp: '2시간 전',
+            isRead: false,
+        },
+        {
+            id: 4,
+            type: 'follow',
+            userName: '파스타사랑',
+            userImage: '',
+            timestamp: '3시간 전',
+            isRead: false,
+        },
+        {
+            id: 5,
+            type: 'post',
+            userName: '라면킹',
+            userImage: '',
+            postTitle: '라면 맛있게 끓이는 법',
+            timestamp: '5시간 전',
+            isRead: false,
+        },
+        {
+            id: 6,
+            type: 'post',
+            userName: '냉장고털이',
+            userImage: '',
+            postTitle: '냉장고 파먹기 레시피',
+            timestamp: '6시간 전',
+            isRead: true,
+        },
+        {
+            id: 7,
+            type: 'follow',
+            userName: '자취요정',
+            userImage: '',
+            timestamp: '8시간 전',
+            isRead: true,
+        },
+        {
+            id: 8,
+            type: 'post',
+            userName: '간편식덕후',
+            userImage: '',
+            postTitle: '전자레인지로 5분 요리',
+            timestamp: '10시간 전',
+            isRead: true,
+        },
+        {
+            id: 9,
+            type: 'post',
+            userName: '요리초보',
+            userImage: '',
+            postTitle: '불 없이 요리하기',
+            timestamp: '12시간 전',
+            isRead: true,
+        },
+        {
+            id: 10,
+            type: 'follow',
+            userName: '혼자밥먹자',
+            userImage: '',
+            timestamp: '1일 전',
+            isRead: true,
+        },
+        {
+            id: 11,
+            type: 'post',
+            userName: '김치러버',
+            userImage: '',
+            postTitle: '김치찌개 황금 레시피',
+            timestamp: '1일 전',
+            isRead: true,
+        },
+        {
+            id: 12,
+            type: 'post',
+            userName: '달걀마스터',
+            userImage: '',
+            postTitle: '달걀 요리 10가지',
+            timestamp: '2일 전',
+            isRead: true,
+        },
     ]);
 
     const notificationRef = useRef(null);
 
-    const unreadCount = notifications.filter(n => !n.isRead).length;
+    const unreadCount = notifications.filter((n) => !n.isRead).length;
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+            if (
+                notificationRef.current &&
+                !notificationRef.current.contains(event.target)
+            ) {
                 setShowNotifications(false);
             }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
+        return () =>
+            document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     const handleNotificationItemClick = (notification) => {
         // Mark as read
-        setNotifications(notifications.map(n =>
-            n.id === notification.id ? { ...n, isRead: true } : n
-        ));
+        setNotifications(
+            notifications.map((n) =>
+                n.id === notification.id ? { ...n, isRead: true } : n,
+            ),
+        );
         setShowNotifications(false);
         onNotificationClick?.(notification);
     };
 
     const handleToggleNotificationRead = (notificationId, e) => {
         e.stopPropagation();
-        setNotifications(notifications.map(n =>
-            n.id === notificationId ? { ...n, isRead: !n.isRead } : n
-        ));
+        setNotifications(
+            notifications.map((n) =>
+                n.id === notificationId ? { ...n, isRead: !n.isRead } : n,
+            ),
+        );
     };
 
     const handleMarkAllAsRead = () => {
-        setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+        setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
     };
 
     const mainCategories = [
@@ -108,7 +224,9 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, o
                                 <div className="absolute w-9 h-9 border-2 border-[#d4cbbf] rounded-full" />
 
                                 {/* "15" text in center */}
-                                <span className="text-[#3d3226] font-bold text-sm relative z-10">15</span>
+                                <span className="text-[#3d3226] font-bold text-sm relative z-10">
+                                    15
+                                </span>
 
                                 {/* Chopsticks and Spoon at bottom (larger) */}
                                 <div className="absolute -bottom-1 flex gap-0.5 items-end">
@@ -122,7 +240,9 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, o
                                     </div>
                                 </div>
                             </div>
-                            <span className="text-2xl font-serif text-[#3d3226]">십오분:식탁</span>
+                            <span className="text-2xl font-serif text-[#3d3226]">
+                                십오분:식탁
+                            </span>
                         </button>
                     </div>
 
@@ -145,10 +265,15 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, o
                                     {username || '내 프로필'}
                                 </button>
                                 <button
-                                    onClick={() => setShowNotifications(!showNotifications)}
+                                    onClick={() =>
+                                        setShowNotifications(!showNotifications)
+                                    }
                                     className="relative"
                                 >
-                                    <Bell size={20} className="text-[#3d3226] hover:text-[#5d4a36] transition-colors" />
+                                    <Bell
+                                        size={20}
+                                        className="text-[#3d3226] hover:text-[#5d4a36] transition-colors"
+                                    />
                                     {unreadCount > 0 && (
                                         <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                                             {unreadCount}
@@ -186,13 +311,16 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, o
 
             {/* Sidebar */}
             <div
-                className={`fixed top-0 left-0 h-full w-80 bg-[#f5f1eb] border-r-2 border-[#3d3226] z-50 transform transition-transform duration-300 overflow-y-auto ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
+                className={`fixed top-0 left-0 h-full w-80 bg-[#f5f1eb] border-r-2 border-[#3d3226] z-50 transform transition-transform duration-300 overflow-y-auto ${
+                    isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                }`}
             >
                 <div className="p-6">
                     {/* Close Button */}
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-serif text-[#3d3226]">메뉴</h2>
+                        <h2 className="text-2xl font-serif text-[#3d3226]">
+                            메뉴
+                        </h2>
                         <button
                             onClick={() => setIsSidebarOpen(false)}
                             className="p-2 hover:bg-[#e5dfd5] rounded-lg transition-colors"
@@ -246,7 +374,12 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, o
 
                             {/* "15" in center */}
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-5xl font-bold text-[#3d3226] relative z-10 group-hover:scale-110 transition-transform" style={{ fontFamily: 'serif' }}>15</span>
+                                <span
+                                    className="text-5xl font-bold text-[#3d3226] relative z-10 group-hover:scale-110 transition-transform"
+                                    style={{ fontFamily: 'serif' }}
+                                >
+                                    15
+                                </span>
                             </div>
 
                             {/* Chopsticks and Spoon at bottom (larger) */}
@@ -263,9 +396,17 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, o
                         </div>
 
                         {/* Text */}
-                        <h3 className="text-2xl font-serif text-[#3d3226] mb-1">십오분:식탁</h3>
-                        <p className="text-sm text-[#6b5d4f] text-center px-4 mb-2">15분이면 충분한<br />식탁 위의 행복</p>
-                        <p className="text-xs text-[#3d3226] font-medium bg-[#f5f1eb] px-3 py-1 rounded-full border border-[#d4cbbf] group-hover:bg-[#3d3226] group-hover:text-[#f5f1eb] transition-colors">🎲 클릭하면 랜덤 레시피!</p>
+                        <h3 className="text-2xl font-serif text-[#3d3226] mb-1">
+                            십오분:식탁
+                        </h3>
+                        <p className="text-sm text-[#6b5d4f] text-center px-4 mb-2">
+                            15분이면 충분한
+                            <br />
+                            식탁 위의 행복
+                        </p>
+                        <p className="text-xs text-[#3d3226] font-medium bg-[#f5f1eb] px-3 py-1 rounded-full border border-[#d4cbbf] group-hover:bg-[#3d3226] group-hover:text-[#f5f1eb] transition-colors">
+                            🎲 클릭하면 랜덤 레시피!
+                        </p>
                     </button>
 
                     {/* Bottom Auth Buttons */}
@@ -313,7 +454,9 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, o
                     ref={notificationRef}
                 >
                     <div className="p-4 border-b-2 border-[#d4cbbf] flex items-center justify-between">
-                        <h3 className="text-xl font-serif text-[#3d3226]">알림</h3>
+                        <h3 className="text-xl font-serif text-[#3d3226]">
+                            알림
+                        </h3>
                         {unreadCount > 0 && (
                             <button
                                 onClick={handleMarkAllAsRead}
@@ -325,50 +468,97 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, o
                         )}
                     </div>
 
-                    <div className={`flex-1 overflow-y-auto p-4 ${showAllNotifications ? 'max-h-[calc(80vh-200px)]' : ''}`}>
+                    <div
+                        className={`flex-1 overflow-y-auto p-4 ${showAllNotifications ? 'max-h-[calc(80vh-200px)]' : ''}`}
+                    >
                         <div className="space-y-2">
-                            {(showAllNotifications ? notifications : notifications.slice(0, 5)).map(notification => (
+                            {(showAllNotifications
+                                ? notifications
+                                : notifications.slice(0, 5)
+                            ).map((notification) => (
                                 <div
                                     key={notification.id}
-                                    className={`rounded-md transition-all border-2 ${notification.isRead
-                                        ? 'bg-white border-[#e5dfd5]'
-                                        : 'bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200'
-                                        }`}
+                                    className={`rounded-md transition-all border-2 ${
+                                        notification.isRead
+                                            ? 'bg-white border-[#e5dfd5]'
+                                            : 'bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200'
+                                    }`}
                                 >
                                     <div className="flex items-start gap-3 py-3 px-4 relative">
                                         {/* Checkbox */}
                                         <button
-                                            onClick={(e) => handleToggleNotificationRead(notification.id, e)}
-                                            className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${notification.isRead
-                                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 border-emerald-600'
-                                                : 'bg-white border-[#d4cbbf] hover:border-emerald-400'
-                                                }`}
+                                            onClick={(e) =>
+                                                handleToggleNotificationRead(
+                                                    notification.id,
+                                                    e,
+                                                )
+                                            }
+                                            className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                                                notification.isRead
+                                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 border-emerald-600'
+                                                    : 'bg-white border-[#d4cbbf] hover:border-emerald-400'
+                                            }`}
                                         >
                                             {notification.isRead && (
-                                                <CheckCircle2 size={14} className="text-white" />
+                                                <CheckCircle2
+                                                    size={14}
+                                                    className="text-white"
+                                                />
                                             )}
                                         </button>
 
                                         <div
-                                            onClick={() => handleNotificationItemClick(notification)}
+                                            onClick={() =>
+                                                handleNotificationItemClick(
+                                                    notification,
+                                                )
+                                            }
                                             className="flex items-start gap-3 flex-1 cursor-pointer"
                                         >
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${notification.isRead ? 'bg-[#d4cbbf]' : 'bg-gradient-to-r from-emerald-400 to-teal-500'
-                                                }`}>
-                                                {notification.type === 'follow' ? (
-                                                    <User size={20} className={notification.isRead ? 'text-[#3d3226]' : 'text-white'} />
+                                            <div
+                                                className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                                    notification.isRead
+                                                        ? 'bg-[#d4cbbf]'
+                                                        : 'bg-gradient-to-r from-emerald-400 to-teal-500'
+                                                }`}
+                                            >
+                                                {notification.type ===
+                                                'follow' ? (
+                                                    <User
+                                                        size={20}
+                                                        className={
+                                                            notification.isRead
+                                                                ? 'text-[#3d3226]'
+                                                                : 'text-white'
+                                                        }
+                                                    />
                                                 ) : (
-                                                    <PenSquare size={20} className={notification.isRead ? 'text-[#3d3226]' : 'text-white'} />
+                                                    <PenSquare
+                                                        size={20}
+                                                        className={
+                                                            notification.isRead
+                                                                ? 'text-[#3d3226]'
+                                                                : 'text-white'
+                                                        }
+                                                    />
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className={`text-sm font-medium line-clamp-2 ${notification.isRead ? 'text-[#6b5d4f]' : 'text-[#3d3226]'
-                                                    }`}>
-                                                    {notification.type === 'follow'
+                                                <p
+                                                    className={`text-sm font-medium line-clamp-2 ${
+                                                        notification.isRead
+                                                            ? 'text-[#6b5d4f]'
+                                                            : 'text-[#3d3226]'
+                                                    }`}
+                                                >
+                                                    {notification.type ===
+                                                    'follow'
                                                         ? `${notification.userName}님이 당신을 팔로우했습니다.`
                                                         : `${notification.userName}님이 "${notification.postTitle}"를 작성했습니다.`}
                                                 </p>
-                                                <p className="text-xs text-[#6b5d4f] mt-1">{notification.timestamp}</p>
+                                                <p className="text-xs text-[#6b5d4f] mt-1">
+                                                    {notification.timestamp}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -380,17 +570,28 @@ export function Header({ onOpenAuth, onNavigate, isLoggedIn = false, username, o
                     <div className="p-4 border-t-2 border-[#d4cbbf] bg-[#f5f1eb]">
                         {notifications.length > 5 && (
                             <button
-                                onClick={() => setShowAllNotifications(!showAllNotifications)}
+                                onClick={() =>
+                                    setShowAllNotifications(
+                                        !showAllNotifications,
+                                    )
+                                }
                                 className="w-full px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 transition-colors rounded-md text-sm font-medium flex items-center justify-center gap-2 shadow-md"
                             >
-                                <span>{showAllNotifications ? '닫기' : '더보기'}</span>
-                                <ChevronDown size={16} className={`transition-transform ${showAllNotifications ? 'rotate-180' : ''}`} />
+                                <span>
+                                    {showAllNotifications ? '닫기' : '더보기'}
+                                </span>
+                                <ChevronDown
+                                    size={16}
+                                    className={`transition-transform ${showAllNotifications ? 'rotate-180' : ''}`}
+                                />
                             </button>
                         )}
 
                         {showAllNotifications && notifications.length > 5 && (
                             <div className="mt-2 text-center">
-                                <p className="text-xs text-[#6b5d4f]">전체 {notifications.length}개의 알림</p>
+                                <p className="text-xs text-[#6b5d4f]">
+                                    전체 {notifications.length}개의 알림
+                                </p>
                             </div>
                         )}
                     </div>

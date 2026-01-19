@@ -47,14 +47,18 @@ export function CommunityWrite({ onNavigate }) {
                     {/* Header */}
                     <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
                         <h1 className="text-3xl mb-2">커뮤니티 글쓰기</h1>
-                        <p className="text-[#e5dfd5]">자유롭게 이야기를 나눠보세요</p>
+                        <p className="text-[#e5dfd5]">
+                            자유롭게 이야기를 나눠보세요
+                        </p>
                     </div>
 
                     {/* Form */}
                     <div className="p-8 space-y-6">
                         {/* Title */}
                         <div>
-                            <label className="block text-sm mb-2 text-[#3d3226]">제목</label>
+                            <label className="block text-sm mb-2 text-[#3d3226]">
+                                제목
+                            </label>
                             <input
                                 type="text"
                                 value={title}
@@ -66,7 +70,9 @@ export function CommunityWrite({ onNavigate }) {
 
                         {/* Content */}
                         <div>
-                            <label className="block text-sm mb-2 text-[#3d3226]">내용</label>
+                            <label className="block text-sm mb-2 text-[#3d3226]">
+                                내용
+                            </label>
                             <textarea
                                 value={content}
                                 onChange={(e) => setContent(e.target.value)}
@@ -78,7 +84,9 @@ export function CommunityWrite({ onNavigate }) {
 
                         {/* Image Upload */}
                         <div>
-                            <label className="block text-sm mb-2 text-[#3d3226]">이미지 업로드</label>
+                            <label className="block text-sm mb-2 text-[#3d3226]">
+                                이미지 업로드
+                            </label>
 
                             <input
                                 type="file"

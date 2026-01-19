@@ -1,5 +1,5 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { RecipeBoard } from "../../../../components/RecipeBoard";
+import { useNavigate, useParams } from 'react-router-dom';
+import { RecipeBoard } from '../../../../components/RecipeBoard';
 
 export default function RecipeListPage() {
     const navigate = useNavigate();

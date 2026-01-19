@@ -1,45 +1,45 @@
-import { Outlet, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Header } from "../components/Header";
-import { AuthModal } from "../components/AuthModal";
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Header } from '../components/Header';
+import { AuthModal } from '../components/AuthModal';
 
 export default function RootLayout() {
     const navigate = useNavigate();
 
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [authMode, setAuthMode] = useState("signin");
+    const [authMode, setAuthMode] = useState('signin');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userNickname, setUserNickname] = useState("");
+    const [userNickname, setUserNickname] = useState('');
 
     useEffect(() => {
-        const savedNickname = localStorage.getItem("userNickname");
-        const savedLoginState = localStorage.getItem("isLoggedIn");
+        const savedNickname = localStorage.getItem('userNickname');
+        const savedLoginState = localStorage.getItem('isLoggedIn');
         if (savedNickname) setUserNickname(savedNickname);
-        if (savedLoginState === "true") setIsLoggedIn(true);
+        if (savedLoginState === 'true') setIsLoggedIn(true);
     }, []);
 
-    const openAuthModal = (mode = "signin") => {
-        const normalized = mode === "login" ? "signin" : mode;
+    const openAuthModal = (mode = 'signin') => {
+        const normalized = mode === 'login' ? 'signin' : mode;
         setAuthMode(normalized);
         setIsAuthModalOpen(true);
     };
 
     const handleAuthSuccess = (nickname) => {
         setIsLoggedIn(true);
-        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem('isLoggedIn', 'true');
 
         if (nickname) {
             setUserNickname(nickname);
-            localStorage.setItem("userNickname", nickname);
+            localStorage.setItem('userNickname', nickname);
         }
     };
 
     const handleNavigate = (pageKey) => {
-        if (pageKey === "home") navigate("/");
-        if (pageKey === "board") navigate("/boards/1/recipe");
-        if (pageKey === "community") navigate("/boards/2/free");
-        if (pageKey === "profile") navigate("/me"); // 추후
-        if (pageKey === "write") navigate("/boards/1/recipe/write"); // (선택) 헤더에 글쓰기 버튼 있으면
+        if (pageKey === 'home') navigate('/');
+        if (pageKey === 'board') navigate('/boards/1/recipe');
+        if (pageKey === 'community') navigate('/boards/2/free');
+        if (pageKey === 'profile') navigate('/me'); // 추후
+        if (pageKey === 'write') navigate('/boards/1/recipe/write'); // (선택) 헤더에 글쓰기 버튼 있으면
     };
 
     return (

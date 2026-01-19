@@ -2,7 +2,9 @@
 import Axios from 'axios';
 
 // 1. 기본 Axios 인스턴스 생성
-export const AXIOS_INSTANCE = Axios.create({ baseURL: 'http://localhost:8080' });
+export const AXIOS_INSTANCE = Axios.create({
+    baseURL: 'http://localhost:8080',
+});
 
 // 2. 요청 인터셉터 (토큰 자동 주입)
 AXIOS_INSTANCE.interceptors.request.use((config) => {

@@ -54,7 +54,10 @@ export function RecipeWrite({ onNavigate }) {
     const generateAIHashtags = () => {
         // Mock AI hashtag generation
         const aiHashtags = ['15분요리', '간단레시피', '자취생필수', '초간단'];
-        setHashtags([...hashtags, ...aiHashtags.filter(tag => !hashtags.includes(tag))]);
+        setHashtags([
+            ...hashtags,
+            ...aiHashtags.filter((tag) => !hashtags.includes(tag)),
+        ]);
     };
 
     const addHashtag = () => {
@@ -65,7 +68,7 @@ export function RecipeWrite({ onNavigate }) {
     };
 
     const removeHashtag = (tag) => {
-        setHashtags(hashtags.filter(t => t !== tag));
+        setHashtags(hashtags.filter((t) => t !== tag));
     };
 
     const handleSubmit = () => {
@@ -87,7 +90,7 @@ export function RecipeWrite({ onNavigate }) {
             title,
             completedImage,
             ingredientsImage,
-            ingredients: ingredients.filter(i => i.trim()),
+            ingredients: ingredients.filter((i) => i.trim()),
             cookingMethod,
             hashtags,
         });
@@ -115,14 +118,18 @@ export function RecipeWrite({ onNavigate }) {
                     {/* Header */}
                     <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
                         <h1 className="text-3xl mb-2">레시피 작성하기</h1>
-                        <p className="text-[#e5dfd5]">나만의 특별한 레시피를 공유해보세요</p>
+                        <p className="text-[#e5dfd5]">
+                            나만의 특별한 레시피를 공유해보세요
+                        </p>
                     </div>
 
                     {/* Form */}
                     <div className="p-8 space-y-6">
                         {/* Title */}
                         <div>
-                            <label className="block text-sm mb-2 text-[#3d3226]">제목</label>
+                            <label className="block text-sm mb-2 text-[#3d3226]">
+                                제목
+                            </label>
                             <input
                                 type="text"
                                 value={title}
@@ -134,23 +141,35 @@ export function RecipeWrite({ onNavigate }) {
 
                         {/* Completed Image */}
                         <div>
-                            <label className="block text-sm mb-2 text-[#3d3226]">완성 사진 (썸네일)</label>
+                            <label className="block text-sm mb-2 text-[#3d3226]">
+                                완성 사진 (썸네일)
+                            </label>
                             <div className="flex gap-4">
                                 {completedImage && (
-                                    <img src={completedImage} alt="완성" className="w-32 h-32 object-cover rounded-md" />
+                                    <img
+                                        src={completedImage}
+                                        alt="완성"
+                                        className="w-32 h-32 object-cover rounded-md"
+                                    />
                                 )}
                                 <button
-                                    onClick={() => completedImageRef.current?.click()}
+                                    onClick={() =>
+                                        completedImageRef.current?.click()
+                                    }
                                     className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors"
                                 >
                                     <Upload size={20} />
-                                    {completedImage ? '사진 변경' : '사진 업로드'}
+                                    {completedImage
+                                        ? '사진 변경'
+                                        : '사진 업로드'}
                                 </button>
                                 <input
                                     ref={completedImageRef}
                                     type="file"
                                     accept="image/*"
-                                    onChange={(e) => handleImageUpload(e, 'completed')}
+                                    onChange={(e) =>
+                                        handleImageUpload(e, 'completed')
+                                    }
                                     className="hidden"
                                 />
                             </div>
@@ -158,23 +177,35 @@ export function RecipeWrite({ onNavigate }) {
 
                         {/* Ingredients Image */}
                         <div>
-                            <label className="block text-sm mb-2 text-[#3d3226]">재료 전체 사진</label>
+                            <label className="block text-sm mb-2 text-[#3d3226]">
+                                재료 전체 사진
+                            </label>
                             <div className="flex gap-4">
                                 {ingredientsImage && (
-                                    <img src={ingredientsImage} alt="재료" className="w-32 h-32 object-cover rounded-md" />
+                                    <img
+                                        src={ingredientsImage}
+                                        alt="재료"
+                                        className="w-32 h-32 object-cover rounded-md"
+                                    />
                                 )}
                                 <button
-                                    onClick={() => ingredientsImageRef.current?.click()}
+                                    onClick={() =>
+                                        ingredientsImageRef.current?.click()
+                                    }
                                     className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors"
                                 >
                                     <Upload size={20} />
-                                    {ingredientsImage ? '사진 변경' : '사진 업로드'}
+                                    {ingredientsImage
+                                        ? '사진 변경'
+                                        : '사진 업로드'}
                                 </button>
                                 <input
                                     ref={ingredientsImageRef}
                                     type="file"
                                     accept="image/*"
-                                    onChange={(e) => handleImageUpload(e, 'ingredients')}
+                                    onChange={(e) =>
+                                        handleImageUpload(e, 'ingredients')
+                                    }
                                     className="hidden"
                                 />
                             </div>
@@ -182,21 +213,35 @@ export function RecipeWrite({ onNavigate }) {
 
                         {/* Ingredients */}
                         <div>
-                            <label className="block text-sm mb-2 text-[#3d3226]">재료 (Enter로 항목 추가)</label>
+                            <label className="block text-sm mb-2 text-[#3d3226]">
+                                재료 (Enter로 항목 추가)
+                            </label>
                             <div className="space-y-2">
                                 {ingredients.map((ingredient, index) => (
                                     <div key={index} className="flex gap-2">
                                         <input
                                             type="text"
                                             value={ingredient}
-                                            onChange={(e) => handleIngredientChange(index, e.target.value)}
-                                            onKeyDown={(e) => handleIngredientKeyDown(e, index)}
+                                            onChange={(e) =>
+                                                handleIngredientChange(
+                                                    index,
+                                                    e.target.value,
+                                                )
+                                            }
+                                            onKeyDown={(e) =>
+                                                handleIngredientKeyDown(
+                                                    e,
+                                                    index,
+                                                )
+                                            }
                                             className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none"
                                             placeholder={`재료 ${index + 1}`}
                                         />
                                         {ingredients.length > 1 && (
                                             <button
-                                                onClick={() => removeIngredient(index)}
+                                                onClick={() =>
+                                                    removeIngredient(index)
+                                                }
                                                 className="p-3 text-red-600 hover:bg-red-50 rounded-md transition-colors"
                                             >
                                                 <X size={20} />
@@ -209,10 +254,14 @@ export function RecipeWrite({ onNavigate }) {
 
                         {/* Cooking Method */}
                         <div>
-                            <label className="block text-sm mb-2 text-[#3d3226]">조리 방법</label>
+                            <label className="block text-sm mb-2 text-[#3d3226]">
+                                조리 방법
+                            </label>
                             <textarea
                                 value={cookingMethod}
-                                onChange={(e) => setCookingMethod(e.target.value)}
+                                onChange={(e) =>
+                                    setCookingMethod(e.target.value)
+                                }
                                 className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none resize-none"
                                 rows={8}
                                 placeholder="조리 방법을 상세히 입력해주세요..."
@@ -222,7 +271,9 @@ export function RecipeWrite({ onNavigate }) {
                         {/* Hashtags */}
                         <div>
                             <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm text-[#3d3226]">해시태그</label>
+                                <label className="block text-sm text-[#3d3226]">
+                                    해시태그
+                                </label>
                                 <button
                                     onClick={generateAIHashtags}
                                     className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md"
@@ -236,8 +287,13 @@ export function RecipeWrite({ onNavigate }) {
                                 <input
                                     type="text"
                                     value={newHashtag}
-                                    onChange={(e) => setNewHashtag(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addHashtag())}
+                                    onChange={(e) =>
+                                        setNewHashtag(e.target.value)
+                                    }
+                                    onKeyDown={(e) =>
+                                        e.key === 'Enter' &&
+                                        (e.preventDefault(), addHashtag())
+                                    }
                                     className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none"
                                     placeholder="해시태그 입력 (# 없이)"
                                 />
@@ -282,25 +338,34 @@ export function RecipeWrite({ onNavigate }) {
                     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                         <div className="bg-white rounded-lg shadow-xl max-w-md w-full border-2 border-[#e5dfd5]">
                             <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-t-lg">
-                                <h3 className="text-xl font-bold">이메일 인증 필요</h3>
+                                <h3 className="text-xl font-bold">
+                                    이메일 인증 필요
+                                </h3>
                             </div>
                             <div className="p-6">
                                 <div className="flex items-start gap-4 mb-6">
                                     <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                                        <Mail size={24} className="text-emerald-600" />
+                                        <Mail
+                                            size={24}
+                                            className="text-emerald-600"
+                                        />
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-[#3d3226] mb-2">
-                                            게시글 작성을 위해서는 이메일 인증이 필요합니다.
+                                            게시글 작성을 위해서는 이메일 인증이
+                                            필요합니다.
                                         </p>
                                         <p className="text-sm text-[#6b5d4f]">
-                                            프로필 페이지에서 이메일 인증을 완료해주세요.
+                                            프로필 페이지에서 이메일 인증을
+                                            완료해주세요.
                                         </p>
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
                                     <button
-                                        onClick={() => setShowEmailWarning(false)}
+                                        onClick={() =>
+                                            setShowEmailWarning(false)
+                                        }
                                         className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] text-[#3d3226] rounded-md hover:border-[#3d3226] transition-colors"
                                     >
                                         취소
