@@ -4,707 +4,512 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-    DataTag,
-    DefinedInitialDataOptions,
-    DefinedUseQueryResult,
-    MutationFunction,
-    QueryClient,
-    QueryFunction,
-    QueryKey,
-    UndefinedInitialDataOptions,
-    UseMutationOptions,
-    UseMutationResult,
-    UseQueryOptions,
-    UseQueryResult,
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
-    AddRecipeReqDto,
-    GetRecipeListParams,
-    ModifyRecipeReqDto,
+  AddRecipeReqDto,
+  GetRecipeListParams,
+  ModifyRecipeReqDto
 } from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
+      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
+
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
+
+
 export type modifyRecipeResponse200 = {
-    data: Blob;
-    status: 200;
-};
-
-export type modifyRecipeResponseSuccess = modifyRecipeResponse200 & {
-    headers: Headers;
-};
-export type modifyRecipeResponse = modifyRecipeResponseSuccess;
-
-export const getModifyRecipeUrl = (boardId: number, recipeId: number) => {
-    return `/board/${boardId}/recipes/modify/${recipeId}`;
-};
-
-export const modifyRecipe = async (
-    boardId: number,
-    recipeId: number,
-    modifyRecipeReqDto: ModifyRecipeReqDto,
-    options?: RequestInit,
-): Promise<modifyRecipeResponse> => {
-    return customInstance<modifyRecipeResponse>(
-        getModifyRecipeUrl(boardId, recipeId),
-        {
-            ...options,
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                ...options?.headers,
-            },
-            body: JSON.stringify(modifyRecipeReqDto),
-        },
-    );
-};
-
-export const getModifyRecipeMutationOptions = <
-    TError = unknown,
-    TContext = unknown,
->(options?: {
-    mutation?: UseMutationOptions<
-        Awaited<ReturnType<typeof modifyRecipe>>,
-        TError,
-        { boardId: number; recipeId: number; data: ModifyRecipeReqDto },
-        TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-    Awaited<ReturnType<typeof modifyRecipe>>,
-    TError,
-    { boardId: number; recipeId: number; data: ModifyRecipeReqDto },
-    TContext
-> => {
-    const mutationKey = ['modifyRecipe'];
-    const { mutation: mutationOptions, request: requestOptions } = options
-        ? options.mutation &&
-          'mutationKey' in options.mutation &&
-          options.mutation.mutationKey
-            ? options
-            : { ...options, mutation: { ...options.mutation, mutationKey } }
-        : { mutation: { mutationKey }, request: undefined };
-
-    const mutationFn: MutationFunction<
-        Awaited<ReturnType<typeof modifyRecipe>>,
-        { boardId: number; recipeId: number; data: ModifyRecipeReqDto }
-    > = (props) => {
-        const { boardId, recipeId, data } = props ?? {};
-
-        return modifyRecipe(boardId, recipeId, data, requestOptions);
-    };
-
-    return { mutationFn, ...mutationOptions };
-};
-
-export type ModifyRecipeMutationResult = NonNullable<
-    Awaited<ReturnType<typeof modifyRecipe>>
->;
-export type ModifyRecipeMutationBody = ModifyRecipeReqDto;
-export type ModifyRecipeMutationError = unknown;
-
-export const useModifyRecipe = <TError = unknown, TContext = unknown>(
-    options?: {
-        mutation?: UseMutationOptions<
-            Awaited<ReturnType<typeof modifyRecipe>>,
-            TError,
-            { boardId: number; recipeId: number; data: ModifyRecipeReqDto },
-            TContext
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseMutationResult<
-    Awaited<ReturnType<typeof modifyRecipe>>,
-    TError,
-    { boardId: number; recipeId: number; data: ModifyRecipeReqDto },
-    TContext
-> => {
-    return useMutation(getModifyRecipeMutationOptions(options), queryClient);
-};
-export type addRecipeResponse200 = {
-    data: Blob;
-    status: 200;
-};
-
-export type addRecipeResponseSuccess = addRecipeResponse200 & {
-    headers: Headers;
-};
-export type addRecipeResponse = addRecipeResponseSuccess;
-
-export const getAddRecipeUrl = (boardId: number) => {
-    return `/board/${boardId}/recipes/add`;
-};
-
-export const addRecipe = async (
-    boardId: number,
-    addRecipeReqDto: AddRecipeReqDto,
-    options?: RequestInit,
-): Promise<addRecipeResponse> => {
-    return customInstance<addRecipeResponse>(getAddRecipeUrl(boardId), {
-        ...options,
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(addRecipeReqDto),
-    });
-};
-
-export const getAddRecipeMutationOptions = <
-    TError = unknown,
-    TContext = unknown,
->(options?: {
-    mutation?: UseMutationOptions<
-        Awaited<ReturnType<typeof addRecipe>>,
-        TError,
-        { boardId: number; data: AddRecipeReqDto },
-        TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-    Awaited<ReturnType<typeof addRecipe>>,
-    TError,
-    { boardId: number; data: AddRecipeReqDto },
-    TContext
-> => {
-    const mutationKey = ['addRecipe'];
-    const { mutation: mutationOptions, request: requestOptions } = options
-        ? options.mutation &&
-          'mutationKey' in options.mutation &&
-          options.mutation.mutationKey
-            ? options
-            : { ...options, mutation: { ...options.mutation, mutationKey } }
-        : { mutation: { mutationKey }, request: undefined };
-
-    const mutationFn: MutationFunction<
-        Awaited<ReturnType<typeof addRecipe>>,
-        { boardId: number; data: AddRecipeReqDto }
-    > = (props) => {
-        const { boardId, data } = props ?? {};
-
-        return addRecipe(boardId, data, requestOptions);
-    };
-
-    return { mutationFn, ...mutationOptions };
-};
-
-export type AddRecipeMutationResult = NonNullable<
-    Awaited<ReturnType<typeof addRecipe>>
->;
-export type AddRecipeMutationBody = AddRecipeReqDto;
-export type AddRecipeMutationError = unknown;
-
-export const useAddRecipe = <TError = unknown, TContext = unknown>(
-    options?: {
-        mutation?: UseMutationOptions<
-            Awaited<ReturnType<typeof addRecipe>>,
-            TError,
-            { boardId: number; data: AddRecipeReqDto },
-            TContext
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseMutationResult<
-    Awaited<ReturnType<typeof addRecipe>>,
-    TError,
-    { boardId: number; data: AddRecipeReqDto },
-    TContext
-> => {
-    return useMutation(getAddRecipeMutationOptions(options), queryClient);
-};
-export type getRecipeListResponse200 = {
-    data: Blob;
-    status: 200;
-};
-
-export type getRecipeListResponseSuccess = getRecipeListResponse200 & {
-    headers: Headers;
-};
-export type getRecipeListResponse = getRecipeListResponseSuccess;
-
-export const getGetRecipeListUrl = (
-    boardId: number,
-    params?: GetRecipeListParams,
-) => {
-    const normalizedParams = new URLSearchParams();
-
-    Object.entries(params || {}).forEach(([key, value]) => {
-        if (value !== undefined) {
-            normalizedParams.append(
-                key,
-                value === null ? 'null' : value.toString(),
-            );
-        }
-    });
-
-    const stringifiedParams = normalizedParams.toString();
-
-    return stringifiedParams.length > 0
-        ? `/board/${boardId}/recipes/list?${stringifiedParams}`
-        : `/board/${boardId}/recipes/list`;
-};
-
-export const getRecipeList = async (
-    boardId: number,
-    params?: GetRecipeListParams,
-    options?: RequestInit,
-): Promise<getRecipeListResponse> => {
-    return customInstance<getRecipeListResponse>(
-        getGetRecipeListUrl(boardId, params),
-        {
-            ...options,
-            method: 'GET',
-        },
-    );
-};
-
-export const getGetRecipeListQueryKey = (
-    boardId?: number,
-    params?: GetRecipeListParams,
-) => {
-    return [
-        `/board/${boardId}/recipes/list`,
-        ...(params ? [params] : []),
-    ] as const;
-};
-
-export const getGetRecipeListQueryOptions = <
-    TData = Awaited<ReturnType<typeof getRecipeList>>,
-    TError = unknown,
->(
-    boardId: number,
-    params?: GetRecipeListParams,
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getRecipeList>>,
-                TError,
-                TData
-            >
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-) => {
-    const { query: queryOptions, request: requestOptions } = options ?? {};
-
-    const queryKey =
-        queryOptions?.queryKey ?? getGetRecipeListQueryKey(boardId, params);
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecipeList>>> = ({
-        signal,
-    }) => getRecipeList(boardId, params, { signal, ...requestOptions });
-
-    return {
-        queryKey,
-        queryFn,
-        enabled: !!boardId,
-        ...queryOptions,
-    } as UseQueryOptions<
-        Awaited<ReturnType<typeof getRecipeList>>,
-        TError,
-        TData
-    > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type GetRecipeListQueryResult = NonNullable<
-    Awaited<ReturnType<typeof getRecipeList>>
->;
-export type GetRecipeListQueryError = unknown;
-
-export function useGetRecipeList<
-    TData = Awaited<ReturnType<typeof getRecipeList>>,
-    TError = unknown,
->(
-    boardId: number,
-    params: undefined | GetRecipeListParams,
-    options: {
-        query: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getRecipeList>>,
-                TError,
-                TData
-            >
-        > &
-            Pick<
-                DefinedInitialDataOptions<
-                    Awaited<ReturnType<typeof getRecipeList>>,
-                    TError,
-                    Awaited<ReturnType<typeof getRecipeList>>
-                >,
-                'initialData'
-            >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetRecipeList<
-    TData = Awaited<ReturnType<typeof getRecipeList>>,
-    TError = unknown,
->(
-    boardId: number,
-    params?: GetRecipeListParams,
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getRecipeList>>,
-                TError,
-                TData
-            >
-        > &
-            Pick<
-                UndefinedInitialDataOptions<
-                    Awaited<ReturnType<typeof getRecipeList>>,
-                    TError,
-                    Awaited<ReturnType<typeof getRecipeList>>
-                >,
-                'initialData'
-            >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetRecipeList<
-    TData = Awaited<ReturnType<typeof getRecipeList>>,
-    TError = unknown,
->(
-    boardId: number,
-    params?: GetRecipeListParams,
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getRecipeList>>,
-                TError,
-                TData
-            >
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-};
-
-export function useGetRecipeList<
-    TData = Awaited<ReturnType<typeof getRecipeList>>,
-    TError = unknown,
->(
-    boardId: number,
-    params?: GetRecipeListParams,
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getRecipeList>>,
-                TError,
-                TData
-            >
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-} {
-    const queryOptions = getGetRecipeListQueryOptions(boardId, params, options);
-
-    const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-        TData,
-        TError
-    > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-    return { ...query, queryKey: queryOptions.queryKey };
+  data: Blob
+  status: 200
 }
+    
+export type modifyRecipeResponseSuccess = (modifyRecipeResponse200) & {
+  headers: Headers;
+};
+;
+
+export type modifyRecipeResponse = (modifyRecipeResponseSuccess)
+
+export const getModifyRecipeUrl = (boardId: number,
+    recipeId: number,) => {
+
+
+  
+
+  return `/board/${boardId}/recipes/modify/${recipeId}`
+}
+
+export const modifyRecipe = async (boardId: number,
+    recipeId: number,
+    modifyRecipeReqDto: ModifyRecipeReqDto, options?: RequestInit): Promise<modifyRecipeResponse> => {
+  
+  return customInstance<modifyRecipeResponse>(getModifyRecipeUrl(boardId,recipeId),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      modifyRecipeReqDto,)
+  }
+);}
+
+
+
+
+export const getModifyRecipeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifyRecipe>>, TError,{boardId: number;recipeId: number;data: ModifyRecipeReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof modifyRecipe>>, TError,{boardId: number;recipeId: number;data: ModifyRecipeReqDto}, TContext> => {
+
+const mutationKey = ['modifyRecipe'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modifyRecipe>>, {boardId: number;recipeId: number;data: ModifyRecipeReqDto}> = (props) => {
+          const {boardId,recipeId,data} = props ?? {};
+
+          return  modifyRecipe(boardId,recipeId,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModifyRecipeMutationResult = NonNullable<Awaited<ReturnType<typeof modifyRecipe>>>
+    export type ModifyRecipeMutationBody = ModifyRecipeReqDto
+    export type ModifyRecipeMutationError = unknown
+
+    export const useModifyRecipe = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifyRecipe>>, TError,{boardId: number;recipeId: number;data: ModifyRecipeReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modifyRecipe>>,
+        TError,
+        {boardId: number;recipeId: number;data: ModifyRecipeReqDto},
+        TContext
+      > => {
+      return useMutation(getModifyRecipeMutationOptions(options), queryClient);
+    }
+    export type addRecipeResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type addRecipeResponseSuccess = (addRecipeResponse200) & {
+  headers: Headers;
+};
+;
+
+export type addRecipeResponse = (addRecipeResponseSuccess)
+
+export const getAddRecipeUrl = (boardId: number,) => {
+
+
+  
+
+  return `/board/${boardId}/recipes/add`
+}
+
+export const addRecipe = async (boardId: number,
+    addRecipeReqDto: AddRecipeReqDto, options?: RequestInit): Promise<addRecipeResponse> => {
+  
+  return customInstance<addRecipeResponse>(getAddRecipeUrl(boardId),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      addRecipeReqDto,)
+  }
+);}
+
+
+
+
+export const getAddRecipeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addRecipe>>, TError,{boardId: number;data: AddRecipeReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof addRecipe>>, TError,{boardId: number;data: AddRecipeReqDto}, TContext> => {
+
+const mutationKey = ['addRecipe'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addRecipe>>, {boardId: number;data: AddRecipeReqDto}> = (props) => {
+          const {boardId,data} = props ?? {};
+
+          return  addRecipe(boardId,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddRecipeMutationResult = NonNullable<Awaited<ReturnType<typeof addRecipe>>>
+    export type AddRecipeMutationBody = AddRecipeReqDto
+    export type AddRecipeMutationError = unknown
+
+    export const useAddRecipe = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addRecipe>>, TError,{boardId: number;data: AddRecipeReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addRecipe>>,
+        TError,
+        {boardId: number;data: AddRecipeReqDto},
+        TContext
+      > => {
+      return useMutation(getAddRecipeMutationOptions(options), queryClient);
+    }
+    export type getRecipeListResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type getRecipeListResponseSuccess = (getRecipeListResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getRecipeListResponse = (getRecipeListResponseSuccess)
+
+export const getGetRecipeListUrl = (boardId: number,
+    params?: GetRecipeListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/board/${boardId}/recipes/list?${stringifiedParams}` : `/board/${boardId}/recipes/list`
+}
+
+export const getRecipeList = async (boardId: number,
+    params?: GetRecipeListParams, options?: RequestInit): Promise<getRecipeListResponse> => {
+  
+  return customInstance<getRecipeListResponse>(getGetRecipeListUrl(boardId,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getGetRecipeListQueryKey = (boardId?: number,
+    params?: GetRecipeListParams,) => {
+    return [
+    `/board/${boardId}/recipes/list`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetRecipeListQueryOptions = <TData = Awaited<ReturnType<typeof getRecipeList>>, TError = unknown>(boardId: number,
+    params?: GetRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRecipeListQueryKey(boardId,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecipeList>>> = ({ signal }) => getRecipeList(boardId,params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(boardId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRecipeList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetRecipeListQueryResult = NonNullable<Awaited<ReturnType<typeof getRecipeList>>>
+export type GetRecipeListQueryError = unknown
+
+
+export function useGetRecipeList<TData = Awaited<ReturnType<typeof getRecipeList>>, TError = unknown>(
+ boardId: number,
+    params: undefined |  GetRecipeListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRecipeList>>,
+          TError,
+          Awaited<ReturnType<typeof getRecipeList>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRecipeList<TData = Awaited<ReturnType<typeof getRecipeList>>, TError = unknown>(
+ boardId: number,
+    params?: GetRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRecipeList>>,
+          TError,
+          Awaited<ReturnType<typeof getRecipeList>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRecipeList<TData = Awaited<ReturnType<typeof getRecipeList>>, TError = unknown>(
+ boardId: number,
+    params?: GetRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetRecipeList<TData = Awaited<ReturnType<typeof getRecipeList>>, TError = unknown>(
+ boardId: number,
+    params?: GetRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetRecipeListQueryOptions(boardId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
 
 export type getRecipeDetailResponse200 = {
-    data: Blob;
-    status: 200;
+  data: Blob
+  status: 200
+}
+    
+export type getRecipeDetailResponseSuccess = (getRecipeDetailResponse200) & {
+  headers: Headers;
 };
+;
 
-export type getRecipeDetailResponseSuccess = getRecipeDetailResponse200 & {
-    headers: Headers;
-};
-export type getRecipeDetailResponse = getRecipeDetailResponseSuccess;
+export type getRecipeDetailResponse = (getRecipeDetailResponseSuccess)
 
-export const getGetRecipeDetailUrl = (boardId: number, recipeId: number) => {
-    return `/board/${boardId}/recipes/detail/${recipeId}`;
-};
+export const getGetRecipeDetailUrl = (boardId: number,
+    recipeId: number,) => {
 
-export const getRecipeDetail = async (
-    boardId: number,
-    recipeId: number,
-    options?: RequestInit,
-): Promise<getRecipeDetailResponse> => {
-    return customInstance<getRecipeDetailResponse>(
-        getGetRecipeDetailUrl(boardId, recipeId),
-        {
-            ...options,
-            method: 'GET',
-        },
-    );
-};
 
-export const getGetRecipeDetailQueryKey = (
-    boardId?: number,
-    recipeId?: number,
-) => {
-    return [`/board/${boardId}/recipes/detail/${recipeId}`] as const;
-};
+  
 
-export const getGetRecipeDetailQueryOptions = <
-    TData = Awaited<ReturnType<typeof getRecipeDetail>>,
-    TError = unknown,
->(
-    boardId: number,
-    recipeId: number,
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getRecipeDetail>>,
-                TError,
-                TData
-            >
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-) => {
-    const { query: queryOptions, request: requestOptions } = options ?? {};
-
-    const queryKey =
-        queryOptions?.queryKey ?? getGetRecipeDetailQueryKey(boardId, recipeId);
-
-    const queryFn: QueryFunction<
-        Awaited<ReturnType<typeof getRecipeDetail>>
-    > = ({ signal }) =>
-        getRecipeDetail(boardId, recipeId, { signal, ...requestOptions });
-
-    return {
-        queryKey,
-        queryFn,
-        enabled: !!(boardId && recipeId),
-        ...queryOptions,
-    } as UseQueryOptions<
-        Awaited<ReturnType<typeof getRecipeDetail>>,
-        TError,
-        TData
-    > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type GetRecipeDetailQueryResult = NonNullable<
-    Awaited<ReturnType<typeof getRecipeDetail>>
->;
-export type GetRecipeDetailQueryError = unknown;
-
-export function useGetRecipeDetail<
-    TData = Awaited<ReturnType<typeof getRecipeDetail>>,
-    TError = unknown,
->(
-    boardId: number,
-    recipeId: number,
-    options: {
-        query: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getRecipeDetail>>,
-                TError,
-                TData
-            >
-        > &
-            Pick<
-                DefinedInitialDataOptions<
-                    Awaited<ReturnType<typeof getRecipeDetail>>,
-                    TError,
-                    Awaited<ReturnType<typeof getRecipeDetail>>
-                >,
-                'initialData'
-            >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetRecipeDetail<
-    TData = Awaited<ReturnType<typeof getRecipeDetail>>,
-    TError = unknown,
->(
-    boardId: number,
-    recipeId: number,
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getRecipeDetail>>,
-                TError,
-                TData
-            >
-        > &
-            Pick<
-                UndefinedInitialDataOptions<
-                    Awaited<ReturnType<typeof getRecipeDetail>>,
-                    TError,
-                    Awaited<ReturnType<typeof getRecipeDetail>>
-                >,
-                'initialData'
-            >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetRecipeDetail<
-    TData = Awaited<ReturnType<typeof getRecipeDetail>>,
-    TError = unknown,
->(
-    boardId: number,
-    recipeId: number,
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getRecipeDetail>>,
-                TError,
-                TData
-            >
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-};
-
-export function useGetRecipeDetail<
-    TData = Awaited<ReturnType<typeof getRecipeDetail>>,
-    TError = unknown,
->(
-    boardId: number,
-    recipeId: number,
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getRecipeDetail>>,
-                TError,
-                TData
-            >
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-} {
-    const queryOptions = getGetRecipeDetailQueryOptions(
-        boardId,
-        recipeId,
-        options,
-    );
-
-    const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-        TData,
-        TError
-    > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-    return { ...query, queryKey: queryOptions.queryKey };
+  return `/board/${boardId}/recipes/detail/${recipeId}`
 }
 
+export const getRecipeDetail = async (boardId: number,
+    recipeId: number, options?: RequestInit): Promise<getRecipeDetailResponse> => {
+  
+  return customInstance<getRecipeDetailResponse>(getGetRecipeDetailUrl(boardId,recipeId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getGetRecipeDetailQueryKey = (boardId?: number,
+    recipeId?: number,) => {
+    return [
+    `/board/${boardId}/recipes/detail/${recipeId}`
+    ] as const;
+    }
+
+    
+export const getGetRecipeDetailQueryOptions = <TData = Awaited<ReturnType<typeof getRecipeDetail>>, TError = unknown>(boardId: number,
+    recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeDetail>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRecipeDetailQueryKey(boardId,recipeId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecipeDetail>>> = ({ signal }) => getRecipeDetail(boardId,recipeId, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(boardId && recipeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRecipeDetail>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetRecipeDetailQueryResult = NonNullable<Awaited<ReturnType<typeof getRecipeDetail>>>
+export type GetRecipeDetailQueryError = unknown
+
+
+export function useGetRecipeDetail<TData = Awaited<ReturnType<typeof getRecipeDetail>>, TError = unknown>(
+ boardId: number,
+    recipeId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeDetail>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRecipeDetail>>,
+          TError,
+          Awaited<ReturnType<typeof getRecipeDetail>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRecipeDetail<TData = Awaited<ReturnType<typeof getRecipeDetail>>, TError = unknown>(
+ boardId: number,
+    recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeDetail>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRecipeDetail>>,
+          TError,
+          Awaited<ReturnType<typeof getRecipeDetail>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRecipeDetail<TData = Awaited<ReturnType<typeof getRecipeDetail>>, TError = unknown>(
+ boardId: number,
+    recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeDetail>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetRecipeDetail<TData = Awaited<ReturnType<typeof getRecipeDetail>>, TError = unknown>(
+ boardId: number,
+    recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeDetail>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetRecipeDetailQueryOptions(boardId,recipeId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 export type removeRecipeResponse200 = {
-    data: Blob;
-    status: 200;
+  data: Blob
+  status: 200
+}
+    
+export type removeRecipeResponseSuccess = (removeRecipeResponse200) & {
+  headers: Headers;
 };
+;
 
-export type removeRecipeResponseSuccess = removeRecipeResponse200 & {
-    headers: Headers;
-};
-export type removeRecipeResponse = removeRecipeResponseSuccess;
+export type removeRecipeResponse = (removeRecipeResponseSuccess)
 
-export const getRemoveRecipeUrl = (boardId: number, recipeId: number) => {
-    return `/board/${boardId}/recipes/remove/${recipeId}`;
-};
+export const getRemoveRecipeUrl = (boardId: number,
+    recipeId: number,) => {
 
-export const removeRecipe = async (
-    boardId: number,
-    recipeId: number,
-    options?: RequestInit,
-): Promise<removeRecipeResponse> => {
-    return customInstance<removeRecipeResponse>(
-        getRemoveRecipeUrl(boardId, recipeId),
-        {
-            ...options,
-            method: 'DELETE',
-        },
-    );
-};
 
-export const getRemoveRecipeMutationOptions = <
-    TError = unknown,
-    TContext = unknown,
->(options?: {
-    mutation?: UseMutationOptions<
+  
+
+  return `/board/${boardId}/recipes/remove/${recipeId}`
+}
+
+export const removeRecipe = async (boardId: number,
+    recipeId: number, options?: RequestInit): Promise<removeRecipeResponse> => {
+  
+  return customInstance<removeRecipeResponse>(getRemoveRecipeUrl(boardId,recipeId),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+
+
+
+
+export const getRemoveRecipeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeRecipe>>, TError,{boardId: number;recipeId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeRecipe>>, TError,{boardId: number;recipeId: number}, TContext> => {
+
+const mutationKey = ['removeRecipe'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeRecipe>>, {boardId: number;recipeId: number}> = (props) => {
+          const {boardId,recipeId} = props ?? {};
+
+          return  removeRecipe(boardId,recipeId,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveRecipeMutationResult = NonNullable<Awaited<ReturnType<typeof removeRecipe>>>
+    
+    export type RemoveRecipeMutationError = unknown
+
+    export const useRemoveRecipe = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeRecipe>>, TError,{boardId: number;recipeId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof removeRecipe>>,
         TError,
-        { boardId: number; recipeId: number },
+        {boardId: number;recipeId: number},
         TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-    Awaited<ReturnType<typeof removeRecipe>>,
-    TError,
-    { boardId: number; recipeId: number },
-    TContext
-> => {
-    const mutationKey = ['removeRecipe'];
-    const { mutation: mutationOptions, request: requestOptions } = options
-        ? options.mutation &&
-          'mutationKey' in options.mutation &&
-          options.mutation.mutationKey
-            ? options
-            : { ...options, mutation: { ...options.mutation, mutationKey } }
-        : { mutation: { mutationKey }, request: undefined };
-
-    const mutationFn: MutationFunction<
-        Awaited<ReturnType<typeof removeRecipe>>,
-        { boardId: number; recipeId: number }
-    > = (props) => {
-        const { boardId, recipeId } = props ?? {};
-
-        return removeRecipe(boardId, recipeId, requestOptions);
-    };
-
-    return { mutationFn, ...mutationOptions };
-};
-
-export type RemoveRecipeMutationResult = NonNullable<
-    Awaited<ReturnType<typeof removeRecipe>>
->;
-
-export type RemoveRecipeMutationError = unknown;
-
-export const useRemoveRecipe = <TError = unknown, TContext = unknown>(
-    options?: {
-        mutation?: UseMutationOptions<
-            Awaited<ReturnType<typeof removeRecipe>>,
-            TError,
-            { boardId: number; recipeId: number },
-            TContext
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseMutationResult<
-    Awaited<ReturnType<typeof removeRecipe>>,
-    TError,
-    { boardId: number; recipeId: number },
-    TContext
-> => {
-    return useMutation(getRemoveRecipeMutationOptions(options), queryClient);
-};
+      > => {
+      return useMutation(getRemoveRecipeMutationOptions(options), queryClient);
+    }
+    

@@ -1,35 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AuthModal } from '../../components/AuthModal';
+import { usePrincipalState } from '../../store/usePrincipalState';
+import { LoaderCircle } from 'lucide-react';
 
-function OAuth2Page({ socialData: initialSocialData }) {
+const OAuth2Page = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-
+    const { fetchUser } = usePrincipalState();
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [authMode, setAuthMode] = useState('signin'); // 'signin' (merge) or 'signup'
-
-    // Derive socialData from props or URL params
-    const socialData = React.useMemo(() => {
-        if (initialSocialData) return initialSocialData;
-        
-        const provider = searchParams.get('provider');
-        const providerUserId = searchParams.get('providerUserId');
-        const email = searchParams.get('email');
-        
-        if (provider && providerUserId) {
-            return { provider, providerUserId, email };
-        }
-        return null;
-    }, [initialSocialData, searchParams]);
+    const [authMode, setAuthMode] = useState('signin');
+    const [socialData, setSocialData] = useState({
+        email: searchParams.get('email'),
+        provider: searchParams.get('provider'),
+        name: searchParams.get('name'),
+        providerUserId: searchParams.get('providerId') || searchParams.get('providerUserId')
+    });
 
     useEffect(() => {
         const accessToken = searchParams.get('accessToken');
         if (accessToken) {
             localStorage.setItem('AccessToken', accessToken);
-            window.location.href = '/';
+            
+            fetchUser().finally(() => {
+                navigate('/');
+            });
         }
-    }, [searchParams]);
+    }, [searchParams, fetchUser, navigate]);
+
+    if (searchParams.get('accessToken')) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-[#f5f1eb]">
+                <p className="text-[#6b5d4f] text-lg font-medium animate-pulse">로그인 처리중...</p>
+                <LoaderCircle className="w-12 h-12 text-[#3d3226] animate-spin mb-4" />
+            </div>
+        );
+    }
 
     if (!socialData) {
         return <div className="flex items-center justify-center min-h-screen">Loading...</div>;

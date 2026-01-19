@@ -4,202 +4,186 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import { useMutation } from '@tanstack/react-query';
+import {
+  useMutation
+} from '@tanstack/react-query';
 import type {
-    MutationFunction,
-    QueryClient,
-    UseMutationOptions,
-    UseMutationResult,
+  MutationFunction,
+  QueryClient,
+  UseMutationOptions,
+  UseMutationResult
 } from '@tanstack/react-query';
 
 import type {
-    OAuth2MergeReqDto,
-    OAuth2SignupReqDto,
+  OAuth2MergeReqDto,
+  OAuth2SignupReqDto
 } from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
+      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
+
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type signup1Response200 = {
-    data: Blob;
-    status: 200;
-};
 
-export type signup1ResponseSuccess = signup1Response200 & {
-    headers: Headers;
+
+export type signup1Response200 = {
+  data: Blob
+  status: 200
+}
+    
+export type signup1ResponseSuccess = (signup1Response200) & {
+  headers: Headers;
 };
-export type signup1Response = signup1ResponseSuccess;
+;
+
+export type signup1Response = (signup1ResponseSuccess)
 
 export const getSignup1Url = () => {
-    return `/oauth2/signup`;
-};
 
-export const signup1 = async (
-    oAuth2SignupReqDto: OAuth2SignupReqDto,
-    options?: RequestInit,
-): Promise<signup1Response> => {
-    return customInstance<signup1Response>(getSignup1Url(), {
-        ...options,
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(oAuth2SignupReqDto),
-    });
-};
 
-export const getSignup1MutationOptions = <
-    TError = unknown,
-    TContext = unknown,
->(options?: {
-    mutation?: UseMutationOptions<
+  
+
+  return `/oauth2/signup`
+}
+
+export const signup1 = async (oAuth2SignupReqDto: OAuth2SignupReqDto, options?: RequestInit): Promise<signup1Response> => {
+  
+  return customInstance<signup1Response>(getSignup1Url(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      oAuth2SignupReqDto,)
+  }
+);}
+
+
+
+
+export const getSignup1MutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof signup1>>, TError,{data: OAuth2SignupReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof signup1>>, TError,{data: OAuth2SignupReqDto}, TContext> => {
+
+const mutationKey = ['signup1'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof signup1>>, {data: OAuth2SignupReqDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  signup1(data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type Signup1MutationResult = NonNullable<Awaited<ReturnType<typeof signup1>>>
+    export type Signup1MutationBody = OAuth2SignupReqDto
+    export type Signup1MutationError = unknown
+
+    export const useSignup1 = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof signup1>>, TError,{data: OAuth2SignupReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof signup1>>,
         TError,
-        { data: OAuth2SignupReqDto },
+        {data: OAuth2SignupReqDto},
         TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-    Awaited<ReturnType<typeof signup1>>,
-    TError,
-    { data: OAuth2SignupReqDto },
-    TContext
-> => {
-    const mutationKey = ['signup1'];
-    const { mutation: mutationOptions, request: requestOptions } = options
-        ? options.mutation &&
-          'mutationKey' in options.mutation &&
-          options.mutation.mutationKey
-            ? options
-            : { ...options, mutation: { ...options.mutation, mutationKey } }
-        : { mutation: { mutationKey }, request: undefined };
-
-    const mutationFn: MutationFunction<
-        Awaited<ReturnType<typeof signup1>>,
-        { data: OAuth2SignupReqDto }
-    > = (props) => {
-        const { data } = props ?? {};
-
-        return signup1(data, requestOptions);
-    };
-
-    return { mutationFn, ...mutationOptions };
+      > => {
+      return useMutation(getSignup1MutationOptions(options), queryClient);
+    }
+    export type mergeResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type mergeResponseSuccess = (mergeResponse200) & {
+  headers: Headers;
 };
+;
 
-export type Signup1MutationResult = NonNullable<
-    Awaited<ReturnType<typeof signup1>>
->;
-export type Signup1MutationBody = OAuth2SignupReqDto;
-export type Signup1MutationError = unknown;
-
-export const useSignup1 = <TError = unknown, TContext = unknown>(
-    options?: {
-        mutation?: UseMutationOptions<
-            Awaited<ReturnType<typeof signup1>>,
-            TError,
-            { data: OAuth2SignupReqDto },
-            TContext
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseMutationResult<
-    Awaited<ReturnType<typeof signup1>>,
-    TError,
-    { data: OAuth2SignupReqDto },
-    TContext
-> => {
-    return useMutation(getSignup1MutationOptions(options), queryClient);
-};
-export type mergeResponse200 = {
-    data: Blob;
-    status: 200;
-};
-
-export type mergeResponseSuccess = mergeResponse200 & {
-    headers: Headers;
-};
-export type mergeResponse = mergeResponseSuccess;
+export type mergeResponse = (mergeResponseSuccess)
 
 export const getMergeUrl = () => {
-    return `/oauth2/merge`;
-};
 
-export const merge = async (
-    oAuth2MergeReqDto: OAuth2MergeReqDto,
-    options?: RequestInit,
-): Promise<mergeResponse> => {
-    return customInstance<mergeResponse>(getMergeUrl(), {
-        ...options,
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(oAuth2MergeReqDto),
-    });
-};
 
-export const getMergeMutationOptions = <
-    TError = unknown,
-    TContext = unknown,
->(options?: {
-    mutation?: UseMutationOptions<
+  
+
+  return `/oauth2/merge`
+}
+
+export const merge = async (oAuth2MergeReqDto: OAuth2MergeReqDto, options?: RequestInit): Promise<mergeResponse> => {
+  
+  return customInstance<mergeResponse>(getMergeUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      oAuth2MergeReqDto,)
+  }
+);}
+
+
+
+
+export const getMergeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof merge>>, TError,{data: OAuth2MergeReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof merge>>, TError,{data: OAuth2MergeReqDto}, TContext> => {
+
+const mutationKey = ['merge'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof merge>>, {data: OAuth2MergeReqDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  merge(data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MergeMutationResult = NonNullable<Awaited<ReturnType<typeof merge>>>
+    export type MergeMutationBody = OAuth2MergeReqDto
+    export type MergeMutationError = unknown
+
+    export const useMerge = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof merge>>, TError,{data: OAuth2MergeReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof merge>>,
         TError,
-        { data: OAuth2MergeReqDto },
+        {data: OAuth2MergeReqDto},
         TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-    Awaited<ReturnType<typeof merge>>,
-    TError,
-    { data: OAuth2MergeReqDto },
-    TContext
-> => {
-    const mutationKey = ['merge'];
-    const { mutation: mutationOptions, request: requestOptions } = options
-        ? options.mutation &&
-          'mutationKey' in options.mutation &&
-          options.mutation.mutationKey
-            ? options
-            : { ...options, mutation: { ...options.mutation, mutationKey } }
-        : { mutation: { mutationKey }, request: undefined };
-
-    const mutationFn: MutationFunction<
-        Awaited<ReturnType<typeof merge>>,
-        { data: OAuth2MergeReqDto }
-    > = (props) => {
-        const { data } = props ?? {};
-
-        return merge(data, requestOptions);
-    };
-
-    return { mutationFn, ...mutationOptions };
-};
-
-export type MergeMutationResult = NonNullable<
-    Awaited<ReturnType<typeof merge>>
->;
-export type MergeMutationBody = OAuth2MergeReqDto;
-export type MergeMutationError = unknown;
-
-export const useMerge = <TError = unknown, TContext = unknown>(
-    options?: {
-        mutation?: UseMutationOptions<
-            Awaited<ReturnType<typeof merge>>,
-            TError,
-            { data: OAuth2MergeReqDto },
-            TContext
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseMutationResult<
-    Awaited<ReturnType<typeof merge>>,
-    TError,
-    { data: OAuth2MergeReqDto },
-    TContext
-> => {
-    return useMutation(getMergeMutationOptions(options), queryClient);
-};
+      > => {
+      return useMutation(getMergeMutationOptions(options), queryClient);
+    }
+    

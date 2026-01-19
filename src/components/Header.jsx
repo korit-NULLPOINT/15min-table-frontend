@@ -9,6 +9,7 @@ import {
     ChevronDown,
     CheckCheck,
 } from 'lucide-react';
+import { getPrincipal } from '../apis/generated/user-account-controller/user-account-controller';
 
 export function Header({
     onOpenAuth,
@@ -20,6 +21,7 @@ export function Header({
     onLogout,
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [userData, setUserData] = useState(null);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showAllNotifications, setShowAllNotifications] = useState(false);
     const [notifications, setNotifications] = useState([
@@ -134,6 +136,17 @@ export function Header({
     const unreadCount = notifications.filter((n) => !n.isRead).length;
 
     useEffect(() => {
+        const fetchPrincipal = async () => {
+            try {
+                const response = await getPrincipal();
+                // console.log(response);
+                setUserData(response.data);
+            } catch (e) {
+                console.error('Failed to fetch principal', e);
+            }
+        };
+        fetchPrincipal();
+
         const handleClickOutside = (event) => {
             if (
                 notificationRef.current &&
@@ -232,7 +245,7 @@ export function Header({
                                     onClick={() => onNavigate?.('profile')}
                                     className="flex items-center gap-2 px-5 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md">
                                     <User size={20} />
-                                    {username || '내 프로필'}
+                                    {userData?.username || '내 프로필'}
                                 </button>
                                 <button
                                     onClick={() =>

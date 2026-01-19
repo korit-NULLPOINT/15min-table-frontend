@@ -4,360 +4,298 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
 import type {
-    DataTag,
-    DefinedInitialDataOptions,
-    DefinedUseQueryResult,
-    MutationFunction,
-    QueryClient,
-    QueryFunction,
-    QueryKey,
-    UndefinedInitialDataOptions,
-    UseMutationOptions,
-    UseMutationResult,
-    UseQueryOptions,
-    UseQueryResult,
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
 } from '@tanstack/react-query';
 
-import type { BoardCreateReqDto } from '../openAPIDefinition.schemas';
+import type {
+  BoardCreateReqDto
+} from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
+      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
+
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-export type getBoardListResponse200 = {
-    data: Blob;
-    status: 200;
-};
 
-export type getBoardListResponseSuccess = getBoardListResponse200 & {
-    headers: Headers;
+
+export type getBoardListResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type getBoardListResponseSuccess = (getBoardListResponse200) & {
+  headers: Headers;
 };
-export type getBoardListResponse = getBoardListResponseSuccess;
+;
+
+export type getBoardListResponse = (getBoardListResponseSuccess)
 
 export const getGetBoardListUrl = () => {
-    return `/board`;
-};
 
-export const getBoardList = async (
-    options?: RequestInit,
-): Promise<getBoardListResponse> => {
-    return customInstance<getBoardListResponse>(getGetBoardListUrl(), {
-        ...options,
-        method: 'GET',
-    });
-};
 
-export const getGetBoardListQueryKey = () => {
-    return [`/board`] as const;
-};
+  
 
-export const getGetBoardListQueryOptions = <
-    TData = Awaited<ReturnType<typeof getBoardList>>,
-    TError = unknown,
->(options?: {
-    query?: Partial<
-        UseQueryOptions<Awaited<ReturnType<typeof getBoardList>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customInstance>;
-}) => {
-    const { query: queryOptions, request: requestOptions } = options ?? {};
-
-    const queryKey = queryOptions?.queryKey ?? getGetBoardListQueryKey();
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBoardList>>> = ({
-        signal,
-    }) => getBoardList({ signal, ...requestOptions });
-
-    return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
-        Awaited<ReturnType<typeof getBoardList>>,
-        TError,
-        TData
-    > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type GetBoardListQueryResult = NonNullable<
-    Awaited<ReturnType<typeof getBoardList>>
->;
-export type GetBoardListQueryError = unknown;
-
-export function useGetBoardList<
-    TData = Awaited<ReturnType<typeof getBoardList>>,
-    TError = unknown,
->(
-    options: {
-        query: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getBoardList>>,
-                TError,
-                TData
-            >
-        > &
-            Pick<
-                DefinedInitialDataOptions<
-                    Awaited<ReturnType<typeof getBoardList>>,
-                    TError,
-                    Awaited<ReturnType<typeof getBoardList>>
-                >,
-                'initialData'
-            >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetBoardList<
-    TData = Awaited<ReturnType<typeof getBoardList>>,
-    TError = unknown,
->(
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getBoardList>>,
-                TError,
-                TData
-            >
-        > &
-            Pick<
-                UndefinedInitialDataOptions<
-                    Awaited<ReturnType<typeof getBoardList>>,
-                    TError,
-                    Awaited<ReturnType<typeof getBoardList>>
-                >,
-                'initialData'
-            >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useGetBoardList<
-    TData = Awaited<ReturnType<typeof getBoardList>>,
-    TError = unknown,
->(
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getBoardList>>,
-                TError,
-                TData
-            >
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-};
-
-export function useGetBoardList<
-    TData = Awaited<ReturnType<typeof getBoardList>>,
-    TError = unknown,
->(
-    options?: {
-        query?: Partial<
-            UseQueryOptions<
-                Awaited<ReturnType<typeof getBoardList>>,
-                TError,
-                TData
-            >
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-    queryKey: DataTag<QueryKey, TData, TError>;
-} {
-    const queryOptions = getGetBoardListQueryOptions(options);
-
-    const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-        TData,
-        TError
-    > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-    return { ...query, queryKey: queryOptions.queryKey };
+  return `/board`
 }
 
-export type addBoardResponse200 = {
-    data: Blob;
-    status: 200;
-};
+export const getBoardList = async ( options?: RequestInit): Promise<getBoardListResponse> => {
+  
+  return customInstance<getBoardListResponse>(getGetBoardListUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
 
-export type addBoardResponseSuccess = addBoardResponse200 & {
-    headers: Headers;
+
+
+
+
+export const getGetBoardListQueryKey = () => {
+    return [
+    `/board`
+    ] as const;
+    }
+
+    
+export const getGetBoardListQueryOptions = <TData = Awaited<ReturnType<typeof getBoardList>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBoardList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBoardListQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBoardList>>> = ({ signal }) => getBoardList({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBoardList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetBoardListQueryResult = NonNullable<Awaited<ReturnType<typeof getBoardList>>>
+export type GetBoardListQueryError = unknown
+
+
+export function useGetBoardList<TData = Awaited<ReturnType<typeof getBoardList>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBoardList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBoardList>>,
+          TError,
+          Awaited<ReturnType<typeof getBoardList>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetBoardList<TData = Awaited<ReturnType<typeof getBoardList>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBoardList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBoardList>>,
+          TError,
+          Awaited<ReturnType<typeof getBoardList>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetBoardList<TData = Awaited<ReturnType<typeof getBoardList>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBoardList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetBoardList<TData = Awaited<ReturnType<typeof getBoardList>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBoardList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetBoardListQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type addBoardResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type addBoardResponseSuccess = (addBoardResponse200) & {
+  headers: Headers;
 };
-export type addBoardResponse = addBoardResponseSuccess;
+;
+
+export type addBoardResponse = (addBoardResponseSuccess)
 
 export const getAddBoardUrl = () => {
-    return `/board`;
-};
 
-export const addBoard = async (
-    boardCreateReqDto: BoardCreateReqDto,
-    options?: RequestInit,
-): Promise<addBoardResponse> => {
-    return customInstance<addBoardResponse>(getAddBoardUrl(), {
-        ...options,
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...options?.headers },
-        body: JSON.stringify(boardCreateReqDto),
-    });
-};
 
-export const getAddBoardMutationOptions = <
-    TError = unknown,
-    TContext = unknown,
->(options?: {
-    mutation?: UseMutationOptions<
+  
+
+  return `/board`
+}
+
+export const addBoard = async (boardCreateReqDto: BoardCreateReqDto, options?: RequestInit): Promise<addBoardResponse> => {
+  
+  return customInstance<addBoardResponse>(getAddBoardUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      boardCreateReqDto,)
+  }
+);}
+
+
+
+
+export const getAddBoardMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addBoard>>, TError,{data: BoardCreateReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof addBoard>>, TError,{data: BoardCreateReqDto}, TContext> => {
+
+const mutationKey = ['addBoard'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addBoard>>, {data: BoardCreateReqDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  addBoard(data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddBoardMutationResult = NonNullable<Awaited<ReturnType<typeof addBoard>>>
+    export type AddBoardMutationBody = BoardCreateReqDto
+    export type AddBoardMutationError = unknown
+
+    export const useAddBoard = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addBoard>>, TError,{data: BoardCreateReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof addBoard>>,
         TError,
-        { data: BoardCreateReqDto },
+        {data: BoardCreateReqDto},
         TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-    Awaited<ReturnType<typeof addBoard>>,
-    TError,
-    { data: BoardCreateReqDto },
-    TContext
-> => {
-    const mutationKey = ['addBoard'];
-    const { mutation: mutationOptions, request: requestOptions } = options
-        ? options.mutation &&
-          'mutationKey' in options.mutation &&
-          options.mutation.mutationKey
-            ? options
-            : { ...options, mutation: { ...options.mutation, mutationKey } }
-        : { mutation: { mutationKey }, request: undefined };
-
-    const mutationFn: MutationFunction<
-        Awaited<ReturnType<typeof addBoard>>,
-        { data: BoardCreateReqDto }
-    > = (props) => {
-        const { data } = props ?? {};
-
-        return addBoard(data, requestOptions);
-    };
-
-    return { mutationFn, ...mutationOptions };
+      > => {
+      return useMutation(getAddBoardMutationOptions(options), queryClient);
+    }
+    export type removeBoardResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type removeBoardResponseSuccess = (removeBoardResponse200) & {
+  headers: Headers;
 };
+;
 
-export type AddBoardMutationResult = NonNullable<
-    Awaited<ReturnType<typeof addBoard>>
->;
-export type AddBoardMutationBody = BoardCreateReqDto;
-export type AddBoardMutationError = unknown;
+export type removeBoardResponse = (removeBoardResponseSuccess)
 
-export const useAddBoard = <TError = unknown, TContext = unknown>(
-    options?: {
-        mutation?: UseMutationOptions<
-            Awaited<ReturnType<typeof addBoard>>,
-            TError,
-            { data: BoardCreateReqDto },
-            TContext
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseMutationResult<
-    Awaited<ReturnType<typeof addBoard>>,
-    TError,
-    { data: BoardCreateReqDto },
-    TContext
-> => {
-    return useMutation(getAddBoardMutationOptions(options), queryClient);
-};
-export type removeBoardResponse200 = {
-    data: Blob;
-    status: 200;
-};
+export const getRemoveBoardUrl = (boardId: number,) => {
 
-export type removeBoardResponseSuccess = removeBoardResponse200 & {
-    headers: Headers;
-};
-export type removeBoardResponse = removeBoardResponseSuccess;
 
-export const getRemoveBoardUrl = (boardId: number) => {
-    return `/board/${boardId}`;
-};
+  
 
-export const removeBoard = async (
-    boardId: number,
-    options?: RequestInit,
-): Promise<removeBoardResponse> => {
-    return customInstance<removeBoardResponse>(getRemoveBoardUrl(boardId), {
-        ...options,
-        method: 'DELETE',
-    });
-};
+  return `/board/${boardId}`
+}
 
-export const getRemoveBoardMutationOptions = <
-    TError = unknown,
-    TContext = unknown,
->(options?: {
-    mutation?: UseMutationOptions<
+export const removeBoard = async (boardId: number, options?: RequestInit): Promise<removeBoardResponse> => {
+  
+  return customInstance<removeBoardResponse>(getRemoveBoardUrl(boardId),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+
+
+
+
+export const getRemoveBoardMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeBoard>>, TError,{boardId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeBoard>>, TError,{boardId: number}, TContext> => {
+
+const mutationKey = ['removeBoard'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeBoard>>, {boardId: number}> = (props) => {
+          const {boardId} = props ?? {};
+
+          return  removeBoard(boardId,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveBoardMutationResult = NonNullable<Awaited<ReturnType<typeof removeBoard>>>
+    
+    export type RemoveBoardMutationError = unknown
+
+    export const useRemoveBoard = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeBoard>>, TError,{boardId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof removeBoard>>,
         TError,
-        { boardId: number },
+        {boardId: number},
         TContext
-    >;
-    request?: SecondParameter<typeof customInstance>;
-}): UseMutationOptions<
-    Awaited<ReturnType<typeof removeBoard>>,
-    TError,
-    { boardId: number },
-    TContext
-> => {
-    const mutationKey = ['removeBoard'];
-    const { mutation: mutationOptions, request: requestOptions } = options
-        ? options.mutation &&
-          'mutationKey' in options.mutation &&
-          options.mutation.mutationKey
-            ? options
-            : { ...options, mutation: { ...options.mutation, mutationKey } }
-        : { mutation: { mutationKey }, request: undefined };
-
-    const mutationFn: MutationFunction<
-        Awaited<ReturnType<typeof removeBoard>>,
-        { boardId: number }
-    > = (props) => {
-        const { boardId } = props ?? {};
-
-        return removeBoard(boardId, requestOptions);
-    };
-
-    return { mutationFn, ...mutationOptions };
-};
-
-export type RemoveBoardMutationResult = NonNullable<
-    Awaited<ReturnType<typeof removeBoard>>
->;
-
-export type RemoveBoardMutationError = unknown;
-
-export const useRemoveBoard = <TError = unknown, TContext = unknown>(
-    options?: {
-        mutation?: UseMutationOptions<
-            Awaited<ReturnType<typeof removeBoard>>,
-            TError,
-            { boardId: number },
-            TContext
-        >;
-        request?: SecondParameter<typeof customInstance>;
-    },
-    queryClient?: QueryClient,
-): UseMutationResult<
-    Awaited<ReturnType<typeof removeBoard>>,
-    TError,
-    { boardId: number },
-    TContext
-> => {
-    return useMutation(getRemoveBoardMutationOptions(options), queryClient);
-};
+      > => {
+      return useMutation(getRemoveBoardMutationOptions(options), queryClient);
+    }
+    

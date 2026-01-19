@@ -14,123 +14,63 @@ import {
     Users,
     Mail,
     CheckCircle,
+    LoaderCircle,
 } from 'lucide-react';
+import { usePrincipalState } from '../store/usePrincipalState';
+import {
+    currentUserComments,
+    currentUserCommunityPosts,
+    currentUserFavorites,
+    currentUserRecipePosts,
+} from '../utils/recipeData';
 
 export function UserProfile({
     onNavigate,
     onRecipeClick,
     onLogout,
-    username,
     onEditRecipe,
     onFollowersClick,
     onFollowingClick,
     onCommunityPostClick,
     onEditCommunityPost,
 }) {
+    const { principal, login } = usePrincipalState();
+
     const [profileData, setProfileData] = useState({
         gender: '',
         age: '',
         weight: '',
         allergies: '',
-        profileImage: '',
+        profileImgUrl: '',
         email: '',
-        emailVerified: false,
+        verifiedUser: false,
+        username: '',
     });
 
-    const [savedProfile, setSavedProfile] = useState(null);
+    // const [userData, setUserData] = useState(null); // Removed locally
     const [isEditing, setIsEditing] = useState(true);
     const [isSaved, setIsSaved] = useState(false);
     const [activeTab, setActiveTab] = useState('myProfile');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [postType, setPostType] = useState('recipe'); // 레시피 또는 커뮤니티
     const [myProfilePostType, setMyProfilePostType] = useState('recipe'); // My 프로필 내 게시글 타입
-
+    const [isProfileImageLoading, setIsProfileImageLoading] = useState(true);
     const fileInputRef = useRef(null);
+    const imgRef = useRef(null);
+
+    useEffect(() => {
+        setIsProfileImageLoading(true);
+        if (imgRef.current && imgRef.current.complete) {
+            setIsProfileImageLoading(false);
+        }
+    }, [principal?.profileImgUrl]);
 
     // Mock data for posts, comments, and favorites
-    const myPosts = [
-        {
-            id: 1,
-            title: '초간단 김치볶음밥',
-            date: '2026.01.10',
-            thumbnail:
-                'https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?w=400',
-        },
-        {
-            id: 2,
-            title: '크림 파스타 레시피',
-            date: '2026.01.08',
-            thumbnail:
-                'https://images.unsplash.com/photo-1587740907856-997a958a68ac?w=400',
-        },
-    ];
+    const myPosts = currentUserRecipePosts;
+    const myCommunityPosts = currentUserCommunityPosts;
+    const myFavorites = currentUserFavorites;
 
-    const myCommunityPosts = [
-        {
-            id: 101,
-            title: '자취생 필수 조리도구 추천',
-            date: '2026.01.12',
-            views: 245,
-            comments: 12,
-        },
-        {
-            id: 102,
-            title: '냉장고 파먹기 레시피 공유해요',
-            date: '2026.01.09',
-            views: 189,
-            comments: 8,
-        },
-    ];
-
-    const [myComments, setMyComments] = useState([
-        {
-            id: 1,
-            type: 'recipe',
-            postTitle: '초간단 김치볶음밥',
-            comment: '정말 맛있어 보이네요! 저도 만들어봐야겠어요',
-            date: '2026.01.11',
-            postId: 1,
-        },
-        {
-            id: 2,
-            type: 'recipe',
-            postTitle: '로제 파스타',
-            comment: '생크림 대신 우유 사용해도 되나요?',
-            date: '2026.01.09',
-            postId: 2,
-        },
-        {
-            id: 3,
-            type: 'community',
-            postTitle: '자취생 필수 조리도구 추천',
-            comment: '정말 유용한 정보네요! 감사합니다',
-            date: '2026.01.10',
-            postId: 101,
-        },
-        {
-            id: 4,
-            type: 'community',
-            postTitle: '냉장고 파먹기 레시피 공유해요',
-            comment: '저도 같은 고민 했는데 도움됐어요',
-            date: '2026.01.08',
-            postId: 102,
-        },
-    ]);
-
-    const myFavorites = [
-        {
-            id: 3,
-            title: '5분만에 완성 덮밥',
-            thumbnail:
-                'https://images.unsplash.com/photo-1763844668895-6931b4e09458?w=400',
-        },
-        {
-            id: 4,
-            title: '라면 업그레이드',
-            thumbnail:
-                'https://images.unsplash.com/photo-1627900440398-5db32dba8db1?w=400',
-        },
-    ];
+    const [myComments, setMyComments] = useState(currentUserComments);
 
     const handleChange = (field, value) => {
         setProfileData((prev) => ({ ...prev, [field]: value }));
@@ -144,16 +84,19 @@ export function UserProfile({
                 const imageData = reader.result;
                 setProfileData((prev) => ({
                     ...prev,
-                    profileImage: imageData,
+                    profileImgUrl: imageData,
                 }));
             };
             reader.readAsDataURL(file);
         }
     };
 
+    const handleImageLoad = () => {
+        setIsProfileImageLoading(false);
+    };
+
     const handleSave = () => {
-        setSavedProfile(profileData);
-        localStorage.setItem('userProfile', JSON.stringify(profileData));
+        login(profileData);
         setIsEditing(false);
         setIsSaved(true);
         setTimeout(() => setIsSaved(false), 3000);
@@ -163,16 +106,7 @@ export function UserProfile({
         setIsEditing(true);
     };
 
-    const handleLogout = () => {
-        if (onLogout) {
-            onLogout();
-        }
-    };
-
     const handleDeleteAccount = () => {
-        // Remove all user data from localStorage
-        localStorage.removeItem('userProfile');
-        localStorage.removeItem('currentUser');
         // Call logout to return to login screen
         if (onLogout) {
             onLogout();
@@ -187,16 +121,23 @@ export function UserProfile({
         );
     };
 
-    // Load saved profile from localStorage
+    // Load saved profile from Store
     useEffect(() => {
-        const savedData = localStorage.getItem('userProfile');
-        if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            setProfileData(parsedData);
-            setSavedProfile(parsedData);
+        if (principal) {
+            const mappedData = {
+                gender: principal.gender || '',
+                age: principal.age || '',
+                weight: principal.weight || '',
+                allergies: principal.allergies || '',
+                profileImgUrl: principal.profileImgUrl || '',
+                email: principal.email || '',
+                verifiedUser: principal.verifiedUser || false,
+                username: principal.username || '',
+            };
+            setProfileData(mappedData);
             setIsEditing(false);
         }
-    }, []);
+    }, [principal]);
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
@@ -219,15 +160,15 @@ export function UserProfile({
                                     건강한 식생활을 위한 정보를 입력해주세요
                                 </p>
                             </div>
-                            {savedProfile && (
+                            {principal && (
                                 <div
                                     className={`px-4 py-2 rounded-full flex items-center gap-2 ${
-                                        savedProfile.emailVerified
+                                        principal.verifiedUser
                                             ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
                                             : 'bg-orange-500'
                                     }`}
                                 >
-                                    {savedProfile.emailVerified ? (
+                                    {principal.verifiedUser ? (
                                         <>
                                             <CheckCircle size={18} />
                                             <span className="font-medium">
@@ -301,13 +242,22 @@ export function UserProfile({
                         <div className="p-8">
                             {/* Profile Image and Nickname */}
                             <div className="flex flex-col items-center mb-8">
-                                <div className="w-32 h-32 rounded-full border-4 border-[#d4cbbf] overflow-hidden bg-[#ebe5db] flex items-center justify-center">
-                                    {savedProfile?.profileImage ? (
-                                        <img
-                                            src={savedProfile.profileImage}
-                                            alt="프로필"
-                                            className="w-full h-full object-cover"
-                                        />
+                                <div className="w-32 h-32 rounded-full border-4 border-[#d4cbbf] overflow-hidden bg-[#ebe5db] flex items-center justify-center relative">
+                                    {principal?.profileImgUrl ? (
+                                        <>
+                                            {isProfileImageLoading && (
+                                                <LoaderCircle className="w-8 h-8 text-[#6b5d4f] animate-spin absolute z-10" />
+                                            )}
+                                            <img
+                                                ref={imgRef}
+                                                key={principal.profileImgUrl}
+                                                src={principal.profileImgUrl}
+                                                alt="프로필"
+                                                className={`w-full h-full object-cover transition-opacity duration-300 ${isProfileImageLoading ? 'opacity-0' : 'opacity-100'}`}
+                                                onLoad={handleImageLoad}
+                                                onError={handleImageLoad}
+                                            />
+                                        </>
                                     ) : (
                                         <UserIcon
                                             size={48}
@@ -316,7 +266,7 @@ export function UserProfile({
                                     )}
                                 </div>
                                 <h2 className="text-2xl text-[#3d3226] mt-4">
-                                    {username || '닉네임 없음'}
+                                    {principal?.username || '닉네임 없음'}
                                 </h2>
 
                                 {/* Followers / Following */}
@@ -450,11 +400,11 @@ export function UserProfile({
                             {/* Logout and Delete Account Buttons */}
                             <div className="mt-8 space-y-3">
                                 <button
-                                    onClick={handleLogout}
+                                    // onClick=""
                                     className="w-full py-3 border-2 border-[#3d3226] text-[#3d3226] rounded-md hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors flex items-center justify-center gap-2"
                                 >
                                     <LogOut size={20} />
-                                    로그아웃
+                                    Todo : 비밀번호 변경
                                 </button>
                                 <button
                                     onClick={() => setShowDeleteConfirm(true)}
@@ -477,10 +427,10 @@ export function UserProfile({
                                         <div className="flex flex-col items-center mb-6">
                                             <div className="relative">
                                                 <div className="w-32 h-32 rounded-full border-4 border-[#d4cbbf] overflow-hidden bg-[#ebe5db] flex items-center justify-center">
-                                                    {profileData.profileImage ? (
+                                                    {profileData.profileImgUrl ? (
                                                         <img
                                                             src={
-                                                                profileData.profileImage
+                                                                profileData.profileImgUrl
                                                             }
                                                             alt="프로필"
                                                             className="w-full h-full object-cover"
@@ -519,7 +469,7 @@ export function UserProfile({
                                                 닉네임
                                             </label>
                                             <div className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md bg-[#ebe5db] text-[#3d3226]">
-                                                {username || '닉네임 없음'}
+                                                {profileData.username || '닉네임 없음'}
                                             </div>
                                         </div>
 
@@ -638,10 +588,10 @@ export function UserProfile({
                                                         className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white pr-12"
                                                         placeholder="email@example.com"
                                                         disabled={
-                                                            profileData.emailVerified
+                                                            profileData.verifiedUser
                                                         }
                                                     />
-                                                    {profileData.emailVerified && (
+                                                    {profileData.verifiedUser && (
                                                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                                             <CheckCircle
                                                                 size={20}
@@ -656,7 +606,7 @@ export function UserProfile({
                                         {/* Email Verification */}
                                         {profileData.email && (
                                             <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-lg border-2 border-emerald-200">
-                                                {!profileData.emailVerified ? (
+                                                {!profileData.verifiedUser ? (
                                                     <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-3">
                                                             <Mail
@@ -684,7 +634,7 @@ export function UserProfile({
                                                                 setProfileData(
                                                                     (prev) => ({
                                                                         ...prev,
-                                                                        emailVerified: true,
+                                                                        verifiedUser: true,
                                                                     }),
                                                                 );
                                                                 alert(
@@ -756,15 +706,15 @@ export function UserProfile({
                             )}
 
                             {/* Saved Profile Display - Only show when saved and not editing */}
-                            {savedProfile && !isEditing && (
+                            {principal && !isEditing && (
                                 <div className="p-8">
                                     {/* Profile Image and Nickname */}
                                     <div className="flex flex-col items-center mb-8">
                                         <div className="w-32 h-32 rounded-full border-4 border-[#d4cbbf] overflow-hidden bg-[#ebe5db] flex items-center justify-center">
-                                            {savedProfile.profileImage ? (
+                                            {principal.profileImgUrl ? (
                                                 <img
                                                     src={
-                                                        savedProfile.profileImage
+                                                        principal.profileImgUrl
                                                     }
                                                     alt="프로필"
                                                     className="w-full h-full object-cover"
@@ -777,7 +727,7 @@ export function UserProfile({
                                             )}
                                         </div>
                                         <h2 className="text-2xl text-[#3d3226] mt-4">
-                                            {username || '닉네임 없음'}
+                                            {principal.username || '닉네임 없음'}
                                         </h2>
                                     </div>
 
@@ -790,7 +740,7 @@ export function UserProfile({
                                                 성별
                                             </p>
                                             <p className="text-lg text-[#3d3226]">
-                                                {savedProfile.gender || '-'}
+                                                {principal.gender || '-'}
                                             </p>
                                         </div>
                                         <div className="bg-[#ebe5db] p-5 rounded-md border-2 border-[#d4cbbf]">
@@ -798,8 +748,8 @@ export function UserProfile({
                                                 나이
                                             </p>
                                             <p className="text-lg text-[#3d3226]">
-                                                {savedProfile.age
-                                                    ? `${savedProfile.age}세`
+                                                {principal.age
+                                                    ? `${principal.age}세`
                                                     : '-'}
                                             </p>
                                         </div>
@@ -808,8 +758,8 @@ export function UserProfile({
                                                 체중
                                             </p>
                                             <p className="text-lg text-[#3d3226]">
-                                                {savedProfile.weight
-                                                    ? `${savedProfile.weight}kg`
+                                                {principal.weight
+                                                    ? `${principal.weight}kg`
                                                     : '-'}
                                             </p>
                                         </div>
@@ -819,9 +769,9 @@ export function UserProfile({
                                             </p>
                                             <div className="flex items-center gap-2">
                                                 <p className="text-lg text-[#3d3226] flex-1 truncate">
-                                                    {savedProfile.email || '-'}
+                                                    {principal.email || '-'}
                                                 </p>
-                                                {savedProfile.emailVerified && (
+                                                {principal.verifiedUser && (
                                                     <CheckCircle
                                                         size={18}
                                                         className="text-emerald-500 flex-shrink-0"
@@ -834,7 +784,7 @@ export function UserProfile({
                                                 알레르기 정보
                                             </p>
                                             <p className="text-lg text-[#3d3226]">
-                                                {savedProfile.allergies || '-'}
+                                                {principal.allergies || '-'}
                                             </p>
                                         </div>
                                     </div>
