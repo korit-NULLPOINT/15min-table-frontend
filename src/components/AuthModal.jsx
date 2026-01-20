@@ -1,5 +1,5 @@
-import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { X } from "lucide-react";
+import { useState } from "react";
 import {
     useSignin,
     useSignup,
@@ -11,19 +11,9 @@ import {
     useSignup1,
 } from '../apis/generated/o-auth-2-auth-controller/o-auth-2-auth-controller';
 
-export function AuthModal({
-    isOpen,
-    onClose,
-    mode,
-    onAuthSuccess,
-    onModeChange,
-    socialData,
-}) {
+export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }) {
     const { mutateAsync: signupMutate } = useSignup();
     const { mutateAsync: signinMutate } = useSignin();
-    const { mutateAsync: signup1Mutate } = useSignup1();
-    const { mutateAsync: mergeMutate } = useMerge();
-
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [passwordConfirm, setPasswordConfirm] = useState('');
@@ -43,42 +33,40 @@ export function AuthModal({
 
     if (!isOpen) return null;
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        setError('');
 
-        const baseData = {
-            email,
-            password,
-            username,
-        };
+        setError('');
+        // console.log(mode);
+        // console.log(email);
 
         if (mode === 'signup') {
             // 회원가입
+            // 입력값 검증
             if (
                 username.trim().length === 0 ||
                 email.trim().length === 0 ||
                 password.trim().length === 0 ||
                 passwordConfirm.trim().length === 0
             ) {
-                setError('모든 항목을 입력해주세요.');
+                setError("모든 항목을 입력해주세요.");
                 return;
             }
 
             if (!emailRegex.test(email)) {
-                setError('이메일 형식이 올바르지 않습니다.');
+                setError("이메일 형식이 올바르지 않습니다.");
                 return;
             }
 
             if (!passwordRegex.test(password)) {
                 setError(
-                    '비밀번호는 최소 8자리에서 16자리 까지 이고 영문자, 숫자, 특수문자를 포함하여야 합니다.',
+                    '비밀번호는 최소 8자리에서 16자리 까지 이고 영문자, 숫자, 특수문자를 포함하여야 합니다.'
                 );
                 return;
             }
 
             if (password !== passwordConfirm) {
-                setError('비밀번호가 일치하지 않습니다.');
+                setError("비밀번호가 일치하지 않습니다.");
                 return;
             }
 
@@ -111,12 +99,19 @@ export function AuthModal({
                 if (errorData) {
                     alert(errorData.message || '회원가입에 실패했습니다.');
                 } else {
-                    alert('회원가입 중 오류가 발생했습니다.');
+                    alert(body?.message || "회원가입에 실패했습니다.");
                 }
-            }
+            });
+            setEmail('');
+            setPassword('');
+            setPasswordConfirm('');
+            setUsername('');
         } else {
             // 로그인
-            if (email.trim().length === 0 || password.trim().length === 0) {
+            if (
+                email.trim().length === 0 ||
+                password.trim().length === 0
+            ) {
                 setError('모든 항목을 입력해주세요.');
                 return;
             }
@@ -180,36 +175,38 @@ export function AuthModal({
     };
 
     const switchMode = () => {
-        const newMode = mode === 'signin' ? 'signup' : 'signin';
+        const newMode = mode === "signin" ? "signup" : "signin";
         if (onModeChange) onModeChange(newMode);
-        setError('');
+        setError("");
     };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+            <div
+                className="absolute inset-0 bg-black/50"
+                onClick={onClose}
+            />
             <div className="relative bg-[#f5f1eb] rounded-lg shadow-2xl max-w-md w-full mx-4 border-2 border-[#3d3226]">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 hover:bg-[#e5dfd5] rounded-full transition-colors"
-                >
+                    className="absolute top-4 right-4 p-2 hover:bg-[#e5dfd5] rounded-full transition-colors">
                     <X size={24} className="text-[#3d3226]" />
                 </button>
 
                 <div className="p-8">
                     <div className="text-center mb-6">
                         <h2 className="text-3xl font-serif text-[#3d3226] mb-2">
-                            {mode === 'signin' ? '로그인' : '회원가입'}
+                            {mode === "signin" ? "로그인" : "회원가입"}
                         </h2>
                         <p className="text-[#6b5d4f]">
-                            {mode === 'signin'
-                                ? '십오분:식탁에 오신 것을 환영합니다'
-                                : '새로운 레시피를 공유해보세요'}
+                            {mode === "signin"
+                                ? "십오분:식탁에 오신 것을 환영합니다"
+                                : "새로운 레시피를 공유해보세요"}
                         </p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {mode === 'signup' && (
+                        {mode === "signup" && (
                             <div>
                                 <label className="block text-sm mb-2 text-[#3d3226]">
                                     닉네임
@@ -255,7 +252,7 @@ export function AuthModal({
                             />
                         </div>
 
-                        {mode === 'signup' && (
+                        {mode === "signup" && (
                             <div>
                                 <label className="block text-sm mb-2 text-[#3d3226]">
                                     비밀번호 확인
@@ -265,13 +262,10 @@ export function AuthModal({
                                     value={passwordConfirm}
                                     onChange={(e) => {
                                         setPasswordConfirm(e.target.value);
-                                        setError('');
+                                        setError("");
                                     }}
-                                    className={`w-full px-4 py-3 border-2 rounded-md focus:border-[#3d3226] focus:outline-none bg-white ${
-                                        error
-                                            ? 'border-red-500'
-                                            : 'border-[#d4cbbf]'
-                                    }`}
+                                    className={`w-full px-4 py-3 border-2 rounded-md focus:border-[#3d3226] focus:outline-none bg-white ${error ? 'border-red-500' : 'border-[#d4cbbf]'
+                                        }`}
                                     placeholder="••••••••"
                                     required
                                 />
@@ -285,14 +279,12 @@ export function AuthModal({
 
                         <button
                             type="submit"
-                            className="w-full py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors font-medium"
-                        >
-                            {mode === 'signin' ? '로그인' : '가입하기'}
+                            className="w-full py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors font-medium">
+                            {mode === "signin" ? "로그인" : "가입하기"}
                         </button>
                     </form>
 
-                    {/* Social Login Buttons - Only for Signup */}
-                    {mode === 'signin' && (
+                    {mode === "signin" && (
                         <div className="mt-6 space-y-3">
                             <div className="relative">
                                 <div className="absolute inset-0 flex items-center">
@@ -307,9 +299,8 @@ export function AuthModal({
 
                             <button
                                 type="button"
-                                onClick={() => handleSocialLogin('google')}
-                                className="w-full py-3 px-4 bg-white border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors flex items-center justify-center gap-3"
-                            >
+                                onClick={() => handleSocialLogin("google")}
+                                className="w-full py-3 px-4 bg-white border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors flex items-center justify-center gap-3">
                                 <svg width="20" height="20" viewBox="0 0 20 20">
                                     <path
                                         fill="#4285F4"
@@ -338,26 +329,19 @@ export function AuthModal({
                                 onClick={() => handleSocialLogin('naver')}
                                 className="w-full py-3 px-4 bg-[#03C75A] border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors flex items-center justify-center gap-3"
                             >
-                                <span className="text-white font-bold text-lg">
-                                    N
-                                </span>
-                                <span className="text-white">
-                                    네이버로 계속하기
-                                </span>
+                                <span className="text-white font-bold text-lg">N</span>
+                                <span className="text-white">네이버로 계속하기</span>
                             </button>
                         </div>
                     )}
 
                     <div className="mt-6 text-center">
                         <p className="text-sm text-[#6b5d4f]">
-                            {mode === 'signin'
-                                ? '계정이 없으신가요? '
-                                : '이미 계정이 있으신가요? '}
+                            {mode === 'signin' ? '계정이 없으신가요? ' : '이미 계정이 있으신가요? '}
                             <button
                                 className="text-[#3d3226] underline hover:text-[#5d4a36]"
-                                onClick={switchMode}
-                            >
-                                {mode === 'signin' ? '회원가입' : '로그인'}
+                                onClick={switchMode}>
+                                {mode === "signin" ? "회원가입" : "로그인"}
                             </button>
                         </p>
                     </div>
