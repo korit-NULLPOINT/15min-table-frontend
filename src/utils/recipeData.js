@@ -402,3 +402,65 @@ export const otherUserCommunityPosts = [
         comments: 8,
     },
 ];
+
+
+export const mockNotifications = [
+    {
+        notificationId: 1,
+        notificationType: 'FOLLOW',
+        actorUserId: 7,
+        actorUsername: '요리왕',
+        receiverUserId: 3,
+        recipeId: null,
+        boardId: null,
+        isRead: 0,
+        createDt: '2026-01-19T13:05:00',
+    },
+    {
+        notificationId: 2,
+        notificationType: 'COMMENT',
+        actorUserId: 5,
+        actorUsername: '자취요정',
+        receiverUserId: 3,
+        recipeId: 2,
+        boardId: 1,
+        isRead: 0,
+        createDt: '2026-01-19T11:40:00',
+    },
+    {
+        notificationId: 3,
+        notificationType: 'RATING',
+        actorUserId: 9,
+        actorUsername: '파스타러버',
+        receiverUserId: 3,
+        recipeId: 1,
+        boardId: 1,
+        isRead: 1,
+        createDt: '2026-01-18T20:10:00',
+    },
+    {
+        notificationId: 4,
+        notificationType: 'COMMENT',
+        actorUserId: 11,
+        actorUsername: '냉파천재',
+        receiverUserId: 3,
+        recipeId: 5,
+        boardId: 1,
+        isRead: 1,
+        createDt: '2026-01-18T10:02:00',
+    },
+    {
+        notificationId: 5,
+        notificationType: 'FOLLOW',
+        actorUserId: 4,
+        actorUsername: '한끼뚝딱',
+        receiverUserId: 3,
+        recipeId: null,
+        boardId: null,
+        isRead: 0,
+        createDt: '2026-01-17T19:30:00',
+    },
+];
+
+export const mockUnreadCount = mockNotifications.filter((n) => Number(n.isRead) === 0).length;
+
