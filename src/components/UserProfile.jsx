@@ -15,6 +15,7 @@ import {
     Mail,
     CheckCircle,
     LoaderCircle,
+    RotateCcwKey,
 } from 'lucide-react';
 import { usePrincipalState } from '../store/usePrincipalState';
 import {
@@ -33,6 +34,7 @@ export function UserProfile({
     onFollowingClick,
     onCommunityPostClick,
     onEditCommunityPost,
+    onChangePasswordClick,
 }) {
     const { principal, login } = usePrincipalState();
 
@@ -400,11 +402,11 @@ export function UserProfile({
                             {/* Logout and Delete Account Buttons */}
                             <div className="mt-8 space-y-3">
                                 <button
-                                    // onClick=""
+                                    onClick={onChangePasswordClick}
                                     className="w-full py-3 border-2 border-[#3d3226] text-[#3d3226] rounded-md hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors flex items-center justify-center gap-2"
                                 >
-                                    <LogOut size={20} />
-                                    Todo : 비밀번호 변경
+                                    <RotateCcwKey size={20} />
+                                    비밀번호 변경
                                 </button>
                                 <button
                                     onClick={() => setShowDeleteConfirm(true)}
