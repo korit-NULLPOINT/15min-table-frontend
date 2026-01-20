@@ -35,8 +35,7 @@ export default function RootLayout() {
         if (pageKey === 'board') navigate('/boards/1/recipe');
         if (pageKey === 'community') navigate('/boards/2/free');
         if (pageKey === 'profile') navigate('/me');
-        if (pageKey === 'notifications') navigate('/me/notifications');
-        if (pageKey === 'write') navigate('/boards/1/recipe/write'); 
+        if (pageKey === 'write') navigate('/boards/1/recipe/write');
     };
 
     const username = principal?.username || principal?.nickname || '';
@@ -52,7 +51,6 @@ export default function RootLayout() {
                 onNotificationClick={() => {}}
                 onLogout={handleLogout}
             />
-
             <Outlet />
 
             <AuthModal

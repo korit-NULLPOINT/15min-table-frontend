@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { mockNotifications } from '../utils/recipeData';
 
-// --- utils (UI 표시용 포맷) ---
+// --- utils ---
 function formatDateTime(isoString) {
     if (!isoString) return '';
     const d = new Date(isoString);
@@ -15,7 +15,6 @@ function formatDateTime(isoString) {
     return `${yyyy}.${mm}.${dd} ${hh}:${mi}`;
 }
 
-// DB/서버 형태 -> Header에서 쓰기 좋은 UI 모델
 function toUINotification(n) {
     const typeUpper = (n.notificationType ?? '').toUpperCase();
 
@@ -35,140 +34,139 @@ function calcUnread(items) {
     return items.reduce((acc, n) => acc + (n.isRead ? 0 : 1), 0);
 }
 
-function sortByCreateDtDesc(items) {
+function sortByIdDesc(items) {
     return [...items].sort(
-        (a, b) =>
-            new Date(b.raw?.createDt).getTime() -
-            new Date(a.raw?.createDt).getTime(),
+        (a, b) => (b.raw?.notificationId ?? 0) - (a.raw?.notificationId ?? 0),
     );
+}
+
+function computeCursorFromItems(items) {
+    // 마지막(가장 작은 id) 기준으로 다음 cursor
+    const last = items[items.length - 1];
+    return last?.raw?.notificationId ?? null;
 }
 
 export const useNotificationStore = create((set, get) => ({
     // --- state ---
-    initializedUserId: null, // ✅ 유저 바뀌면 reset/init 가능
+    initializedUserId: null,
     items: [],
     unreadCount: 0,
 
-    dropdownOpen: false, // (선택) 헤더에서 열림 상태를 전역으로 두고 싶다면 유지
-    sseConnected: false, // SSE 연결 상태 표시용(선택)
+    // paging
+    cursor: null, // 다음 페이지 기준(notification_id < cursor)
+    hasNext: true,
+    loadingMore: false,
 
-    // --- actions (core) ---
+    // --- actions ---
     reset: () =>
         set({
             initializedUserId: null,
             items: [],
             unreadCount: 0,
-            dropdownOpen: false,
-            sseConnected: false,
+            cursor: null,
+            hasNext: true,
+            loadingMore: false,
         }),
 
-    setDropdownOpen: (open) => set({ dropdownOpen: !!open }),
-    setSseConnected: (connected) => set({ sseConnected: !!connected }),
+    setLoadingMore: (v) => set({ loadingMore: !!v }),
 
-    /**
-     * ✅ 초기 데이터 세팅용 (나중에 API fetch 결과를 여기로 넣으면 됨)
-     * @param {Object} param0
-     * @param {number} param0.userId
-     * @param {Array} param0.rawList  // 서버에서 받은 notification dto 배열(또는 이미 UI 모델이면 uiList 사용)
-     * @param {Array} param0.uiList   // UI 모델 배열을 직접 넣고 싶으면 사용
-     */
+    setPaging: ({ cursor, hasNext } = {}) =>
+        set((s) => ({
+            cursor: cursor ?? s.cursor,
+            hasNext: typeof hasNext === 'boolean' ? hasNext : s.hasNext,
+        })),
+
     setAll: ({ userId, rawList, uiList }) => {
         const items = uiList
-            ? sortByCreateDtDesc(uiList)
-            : sortByCreateDtDesc((rawList ?? []).map(toUINotification));
+            ? sortByIdDesc(uiList)
+            : sortByIdDesc((rawList ?? []).map(toUINotification));
 
         set({
             initializedUserId: userId ?? null,
             items,
             unreadCount: calcUnread(items),
+            cursor: computeCursorFromItems(items),
         });
     },
 
-    /**
-     * ✅ SSE/실시간으로 들어온 알림 1건 반영
-     * - raw dto를 받으면 자동 변환
-     * - 이미 ui 모델이면 그대로
-     */
-    ingest: (payload) => {
-        const ui =
-            payload && payload.raw
-                ? payload // 이미 UI 모델
-                : toUINotification(payload); // raw dto
+    appendMany: (rawList) => {
+        const uiList = (rawList ?? []).map(toUINotification);
 
         set((s) => {
-            // 중복 방지(같은 id가 이미 있으면 갱신)
-            const existsIdx = s.items.findIndex((n) => n.id === ui.id);
-            let nextItems;
+            // 중복 제거(기존 id 있으면 skip)
+            const existing = new Set(s.items.map((x) => x.id));
+            const merged = [
+                ...s.items,
+                ...uiList.filter((x) => !existing.has(x.id)),
+            ];
 
-            if (existsIdx >= 0) {
-                nextItems = [...s.items];
-                nextItems[existsIdx] = {
-                    ...nextItems[existsIdx],
-                    ...ui,
-                };
-                nextItems = sortByCreateDtDesc(nextItems);
-            } else {
-                nextItems = [ui, ...s.items];
-            }
-
-            // unreadCount 갱신: 새로 추가된 게 unread면 +1
-            // (중복 갱신일 경우는 안전하게 재계산)
-            const unreadCount =
-                existsIdx >= 0
-                    ? calcUnread(nextItems)
-                    : s.unreadCount + (ui.isRead ? 0 : 1);
-
-            return { items: nextItems, unreadCount };
-        });
-    },
-
-    /**
-     * ✅ 로컬 읽음 처리(나중에 API 성공 후 호출)
-     */
-    markAsReadLocal: (id) => {
-        set((s) => {
-            let decreased = 0;
-            const nextItems = s.items.map((n) => {
-                if (n.id !== id) return n;
-                if (!n.isRead) decreased = 1;
-                return { ...n, isRead: true };
-            });
-
+            const sorted = sortByIdDesc(merged);
             return {
-                items: nextItems,
-                unreadCount: Math.max(0, s.unreadCount - decreased),
+                items: sorted,
+                unreadCount: calcUnread(sorted),
+                cursor: computeCursorFromItems(sorted),
             };
         });
     },
 
-    /**
-     * ✅ 로컬 전체 읽음 처리(나중에 API 성공 후 호출)
-     */
-    markAllAsReadLocal: () => {
-        set((s) => ({
-            items: s.items.map((n) => ({ ...n, isRead: true })),
-            unreadCount: 0,
-        }));
+    ingest: (payload) => {
+        const ui = payload && payload.raw ? payload : toUINotification(payload);
+
+        set((s) => {
+            const idx = s.items.findIndex((n) => n.id === ui.id);
+            let nextItems;
+
+            if (idx >= 0) {
+                nextItems = [...s.items];
+                nextItems[idx] = { ...nextItems[idx], ...ui };
+                nextItems = sortByIdDesc(nextItems);
+            } else {
+                nextItems = sortByIdDesc([ui, ...s.items]);
+            }
+
+            return {
+                items: nextItems,
+                unreadCount: calcUnread(nextItems),
+                cursor: computeCursorFromItems(nextItems),
+            };
+        });
     },
 
-    // --- dev/mock (선택) ---
-    /**
-     * 아직 API fetch 안 붙일 때, 화면 작업용 mock init
-     * userId를 넘겨서 유저 변경 시에도 재초기화 가능하게
-     */
-    initMockForUser: (userId = 0) => {
-        const { initializedUserId } = get();
+    markAsReadLocal: (id) => {
+        set((s) => {
+            const next = s.items.map((n) =>
+                n.id === id ? { ...n, isRead: true } : n,
+            );
+            return { items: next, unreadCount: calcUnread(next) };
+        });
+    },
 
+    markAllAsReadLocal: () => {
+        set((s) => {
+            const next = s.items.map((n) => ({ ...n, isRead: true }));
+            return { items: next, unreadCount: 0 };
+        });
+    },
+
+    // --- dev/mock ---
+    initMockForUser: (userId = 0, size = 5) => {
+        const { initializedUserId } = get();
         if (initializedUserId === userId) return;
 
-        const items = sortByCreateDtDesc(
-            (mockNotifications ?? []).map(toUINotification),
+        const sortedRaw = [...(mockNotifications ?? [])].sort(
+            (a, b) => (b.notificationId ?? 0) - (a.notificationId ?? 0),
         );
+        const first = sortedRaw.slice(0, size);
+
+        const ui = sortByIdDesc(first.map(toUINotification));
 
         set({
             initializedUserId: userId,
-            items,
-            unreadCount: calcUnread(items),
+            items: ui,
+            unreadCount: calcUnread(ui),
+            cursor: computeCursorFromItems(ui),
+            hasNext: first.length === size, // 단순 판단
+            loadingMore: false,
         });
     },
 }));
