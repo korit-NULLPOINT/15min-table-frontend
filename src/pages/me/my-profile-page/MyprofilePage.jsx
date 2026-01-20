@@ -1,16 +1,16 @@
 // src/pages/me/my-profile-page/MyProfilePage.jsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserProfile } from '../../../components/UserProfile';
+import ChangePasswordPage from '../change-password-page/ChangePasswordPage';
 
 const RECIPE_BOARD_ID = 1;
 const COMMUNITY_BOARD_ID = 2;
 
 export default function MyProfilePage() {
     const navigate = useNavigate();
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
-
-    
     useEffect(() => {
         const token = localStorage.getItem('AccessToken');
         if (!token) navigate('/');
@@ -44,7 +44,7 @@ export default function MyProfilePage() {
     //   };
 
     // ✅ 비밀번호 변경
-    const onChangePasswordClick = () => navigate('/me/change/password');
+    const onChangePasswordClick = () => setIsChangePasswordOpen(true);
 
     // ✅ 로그아웃도 마이페이지 버튼이 있으면 연결
     const onLogout = () => {
@@ -53,16 +53,24 @@ export default function MyProfilePage() {
     };
 
     return (
-        <UserProfile
-            onNavigate={onNavigate}
-            onFollowersClick={onFollowersClick}
-            onFollowingClick={onFollowingClick}
-            onRecipeClick={onRecipeClick}
-            // onCommunityPostClick={onCommunityPostClick}
-            onEditRecipe={onEditRecipe}
-            // onEditCommunityPost={onEditCommunityPost}
-            onChangePasswordClick={onChangePasswordClick}
-            onLogout={onLogout}
-        />
+        <>
+            <UserProfile
+                onNavigate={onNavigate}
+                onFollowersClick={onFollowersClick}
+                onFollowingClick={onFollowingClick}
+                onRecipeClick={onRecipeClick}
+                // onCommunityPostClick={onCommunityPostClick}
+                onEditRecipe={onEditRecipe}
+                // onEditCommunityPost={onEditCommunityPost}
+                onChangePasswordClick={onChangePasswordClick}
+                onLogout={onLogout}
+            />
+            {isChangePasswordOpen && (
+                <ChangePasswordPage
+                    onClose={() => setIsChangePasswordOpen(false)}
+                    onlogout={onLogout}
+                />
+            )}
+        </>
     );
 }

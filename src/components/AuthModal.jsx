@@ -6,7 +6,10 @@ import {
 } from '../apis/generated/user-auth-controller/user-auth-controller';
 import { getPrincipal } from '../apis/generated/user-account-controller/user-account-controller';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { useMerge, useSignup1 } from '../apis/generated/o-auth-2-auth-controller/o-auth-2-auth-controller';
+import {
+    useMerge,
+    useSignup1,
+} from '../apis/generated/o-auth-2-auth-controller/o-auth-2-auth-controller';
 
 export function AuthModal({
     isOpen,
@@ -94,17 +97,17 @@ export function AuthModal({
                 } else {
                     await signupMutate({ data: baseData });
                 }
-                
+
                 alert('회원가입이 완료되었습니다! 로그인해주세요.');
                 if (onModeChange) onModeChange('signin');
-                
+
                 // 입력 필드 초기화
                 setEmail('');
                 setPassword('');
                 setPasswordConfirm('');
                 setUsername('');
             } catch (error) {
-                 const errorData = error.response?.data;
+                const errorData = error.response?.data;
                 if (errorData) {
                     alert(errorData.message || '회원가입에 실패했습니다.');
                 } else {
@@ -136,29 +139,32 @@ export function AuthModal({
                     response = await signinMutate({ data });
                 }
 
-
                 if (response.status === 'success' || response.status === 200) {
-                     // status check might depend on API response structure, generally checking if we have data/success
-                     // Assuming response.data is the token string based on existing code logic
+                    // status check might depend on API response structure, generally checking if we have data/success
+                    // Assuming response.data is the token string based on existing code logic
                     localStorage.setItem('AccessToken', response.data);
 
-                    if (onAuthSuccess)
-                        onAuthSuccess();
+                    if (onAuthSuccess) onAuthSuccess();
                     onClose();
                 } else {
-                     alert(response.message || '로그인에 실패했습니다.');
+                    alert(response.message || '로그인에 실패했습니다.');
                 }
-
             } catch (error) {
                 const errorData = error.response?.data;
                 if (errorData) {
-                     alert(errorData.message || (socialData ? '계정 연동에 실패했습니다.' : '로그인에 실패했습니다.'));
+                    alert(
+                        errorData.message ||
+                            (socialData
+                                ? '계정 연동에 실패했습니다.'
+                                : '로그인에 실패했습니다.'),
+                    );
                 } else {
-                     alert('처리 중 오류가 발생했습니다.');
+                    alert('처리 중 오류가 발생했습니다.');
                 }
             }
 
-            if (!socialData) { // 소셜 데이터가 없을 때만 초기화 (연동 실패 시 재입력 편의)
+            if (!socialData) {
+                // 소셜 데이터가 없을 때만 초기화 (연동 실패 시 재입력 편의)
                 setEmail('');
                 setPassword('');
             }
