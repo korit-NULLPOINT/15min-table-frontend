@@ -4,6 +4,7 @@ module.exports = {
         input: {
             // 백엔드 Swagger 주소
             target: "http://localhost:8080/v3/api-docs",
+            // 
         },
         output: {
             mode: "tags-split",

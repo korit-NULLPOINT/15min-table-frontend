@@ -147,24 +147,6 @@ export interface ApiRespDtoInteger {
   data?: number;
 }
 
-export interface AiHashtagReqDto {
-  title?: string;
-  intro?: string;
-  ingredients?: string;
-  steps?: string;
-  limit?: number;
-}
-
-export interface AiHashtagRespDto {
-  hashtags?: string[];
-}
-
-export interface ApiRespDtoAiHashtagRespDto {
-  status?: string;
-  message?: string;
-  data?: AiHashtagRespDto;
-}
-
 export interface Role {
   roleId?: number;
   roleName?: string;
@@ -193,9 +175,9 @@ export interface PrincipalUser {
   userRoles?: UserRole[];
   authorities?: GrantedAuthority[];
   enabled?: boolean;
-  accountNonExpired?: boolean;
-  credentialsNonExpired?: boolean;
   accountNonLocked?: boolean;
+  credentialsNonExpired?: boolean;
+  accountNonExpired?: boolean;
 }
 
 export interface ApiRespDtoPrincipalUser {
@@ -221,6 +203,7 @@ export interface NotificationRespDto {
   actorUsername?: string;
   notificationType?: string;
   recipeId?: number;
+  commentId?: number;
   isRead?: number;
   createDt?: string;
 }
