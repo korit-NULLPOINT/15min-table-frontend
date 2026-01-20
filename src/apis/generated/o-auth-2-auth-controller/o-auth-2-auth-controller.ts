@@ -15,7 +15,6 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ApiRespDtoVoid,
   OAuth2MergeReqDto,
   OAuth2SignupReqDto
 } from '../openAPIDefinition.schemas';
@@ -32,7 +31,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type signup1Response200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -110,7 +109,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getSignup1MutationOptions(options), queryClient);
     }
     export type mergeResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     

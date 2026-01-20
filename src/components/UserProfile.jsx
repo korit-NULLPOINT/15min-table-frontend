@@ -36,7 +36,8 @@ export function UserProfile({
     onEditCommunityPost,
     onChangePasswordClick,
 }) {
-    const { principal, login } = usePrincipalState();
+    const principal = usePrincipalState((s) => s.principal);
+    const login = usePrincipalState((s) => s.login);
 
     const [profileData, setProfileData] = useState({
         gender: '',
@@ -471,7 +472,8 @@ export function UserProfile({
                                                 닉네임
                                             </label>
                                             <div className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md bg-[#ebe5db] text-[#3d3226]">
-                                                {profileData.username || '닉네임 없음'}
+                                                {profileData.username ||
+                                                    '닉네임 없음'}
                                             </div>
                                         </div>
 
@@ -729,7 +731,8 @@ export function UserProfile({
                                             )}
                                         </div>
                                         <h2 className="text-2xl text-[#3d3226] mt-4">
-                                            {principal.username || '닉네임 없음'}
+                                            {principal.username ||
+                                                '닉네임 없음'}
                                         </h2>
                                     </div>
 
