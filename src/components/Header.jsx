@@ -11,7 +11,8 @@ import {
     CheckCheck,
 } from 'lucide-react';
 
-import { usePrincipalState } from '../store/usePrincipalState'; // ✅
+import { usePrincipalState } from '../store/usePrincipalState';
+import { useNavigate } from 'react-router-dom';
 
 export function Header({
     onOpenAuth,
@@ -22,6 +23,7 @@ export function Header({
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [showAllNotifications, setShowAllNotifications] = useState(false);
+    const navigate = useNavigate();
 
     // 더미 알림 (나중에 SSE/조회 API로 교체)
     const [notifications, setNotifications] = useState([
@@ -180,6 +182,12 @@ export function Header({
 
     const handleMarkAllAsRead = () => {
         setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
+    };
+
+    const handleLogout = () => {
+        logout();
+        setIsSidebarOpen(false);
+        navigate('/', { replace: true });
     };
 
     return (
@@ -402,10 +410,7 @@ export function Header({
                                 </button>
 
                                 <button
-                                    onClick={() => {
-                                        logout();
-                                        setIsSidebarOpen(false);
-                                    }}
+                                    onClick={handleLogout}
                                     className="w-full px-4 py-3 bg-white border-2 border-red-600 text-red-600 hover:bg-red-600 hover:text-[#f5f1eb] transition-colors rounded-md font-medium"
                                 >
                                     🚪 로그아웃
