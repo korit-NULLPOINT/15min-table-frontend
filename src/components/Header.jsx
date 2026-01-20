@@ -13,6 +13,7 @@ import {
 
 import { usePrincipalState } from '../store/usePrincipalState';
 import { useNavigate } from 'react-router-dom';
+import { dummyNotifications } from '../utils/recipeData';
 
 export function Header({
     onOpenAuth,
@@ -26,112 +27,7 @@ export function Header({
     const navigate = useNavigate();
 
     // 더미 알림 (나중에 SSE/조회 API로 교체)
-    const [notifications, setNotifications] = useState([
-        {
-            id: 1,
-            type: 'follow',
-            userName: '요리왕김치',
-            userImage: '',
-            timestamp: '5분 전',
-            isRead: false,
-        },
-        {
-            id: 2,
-            type: 'post',
-            userName: '자취생24',
-            userImage: '',
-            postTitle: '초간단 김치볶음밥',
-            timestamp: '1시간 전',
-            isRead: false,
-        },
-        {
-            id: 3,
-            type: 'post',
-            userName: '혼밥러버',
-            userImage: '',
-            postTitle: '5분만에 완성하는 덮밥',
-            timestamp: '2시간 전',
-            isRead: false,
-        },
-        {
-            id: 4,
-            type: 'follow',
-            userName: '파스타사랑',
-            userImage: '',
-            timestamp: '3시간 전',
-            isRead: false,
-        },
-        {
-            id: 5,
-            type: 'post',
-            userName: '라면킹',
-            userImage: '',
-            postTitle: '라면 맛있게 끓이는 법',
-            timestamp: '5시간 전',
-            isRead: false,
-        },
-        {
-            id: 6,
-            type: 'post',
-            userName: '냉장고털이',
-            userImage: '',
-            postTitle: '냉장고 파먹기 레시피',
-            timestamp: '6시간 전',
-            isRead: true,
-        },
-        {
-            id: 7,
-            type: 'follow',
-            userName: '자취요정',
-            userImage: '',
-            timestamp: '8시간 전',
-            isRead: true,
-        },
-        {
-            id: 8,
-            type: 'post',
-            userName: '간편식덕후',
-            userImage: '',
-            postTitle: '전자레인지로 5분 요리',
-            timestamp: '10시간 전',
-            isRead: true,
-        },
-        {
-            id: 9,
-            type: 'post',
-            userName: '요리초보',
-            userImage: '',
-            postTitle: '불 없이 요리하기',
-            timestamp: '12시간 전',
-            isRead: true,
-        },
-        {
-            id: 10,
-            type: 'follow',
-            userName: '혼자밥먹자',
-            userImage: '',
-            timestamp: '1일 전',
-            isRead: true,
-        },
-        {
-            id: 11,
-            type: 'post',
-            userName: '김치러버',
-            userImage: '',
-            postTitle: '김치찌개 황금 레시피',
-            timestamp: '1일 전',
-            isRead: true,
-        },
-        {
-            id: 12,
-            type: 'post',
-            userName: '달걀마스터',
-            userImage: '',
-            postTitle: '달걀 요리 10가지',
-            timestamp: '2일 전',
-            isRead: true,
-        },
-    ]);
+    const [notifications, setNotifications] = useState(dummyNotifications);
 
     const notificationRef = useRef(null);
     const unreadCount = notifications.filter((n) => !n.isRead).length;

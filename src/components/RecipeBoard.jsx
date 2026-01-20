@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Search, Filter, Star } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
+import { recipes } from '../utils/recipeData';
 
 export function RecipeBoard({ onNavigate, onRecipeClick }) {
     const [searchQuery, setSearchQuery] = useState('');
@@ -27,90 +28,6 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
         '불 없이 요리',
         '혼밥 / 한 그릇',
         '기타',
-    ];
-
-    // Mock recipe data
-    const recipes = [
-        {
-            id: 1,
-            title: '초간단 김치볶음밥',
-            author: '요리초보',
-            rating: 4.8,
-            views: '15.2K',
-            image: 'https://images.unsplash.com/photo-1626803774007-f92c2c32cbe7?w=400',
-            mainCategory: '밥 / 면',
-            subCategory: '5분 요리',
-        },
-        {
-            id: 2,
-            title: '크림 파스타 레시피',
-            author: '파스타마스터',
-            rating: 4.7,
-            views: '12.8K',
-            image: 'https://images.unsplash.com/photo-1587740907856-997a958a68ac?w=400',
-            mainCategory: '밥 / 면',
-            subCategory: '혼밥 / 한 그릇',
-        },
-        {
-            id: 3,
-            title: '5분만에 완성 덮밥',
-            author: '자취왕',
-            rating: 4.9,
-            views: '10.5K',
-            image: 'https://images.unsplash.com/photo-1763844668895-6931b4e09458?w=400',
-            mainCategory: '밥 / 면',
-            subCategory: '5분 요리',
-        },
-        {
-            id: 4,
-            title: '건강한 샐러드 볼',
-            author: '건강요리',
-            rating: 4.6,
-            views: '9.2K',
-            image: 'https://images.unsplash.com/photo-1515516969-d4008cc6241a?w=400',
-            mainCategory: '채소',
-            subCategory: '불 없이 요리',
-        },
-        {
-            id: 5,
-            title: '아침 토스트 모음',
-            author: '브런치러버',
-            rating: 4.5,
-            views: '8.7K',
-            image: 'https://images.unsplash.com/photo-1689020353604-8041221e1273?w=400',
-            mainCategory: '가공식품',
-            subCategory: '5분 요리',
-        },
-        {
-            id: 6,
-            title: '한그릇 비빔밥',
-            author: '집밥요정',
-            rating: 4.7,
-            views: '7.9K',
-            image: 'https://images.unsplash.com/photo-1628521061262-19b5cdb7eee5?w=400',
-            mainCategory: '밥 / 면',
-            subCategory: '혼밥 / 한 그릇',
-        },
-        {
-            id: 7,
-            title: '라면 업그레이드',
-            author: '라면장인',
-            rating: 4.8,
-            views: '13.5K',
-            image: 'https://images.unsplash.com/photo-1627900440398-5db32dba8db1?w=400',
-            mainCategory: '밥 / 면',
-            subCategory: '전자레인지',
-        },
-        {
-            id: 8,
-            title: '뚝배기 된장찌개',
-            author: '집밥요리사',
-            rating: 5.0,
-            views: '11.2K',
-            image: 'https://images.unsplash.com/photo-1560684352-8497838a2229?w=400',
-            mainCategory: '두부 / 콩류',
-            subCategory: '혼밥 / 한 그릇',
-        },
     ];
 
     const filteredRecipes = recipes.filter((recipe) => {

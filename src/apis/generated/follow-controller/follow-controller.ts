@@ -23,12 +23,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import type {
-  ApiRespDtoFollowStatusRespDto,
-  ApiRespDtoListFollowRespDto,
-  ApiRespDtoVoid
-} from '../openAPIDefinition.schemas';
-
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -41,7 +35,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type followResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -118,7 +112,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getFollowMutationOptions(options), queryClient);
     }
     export type unfollowResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -195,7 +189,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getUnfollowMutationOptions(options), queryClient);
     }
     export type getFollowStatusResponse200 = {
-  data: ApiRespDtoFollowStatusRespDto
+  data: Blob
   status: 200
 }
     
@@ -300,7 +294,7 @@ export function useGetFollowStatus<TData = Awaited<ReturnType<typeof getFollowSt
 
 
 export type getFollowingsResponse200 = {
-  data: ApiRespDtoListFollowRespDto
+  data: Blob
   status: 200
 }
     
@@ -405,7 +399,7 @@ export function useGetFollowings<TData = Awaited<ReturnType<typeof getFollowings
 
 
 export type getFollowersResponse200 = {
-  data: ApiRespDtoListFollowRespDto
+  data: Blob
   status: 200
 }
     

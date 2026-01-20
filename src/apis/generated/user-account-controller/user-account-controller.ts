@@ -24,8 +24,6 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ApiRespDtoPrincipalUser,
-  ApiRespDtoVoid,
   ChangePasswordReqDto,
   ChangeProfileImgReqDto,
   ChangeUsernameReqDto
@@ -43,7 +41,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type withdrawResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -120,7 +118,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getWithdrawMutationOptions(options), queryClient);
     }
     export type changeUsernameResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -198,7 +196,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getChangeUsernameMutationOptions(options), queryClient);
     }
     export type changeProfileImgResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -276,7 +274,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getChangeProfileImgMutationOptions(options), queryClient);
     }
     export type changePasswordResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -354,7 +352,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getChangePasswordMutationOptions(options), queryClient);
     }
     export type getPrincipalResponse200 = {
-  data: ApiRespDtoPrincipalUser
+  data: Blob
   status: 200
 }
     
