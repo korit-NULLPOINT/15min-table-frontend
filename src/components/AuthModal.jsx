@@ -3,8 +3,13 @@ import { useState } from "react";
 import {
     useSignin,
     useSignup,
-} from "../apis/generated/user-auth-controller/user-auth-controller";
-import { getPrincipal } from "../apis/generated/user-account-controller/user-account-controller";
+} from '../apis/generated/user-auth-controller/user-auth-controller';
+import { getPrincipal } from '../apis/generated/user-account-controller/user-account-controller';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import {
+    useMerge,
+    useSignup1,
+} from '../apis/generated/o-auth-2-auth-controller/o-auth-2-auth-controller';
 
 export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }) {
     const { mutateAsync: signupMutate } = useSignup();
@@ -69,13 +74,18 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
                 return;
             }
 
-            const data = {
-                email,
-                password,
-                username
-            }
+            try {
+                if (socialData) {
+                    const data = {
+                        ...baseData,
+                        provider: socialData.provider,
+                        providerUserId: socialData.providerUserId,
+                    };
+                    await signup1Mutate({ data });
+                } else {
+                    await signupMutate({ data: baseData });
+                }
 
-            signupMutate({ data }).then((response) => {
                 alert('회원가입이 완료되었습니다! 로그인해주세요.');
                 if (onModeChange) onModeChange('signin');
 
@@ -84,7 +94,7 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
                 setPassword('');
                 setPasswordConfirm('');
                 setUsername('');
-            }).catch((error) => {
+            } catch (error) {
                 const errorData = error.response?.data;
                 if (errorData) {
                     alert(errorData.message || '회원가입에 실패했습니다.');
@@ -106,41 +116,53 @@ export function AuthModal({ isOpen, onClose, mode, onAuthSuccess, onModeChange }
                 return;
             }
 
-            const data = {
-                email,
-                password,
-            }
+            try {
+                let response;
+                if (socialData) {
+                    // 계정 연동 (Merge)
+                    const data = {
+                        email,
+                        password,
+                        provider: socialData.provider,
+                        providerUserId: socialData.providerUserId,
+                    };
+                    response = await mergeMutate({ data });
+                } else {
+                    // 일반 로그인
+                    const data = { email, password };
+                    console.log(data);
+                    response = await signinMutate({ data });
+                }
 
-            signinMutate({ data }).then((response) => {
-                // response is the body returned by customInstance
-                // Assuming success if we are here (2xx)
-                // If customInstance returns raw data, response.data might be undefined if response IS the data.
-                // Based on authApis.js logic: response.data.status === 'success'
-                // customInstance returns `data` (body).
-                // So now `response` IS the body. 
-                // Checks on `response.status` (field in JSON)
-                if (response.status === 'success') {
+                if (response.status === 'success' || response.status === 200) {
+                    // status check might depend on API response structure, generally checking if we have data/success
+                    // Assuming response.data is the token string based on existing code logic
                     localStorage.setItem('AccessToken', response.data);
 
-                    getPrincipal().then((principalResponse) => {
-                        // principalResponse is also body
-                        console.log('Login successful:', { email: principalResponse.data.email, username: principalResponse.data.username });
-                        if (onAuthSuccess) onAuthSuccess(principalResponse.data.username);
-                        onClose();
-                    });
+                    if (onAuthSuccess) onAuthSuccess();
+                    onClose();
                 } else {
                     alert(response.message || '로그인에 실패했습니다.');
                 }
-            }).catch((error) => {
+            } catch (error) {
                 const errorData = error.response?.data;
                 if (errorData) {
-                    alert(errorData.message || '로그인에 실패했습니다.');
+                    alert(
+                        errorData.message ||
+                            (socialData
+                                ? '계정 연동에 실패했습니다.'
+                                : '로그인에 실패했습니다.'),
+                    );
                 } else {
-                    alert('로그인 중 오류가 발생했습니다.');
+                    alert('처리 중 오류가 발생했습니다.');
                 }
-            });
-            setEmail('');
-            setPassword('');
+            }
+
+            if (!socialData) {
+                // 소셜 데이터가 없을 때만 초기화 (연동 실패 시 재입력 편의)
+                setEmail('');
+                setPassword('');
+            }
             setError('');
         }
     };
