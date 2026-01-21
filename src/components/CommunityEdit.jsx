@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Save, Upload, X } from 'lucide-react';
 
-export function CommunityEdit({ postId, onNavigate, userNickname }) {
+export function CommunityEdit({ postId, onNavigate, username }) {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [images, setImages] = useState([]);
@@ -14,11 +14,12 @@ export function CommunityEdit({ postId, onNavigate, userNickname }) {
         const mockPost = {
             id: postId,
             title: '자취생 필수 조리도구 추천',
-            content: '자취하면서 꼭 필요한 조리도구들을 추천해드립니다. 가성비 좋은 제품들 위주로 골라봤어요!',
+            content:
+                '자취하면서 꼭 필요한 조리도구들을 추천해드립니다. 가성비 좋은 제품들 위주로 골라봤어요!',
             images: [
                 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800',
-                'https://images.unsplash.com/photo-1584990347449-39b4aa02cf92?w=800'
-            ]
+                'https://images.unsplash.com/photo-1584990347449-39b4aa02cf92?w=800',
+            ],
         };
 
         setTitle(mockPost.title);
@@ -30,10 +31,10 @@ export function CommunityEdit({ postId, onNavigate, userNickname }) {
         const files = e.target.files;
         if (files) {
             const fileArray = Array.from(files);
-            fileArray.forEach(file => {
+            fileArray.forEach((file) => {
                 const reader = new FileReader();
                 reader.onloadend = () => {
-                    setImages(prev => [...prev, reader.result]);
+                    setImages((prev) => [...prev, reader.result]);
                 };
                 reader.readAsDataURL(file);
             });
@@ -41,7 +42,7 @@ export function CommunityEdit({ postId, onNavigate, userNickname }) {
     };
 
     const handleRemoveImage = (index) => {
-        setImages(prev => prev.filter((_, i) => i !== index));
+        setImages((prev) => prev.filter((_, i) => i !== index));
     };
 
     const handleSave = () => {
@@ -79,7 +80,9 @@ export function CommunityEdit({ postId, onNavigate, userNickname }) {
                     {/* Header */}
                     <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
                         <h1 className="text-3xl mb-2">커뮤니티 게시글 수정</h1>
-                        <p className="text-[#e5dfd5]">제목, 내용, 사진을 수정할 수 있습니다</p>
+                        <p className="text-[#e5dfd5]">
+                            제목, 내용, 사진을 수정할 수 있습니다
+                        </p>
                     </div>
 
                     {/* Form */}
@@ -97,7 +100,9 @@ export function CommunityEdit({ postId, onNavigate, userNickname }) {
                                 placeholder="게시글 제목을 입력하세요"
                                 maxLength={100}
                             />
-                            <p className="text-sm text-[#6b5d4f] mt-1">{title.length}/100</p>
+                            <p className="text-sm text-[#6b5d4f] mt-1">
+                                {title.length}/100
+                            </p>
                         </div>
 
                         {/* Content */}
@@ -112,7 +117,9 @@ export function CommunityEdit({ postId, onNavigate, userNickname }) {
                                 rows={12}
                                 placeholder="내용을 입력하세요"
                             />
-                            <p className="text-sm text-[#6b5d4f] mt-1">{content.length}자</p>
+                            <p className="text-sm text-[#6b5d4f] mt-1">
+                                {content.length}자
+                            </p>
                         </div>
 
                         {/* Images */}
@@ -142,14 +149,19 @@ export function CommunityEdit({ postId, onNavigate, userNickname }) {
                             {images.length > 0 && (
                                 <div className="mt-4 grid grid-cols-2 gap-4">
                                     {images.map((image, index) => (
-                                        <div key={index} className="relative group">
+                                        <div
+                                            key={index}
+                                            className="relative group"
+                                        >
                                             <img
                                                 src={image}
                                                 alt={`이미지 ${index + 1}`}
                                                 className="w-full h-48 object-cover rounded-md border-2 border-[#d4cbbf]"
                                             />
                                             <button
-                                                onClick={() => handleRemoveImage(index)}
+                                                onClick={() =>
+                                                    handleRemoveImage(index)
+                                                }
                                                 className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                                             >
                                                 <X size={16} />
