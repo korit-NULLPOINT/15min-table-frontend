@@ -8,7 +8,6 @@ import {
     FileText,
     MessageSquare,
     Bookmark,
-    LogOut,
     UserX,
     Trash2,
     Users,
@@ -33,7 +32,6 @@ export function UserProfile({
     onFollowersClick,
     onFollowingClick,
     onCommunityPostClick,
-    onEditCommunityPost,
     onChangePasswordClick,
 }) {
     const { principal, login } = usePrincipalState();
@@ -398,24 +396,6 @@ export function UserProfile({
                                     </div>
                                 )}
                             </div>
-
-                            {/* Logout and Delete Account Buttons */}
-                            <div className="mt-8 space-y-3">
-                                <button
-                                    onClick={onChangePasswordClick}
-                                    className="w-full py-3 border-2 border-[#3d3226] text-[#3d3226] rounded-md hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <RotateCcwKey size={20} />
-                                    비밀번호 변경
-                                </button>
-                                <button
-                                    onClick={() => setShowDeleteConfirm(true)}
-                                    className="w-full py-3 border-2 border-red-600 text-red-600 rounded-md hover:bg-red-600 hover:text-white transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <UserX size={20} />
-                                    회원 탈퇴
-                                </button>
-                            </div>
                         </div>
                     )}
 
@@ -471,7 +451,8 @@ export function UserProfile({
                                                 닉네임
                                             </label>
                                             <div className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md bg-[#ebe5db] text-[#3d3226]">
-                                                {profileData.username || '닉네임 없음'}
+                                                {profileData.username ||
+                                                    '닉네임 없음'}
                                             </div>
                                         </div>
 
@@ -729,7 +710,8 @@ export function UserProfile({
                                             )}
                                         </div>
                                         <h2 className="text-2xl text-[#3d3226] mt-4">
-                                            {principal.username || '닉네임 없음'}
+                                            {principal.username ||
+                                                '닉네임 없음'}
                                         </h2>
                                     </div>
 

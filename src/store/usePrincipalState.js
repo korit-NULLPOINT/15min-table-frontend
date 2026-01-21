@@ -20,30 +20,39 @@ export const usePrincipalState = create((set, get) => ({
             return null;
         }
 
-        // 중복 호출 방지(선택)
         if (get().loading) return get().principal;
 
         try {
             set({ loading: true });
 
-            // ✅ orval(customInstance) 응답: { data: ApiRespDto<Principal>, status: number, headers: Headers }
             const response = await getPrincipal();
-
             const httpStatus = response?.status;
-            const body = response?.data; // ApiRespDto
-            const user = body?.data ?? null; // 실제 principal
+            const body = response?.data;
+            const user = body?.data ?? null;
 
             if ((httpStatus === 200 || body?.status === 'success') && user) {
-                set({ isLoggedIn: true, principal: user, loading: false });
+                const roles = user.userRoles ?? [];
+
+                const verifiedUser = roles.some(
+                    (ur) => Number(ur.roleId) === 2,
+                );
+
+                set({
+                    isLoggedIn: true,
+                    principal: {
+                        ...user,
+                        verifiedUser,
+                    },
+                    loading: false,
+                });
+
                 return user;
             }
 
-            // success가 아니거나 user가 없으면 로그아웃 처리
             localStorage.removeItem('AccessToken');
             set({ isLoggedIn: false, principal: null, loading: false });
             return null;
-        } catch (error) {
-            // 토큰 만료/위조/권한 문제면 정리
+        } catch (e) {
             localStorage.removeItem('AccessToken');
             set({ isLoggedIn: false, principal: null, loading: false });
             return null;
