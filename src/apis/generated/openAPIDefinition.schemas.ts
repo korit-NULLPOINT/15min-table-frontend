@@ -174,10 +174,10 @@ export interface PrincipalUser {
   status?: string;
   userRoles?: UserRole[];
   authorities?: GrantedAuthority[];
-  enabled?: boolean;
-  credentialsNonExpired?: boolean;
   accountNonExpired?: boolean;
+  credentialsNonExpired?: boolean;
   accountNonLocked?: boolean;
+  enabled?: boolean;
 }
 
 export interface ApiRespDtoPrincipalUser {

@@ -24,7 +24,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AddCommentReqDto
+  AddCommentReqDto,
+  ApiRespDtoComment,
+  ApiRespDtoListCommentRespDto,
+  ApiRespDtoVoid
 } from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
@@ -39,7 +42,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type deleteCommentResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -116,7 +119,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getDeleteCommentMutationOptions(options), queryClient);
     }
     export type addCommentResponse200 = {
-  data: Blob
+  data: ApiRespDtoComment
   status: 200
 }
     
@@ -194,7 +197,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getAddCommentMutationOptions(options), queryClient);
     }
     export type getMyCommentListResponse200 = {
-  data: Blob
+  data: ApiRespDtoListCommentRespDto
   status: 200
 }
     
@@ -299,7 +302,7 @@ export function useGetMyCommentList<TData = Awaited<ReturnType<typeof getMyComme
 
 
 export type getCommentListByRecipeIdResponse200 = {
-  data: Blob
+  data: ApiRespDtoListCommentRespDto
   status: 200
 }
     

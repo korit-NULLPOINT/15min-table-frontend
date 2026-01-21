@@ -1,23 +1,57 @@
 import {
     ArrowLeft,
-    Clock,
     User as UserIcon,
     Star,
     Share2,
     Bookmark,
     Sparkles,
 } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import AiStoreMapPage from '../pages/boards/recipe/recipe-detail-page/AiStoreMapPage';
 import RecipeCommentPage from '../pages/boards/recipe/recipe-detail-page/RecipeCommentPage';
 import RecipeRatingPage from '../pages/boards/recipe/recipe-detail-page/RecipeRatingPage';
+
 import {
     useExistsByRecipeId,
     useAddBookmark,
     useDeleteBookmark,
 } from '../apis/generated/bookmark-controller/bookmark-controller';
+
+function safeJsonArray(value, fallback = []) {
+    if (Array.isArray(value)) return value;
+    if (typeof value !== 'string') return fallback;
+    try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : fallback;
+    } catch {
+        return fallback;
+    }
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMS = now - date;
+    const diffMins = Math.floor(diffMS / (1000 * 60));
+    const diffHours = Math.floor(diffMS / (1000 * 60 * 60));
+
+    if (diffMins >= 0 && diffMins < 60) return `${diffMins}분 전`;
+    if (diffHours >= 0 && diffHours < 12) return `${diffHours}시간 전`;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHour = String(hours % 12 || 12).padStart(2, '0');
+
+    return `${year}.${month}.${day} ${formattedHour}:${minutes} (${ampm})`;
+}
 
 export function RecipeDetail({
     recipeDetail,
@@ -28,20 +62,66 @@ export function RecipeDetail({
     onAuthorClick,
     comments,
 }) {
+    // ✅ recipeDetail 없으면 렌더 방지 (Page에서 이미 방어해도 안전하게)
+    if (!recipeDetail) return null;
+
+    // --- rating state (RecipeRatingPage에서 변화량만 반영) ---
     const [totalRatings, setTotalRatings] = useState(
         recipeDetail.ratingCount || 0,
-    ); // 총 평가 수
+    );
     const [ratingSum, setRatingSum] = useState(
         (recipeDetail.ratingCount || 0) * (recipeDetail.avgRating || 0),
-    ); // 총 별점 합계
-    // Ref for AI Store Map
-    const mapRef = useRef();
+    );
+
+    const averageRating =
+        totalRatings > 0 ? (ratingSum / totalRatings).toFixed(1) : '0.0';
+
+    const handleStatsChange = (deltaTotal, deltaSum) => {
+        setTotalRatings((prev) => prev + deltaTotal);
+        setRatingSum((prev) => prev + deltaSum);
+    };
+
+    // --- map ref (카카오맵 기능은 AiStoreMapPage에서 유지) ---
+    const mapRef = useRef(null);
+
+    const handleAIStoreMap = () => {
+        if (mapRef.current && typeof mapRef.current.handleAIStoreMap === 'function') {
+            mapRef.current.handleAIStoreMap();
+            return;
+        }
+        // ref 메서드가 없을 때도 사용자 경험은 유지
+        alert('지도 기능을 불러오지 못했습니다. (AiStoreMapPage ref 확인 필요)');
+    };
+
+    // --- ingredient modal ---
     const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
 
-    // React Query Client for invalidation
+    const ingredientsArr = useMemo(() => {
+        // 서버가 JSON 문자열로 주는 케이스 대응
+        return safeJsonArray(recipeDetail.ingredients, []);
+    }, [recipeDetail.ingredients]);
+
+    const ingredientImgSrc = useMemo(() => {
+        // 서버 필드 우선, 없으면 seed로 대체
+        if (recipeDetail?.ingredientImgUrl) return recipeDetail.ingredientImgUrl;
+
+        const str =
+            typeof recipeDetail?.ingredients === 'string'
+                ? recipeDetail.ingredients
+                : JSON.stringify(recipeDetail?.ingredients ?? 'default');
+
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash |= 0;
+        }
+        return `https://picsum.photos/seed/${Math.abs(hash)}/500`;
+    }, [recipeDetail?.ingredientImgUrl, recipeDetail?.ingredients]);
+
+    // --- bookmark hooks ---
     const queryClient = useQueryClient();
 
-    // Bookmark Hooks
     const { data: bookmarkData } = useExistsByRecipeId(recipeDetail.recipeId, {
         query: {
             enabled: !!isLoggedIn && !!recipeDetail.recipeId,
@@ -53,30 +133,14 @@ export function RecipeDetail({
     const { mutate: addBookmark } = useAddBookmark();
     const { mutate: deleteBookmark } = useDeleteBookmark();
 
-    // Calculate ingredient image source once
-    const ingredientImgSrc =
-        recipeDetail?.ingredientImgUrl ||
-        `https://picsum.photos/seed/${(() => {
-            const str = recipeDetail?.ingredients || 'default';
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash = (hash << 5) - hash + char;
-                hash |= 0;
-            }
-            return Math.abs(hash);
-        })()}/500`; // Increased resolution for modal
-
-    // console.log(recipeDetail);
-    // console.log(comments);
-
     const handleBookmarkClick = () => {
         if (!isLoggedIn) {
-            if (onOpenAuth) onOpenAuth();
+            onOpenAuth?.();
             return;
         }
 
         const recipeId = recipeDetail.recipeId;
+        if (!recipeId) return;
 
         if (isBookmarked) {
             deleteBookmark(
@@ -121,59 +185,33 @@ export function RecipeDetail({
         }
     };
 
-    const handleStatsChange = (deltaTotal, deltaSum) => {
-        setTotalRatings((prev) => prev + deltaTotal);
-        setRatingSum((prev) => prev + deltaSum);
-    };
+    const mockHashtags = useMemo(() => {
+        return recipeDetail.hashtags || [
+            '15분요리',
+            '간단레시피',
+            '자취생필수',
+            '초간단',
+        ];
+    }, [recipeDetail.hashtags]);
 
-    const averageRating =
-        totalRatings > 0 ? (ratingSum / totalRatings).toFixed(1) : '0.0';
-
-    const mockHashtags = recipeDetail.hashtags || [
-        '15분요리',
-        '간단레시피',
-        '자취생필수',
-        '초간단',
-    ];
-
-    const handleAIStoreMap = () => {
-        if (mapRef.current) {
-            mapRef.current.handleAIStoreMap();
+    // onNavigate가 (type) 형태로 쓰이기도 하고, 단순 함수로 쓰이기도 해서 안전하게
+    const handleBack = () => {
+        if (typeof onNavigate === 'function') {
+            // page에서 onNavigate={() => navigate(...)} 형태면 인자 무시됨
+            onNavigate('home');
+            return;
         }
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMS = now - date;
-        const diffMins = Math.floor(diffMS / (1000 * 60));
-        const diffHours = Math.floor(diffMS / (1000 * 60 * 60));
-
-        if (diffMins < 60) {
-            return `${diffMins}분 전`;
-        }
-        if (diffHours < 12) {
-            return `${diffHours}시간 전`;
-        }
-
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = date.getHours();
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const formattedHour = String(hours % 12 || 12).padStart(2, '0');
-
-        return `${year}.${month}.${day} ${formattedHour}:${minutes} (${ampm})`;
-    };
+    const authorName = recipeDetail.username || recipeDetail.author || '';
+    const authorUserId = recipeDetail.userId;
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
             <div className="max-w-5xl mx-auto px-6 py-12">
                 {/* Back Button */}
                 <button
-                    onClick={() => onNavigate('home')}
+                    onClick={handleBack}
                     className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                 >
                     <ArrowLeft size={20} />
@@ -186,7 +224,7 @@ export function RecipeDetail({
                         <ImageWithFallback
                             src={
                                 recipeDetail.thumbnailImgUrl ||
-                                `https://picsum.photos/seed/${recipeDetail.recipeId}/500`
+                                `https://picsum.photos/seed/${recipeDetail.recipeId}/800`
                             }
                             alt={recipeDetail.title}
                             className="w-full h-full object-cover"
@@ -195,18 +233,18 @@ export function RecipeDetail({
 
                     <div className="p-8">
                         <div className="flex justify-between items-start mb-2">
-                            <div>
+                            <div className="w-full">
                                 <h1 className="text-4xl mb-4 text-[#3d3226]">
                                     {recipeDetail.title}
                                 </h1>
 
                                 {/* Meta Info */}
-                                <div className="flex items-center gap-6 text-[#6b5d4f] mt-4">
+                                <div className="flex flex-wrap items-center gap-6 text-[#6b5d4f] mt-4">
                                     <div className="flex items-center gap-2">
                                         {recipeDetail.profileImgUrl ? (
                                             <img
                                                 src={recipeDetail.profileImgUrl}
-                                                alt={recipeDetail.username}
+                                                alt={authorName}
                                                 className="w-10 h-10 rounded-full object-cover border border-[#d4cbbf]"
                                             />
                                         ) : (
@@ -217,21 +255,21 @@ export function RecipeDetail({
                                                 />
                                             </div>
                                         )}
+
                                         <span
                                             className="cursor-pointer hover:underline"
                                             onClick={() => {
-                                                const authorId =
-                                                    recipeDetail.userId;
-                                                if (!authorId) return;
+                                                if (!authorUserId) return;
                                                 onAuthorClick?.(
-                                                    authorId,
-                                                    recipeDetail.userId,
+                                                    authorUserId,
+                                                    authorName,
                                                 );
                                             }}
                                         >
-                                            {recipeDetail.username}
+                                            {authorName}
                                         </span>
                                     </div>
+
                                     <div className="flex items-center gap-2">
                                         <Star
                                             size={18}
@@ -245,16 +283,17 @@ export function RecipeDetail({
                                             ({totalRatings}명)
                                         </span>
                                     </div>
+
                                     <div className="flex items-center gap-2">
-                                        <span>
-                                            조회수 {recipeDetail.viewCount}
-                                        </span>
-                                        <span className="w-1 h-1 bg-[#d4cbbf] rounded-full"></span>
+                                        <span>조회수 {recipeDetail.viewCount}</span>
+                                        <span className="w-1 h-1 bg-[#d4cbbf] rounded-full" />
                                         <span>
                                             {recipeDetail.updateDt &&
                                             recipeDetail.updateDt !==
                                                 recipeDetail.createDt
-                                                ? `${formatDate(recipeDetail.updateDt)} (수정됨)`
+                                                ? `${formatDate(
+                                                      recipeDetail.updateDt,
+                                                  )} (수정됨)`
                                                 : formatDate(
                                                       recipeDetail.createDt,
                                                   )}
@@ -264,7 +303,7 @@ export function RecipeDetail({
                             </div>
                         </div>
 
-                        {/* Rating Section */}
+                        {/* Rating Section (컴포넌트 유지) */}
                         <div className="mb-6">
                             <RecipeRatingPage
                                 recipeId={recipeDetail.recipeId}
@@ -272,6 +311,7 @@ export function RecipeDetail({
                                 onOpenAuth={onOpenAuth}
                                 onStatsChange={handleStatsChange}
                             >
+                                {/* Action Buttons */}
                                 <div className="flex gap-3">
                                     <button
                                         onClick={handleBookmarkClick}
@@ -291,6 +331,7 @@ export function RecipeDetail({
                                         />
                                         {isBookmarked ? '저장됨' : '저장하기'}
                                     </button>
+
                                     <button
                                         onClick={handleShareClick}
                                         className="flex items-center justify-center gap-2 w-[140px] py-3 rounded-md border-2 border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226] transition-colors"
@@ -313,20 +354,20 @@ export function RecipeDetail({
                 <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8 mb-8">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-2xl text-[#3d3226]">재료</h2>
+
                         <button
                             onClick={handleAIStoreMap}
                             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md"
                         >
-                            <Sparkles size={16} />내 근처 재료 찾기
+                            <Sparkles size={16} />
+                            내 근처 재료 찾기
                         </button>
                     </div>
+
                     <div className="flex justify-between gap-4">
-                        <div className="flex">
-                            <div className="w-[20px] flex-shrink-0"></div>
-                            <ul className="space-y-3 mb-6">
-                                {JSON.parse(
-                                    recipeDetail.ingredients || '[]',
-                                ).map((ingredient, index) => (
+                        <div className="flex-1">
+                            <ul className="space-y-3">
+                                {ingredientsArr.map((ingredient, index) => (
                                     <li
                                         key={index}
                                         className="flex items-center gap-3 text-[#6b5d4f]"
@@ -339,22 +380,28 @@ export function RecipeDetail({
                                 ))}
                             </ul>
                         </div>
-                        <div className="flex items-center justify-between mb-6">
+
+                        <div className="flex items-start justify-end">
                             <img
                                 src={ingredientImgSrc}
                                 alt="Ingredients"
                                 style={{
-                                    width: `${Math.max(80, JSON.parse(recipeDetail.ingredients || '[]').length * 40)}px`,
-                                    height: `${Math.max(80, JSON.parse(recipeDetail.ingredients || '[]').length * 40)}px`,
+                                    width: `${Math.max(
+                                        120,
+                                        ingredientsArr.length * 40,
+                                    )}px`,
+                                    height: `${Math.max(
+                                        120,
+                                        ingredientsArr.length * 40,
+                                    )}px`,
                                 }}
                                 className="rounded-full object-cover border-2 border-[#d4cbbf] shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
                                 onClick={() => setIsIngredientModalOpen(true)}
                             />
-                            <div className="w-10 flex-shrink-0"></div>
                         </div>
                     </div>
 
-                    {/* AI Store Map Component */}
+                    {/* ✅ 카카오맵 기능은 이 컴포넌트에서 유지 */}
                     <AiStoreMapPage ref={mapRef} />
                 </div>
 
@@ -364,6 +411,7 @@ export function RecipeDetail({
                     <div className="space-y-6">
                         {(recipeDetail.steps || '')
                             .split('\n')
+                            .filter(Boolean)
                             .map((step, index) => (
                                 <div key={index} className="flex gap-4">
                                     <div className="flex-shrink-0 w-10 h-10 bg-[#3d3226] text-[#f5f1eb] rounded-full flex items-center justify-center font-bold">
@@ -380,7 +428,7 @@ export function RecipeDetail({
                 </div>
 
                 {/* Hashtags */}
-                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8">
+                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8 mt-8">
                     <h2 className="text-2xl mb-4 text-[#3d3226]">해시태그</h2>
                     <div className="flex flex-wrap gap-3">
                         {mockHashtags.map((tag) => (
@@ -394,15 +442,16 @@ export function RecipeDetail({
                     </div>
                 </div>
 
-                {/* Comments Component */}
+                {/* Comments Component (API 댓글 유지) */}
                 <RecipeCommentPage
-                    comments={comments}
+                    comments={comments ?? []}
                     isLoggedIn={isLoggedIn}
                     onOpenAuth={onOpenAuth}
                     currentUsername={currentUsername}
                     onNavigate={onNavigate}
                     recipeDetail={recipeDetail}
                 />
+
                 {/* Ingredient Image Modal */}
                 {isIngredientModalOpen && (
                     <div
@@ -416,6 +465,7 @@ export function RecipeDetail({
                             >
                                 <span className="text-2xl">&times;</span>
                             </button>
+
                             <img
                                 src={ingredientImgSrc}
                                 alt="Ingredients Large"
