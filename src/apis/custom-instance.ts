@@ -3,7 +3,7 @@ import Axios, { type AxiosRequestConfig } from "axios";
 
 // 1) Axios 인스턴스
 export const AXIOS_INSTANCE = Axios.create({
-    baseURL: "http://localhost:8080",
+    baseURL: "",
 });
 
 // 2) 토큰 주입

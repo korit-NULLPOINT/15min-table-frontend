@@ -33,8 +33,8 @@ export default function RootLayout() {
         if (pageKey === 'home') navigate('/');
         if (pageKey === 'board') navigate('/boards/1/recipe');
         if (pageKey === 'community') navigate('/boards/2/free');
-        if (pageKey === 'profile') navigate('/me'); // 추후
-        if (pageKey === 'write') navigate('/boards/1/recipe/write'); // (선택) 헤더에 글쓰기 버튼 있으면
+        if (pageKey === 'profile') navigate('/me');
+        if (pageKey === 'write') navigate('/boards/1/recipe/write');
     };
 
     const username = principal?.username || principal?.nickname || '';
@@ -50,7 +50,6 @@ export default function RootLayout() {
                 onNotificationClick={() => {}}
                 onLogout={handleLogout}
             />
-
             <Outlet />
 
             <AuthModal
