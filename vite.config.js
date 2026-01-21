@@ -8,49 +8,49 @@ export default defineConfig({
     server: {
         proxy: {
             // 백엔드로 프록시할 경로들
-            '/user': {
+            '/user/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '/mail': {
+            '/mail/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '/oauth2': {
+            '/oauth2/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '/login': {
+            '/login/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '/board': {
+            '/board/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '/comment': {
+            '/comment/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '/bookmark': {
+            '/bookmark/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '/rating': {
+            '/rating/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '/recipe-hashtag': {
+            '/recipe-hashtag/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-            '/follow': {
+            '/follow/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
 
             // ✅ SSE 포함 알림
-            '/notifications': {
+            '/notifications/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },

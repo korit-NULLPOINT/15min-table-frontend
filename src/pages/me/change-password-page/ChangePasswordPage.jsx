@@ -18,8 +18,10 @@ function ChangePasswordPage({ onClose }) {
     const isPasswordMismatch =
         newPasswordConfirm.length > 0 && newPassword !== newPasswordConfirm;
 
-    const principal = usePrincipalState((s) => s.principal);
-    const logout = usePrincipalState((s) => s.logout);
+    // const principal = usePrincipalState((s) => s.principal);
+    // const logout = usePrincipalState((s) => s.logout);
+
+    const { principal, logout } = usePrincipalState();
 
     const handleSubmit = async (e) => {
         e?.preventDefault?.();

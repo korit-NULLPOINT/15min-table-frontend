@@ -1,14 +1,14 @@
 // src/apis/custom-instance.ts
-import Axios, { type AxiosRequestConfig } from "axios";
+import Axios, { type AxiosRequestConfig } from 'axios';
 
 // 1) Axios 인스턴스
 export const AXIOS_INSTANCE = Axios.create({
-    baseURL: "",
+    baseURL: '',
 });
 
 // 2) 토큰 주입
 AXIOS_INSTANCE.interceptors.request.use((config) => {
-    const token = localStorage.getItem("AccessToken");
+    const token = localStorage.getItem('AccessToken');
     if (token) {
         config.headers = config.headers ?? {};
         (config.headers as any).Authorization = `Bearer ${token}`;
@@ -33,10 +33,10 @@ export const customInstance = async <T>(
     // axios cancel token(하위호환)
     const source = Axios.CancelToken.source();
     if (signal) {
-        if (signal.aborted) source.cancel("Query was cancelled");
+        if (signal.aborted) source.cancel('Query was cancelled');
         else
-            signal.addEventListener("abort", () =>
-                source.cancel("Query was cancelled"),
+            signal.addEventListener('abort', () =>
+                source.cancel('Query was cancelled'),
             );
     }
 
@@ -52,7 +52,7 @@ export const customInstance = async <T>(
 
     const axiosConfig: AxiosRequestConfig = {
         url,
-        method: (options.method ?? "GET") as any,
+        method: (options.method ?? 'GET') as any,
         headers,
         data: (options as any).body ?? (options as any).data,
         cancelToken: source.token,
