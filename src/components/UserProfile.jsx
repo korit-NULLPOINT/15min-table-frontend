@@ -34,7 +34,8 @@ export function UserProfile({
     onCommunityPostClick,
     onChangePasswordClick,
 }) {
-    const { principal, login } = usePrincipalState();
+    const principal = usePrincipalState((s) => s.principal);
+    const login = usePrincipalState((s) => s.login);
 
     const [profileData, setProfileData] = useState({
         gender: '',

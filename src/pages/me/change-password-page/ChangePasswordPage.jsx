@@ -13,6 +13,11 @@ function ChangePasswordPage({ onClose }) {
     const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
     const [error, setError] = useState('');
 
+    const isPasswordMatch =
+        newPassword.length > 0 && newPassword === newPasswordConfirm;
+    const isPasswordMismatch =
+        newPasswordConfirm.length > 0 && newPassword !== newPasswordConfirm;
+
     const principal = usePrincipalState((s) => s.principal);
     const logout = usePrincipalState((s) => s.logout);
 
@@ -144,8 +149,14 @@ function ChangePasswordPage({ onClose }) {
                                 setNewPasswordConfirm(e.target.value);
                                 setError('');
                             }}
-                            className={`w-full px-2 py-2 border-2 rounded-md focus:border-[#3d3226] focus:outline-none bg-white ${
-                                error ? 'border-red-500' : 'border-[#d4cbbf]'
+                            className={`w-full px-2 py-2 border-2 rounded-md focus:outline-none bg-white ${
+                                error
+                                    ? 'border-red-500'
+                                    : isPasswordMatch
+                                      ? 'border-green-500 focus:border-green-500'
+                                      : isPasswordMismatch
+                                        ? 'border-red-500 focus:border-red-500'
+                                        : 'border-[#d4cbbf] focus:border-[#3d3226]'
                             }`}
                             placeholder="••••••••"
                             required

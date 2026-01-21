@@ -25,10 +25,6 @@ import type {
 
 import type {
   AddRecipeReqDto,
-  ApiRespDtoInteger,
-  ApiRespDtoRecipeDetailRespDto,
-  ApiRespDtoRecipeListPageRespDto,
-  ApiRespDtoVoid,
   GetRecipeListParams,
   ModifyRecipeReqDto
 } from '../openAPIDefinition.schemas';
@@ -45,7 +41,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type modifyRecipeResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -126,7 +122,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getModifyRecipeMutationOptions(options), queryClient);
     }
     export type addRecipeResponse200 = {
-  data: ApiRespDtoInteger
+  data: Blob
   status: 200
 }
     
@@ -205,7 +201,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getAddRecipeMutationOptions(options), queryClient);
     }
     export type getRecipeListResponse200 = {
-  data: ApiRespDtoRecipeListPageRespDto
+  data: Blob
   status: 200
 }
     
@@ -325,7 +321,7 @@ export function useGetRecipeList<TData = Awaited<ReturnType<typeof getRecipeList
 
 
 export type getRecipeDetailResponse200 = {
-  data: ApiRespDtoRecipeDetailRespDto
+  data: Blob
   status: 200
 }
     
@@ -438,7 +434,7 @@ export function useGetRecipeDetail<TData = Awaited<ReturnType<typeof getRecipeDe
 
 
 export type removeRecipeResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     

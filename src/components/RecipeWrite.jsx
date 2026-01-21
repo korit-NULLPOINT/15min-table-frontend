@@ -1,18 +1,46 @@
-import { useState, useRef } from 'react';
-import { ArrowLeft, Upload, Plus, X, Sparkles, Mail } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import {
+    ArrowLeft,
+    Upload,
+    Plus,
+    X,
+    Sparkles,
+    Mail,
+    Filter,
+} from 'lucide-react';
+import { usePrincipalState } from '../store/usePrincipalState';
+import { useAddRecipe } from '../apis/generated/recipe-controller/recipe-controller';
+import { mainCategory, subCategory } from '../utils/categoryData';
 
 export function RecipeWrite({ onNavigate }) {
+    const [showEmailWarning, setShowEmailWarning] = useState(false);
+    const principal = usePrincipalState((s) => s.principal);
+    const logout = usePrincipalState((s) => s.logout);
+
+    const { mutateAsync: addRecipeMutate } = useAddRecipe();
+
     const [title, setTitle] = useState('');
-    const [completedImage, setCompletedImage] = useState('');
-    const [ingredientsImage, setIngredientsImage] = useState('');
+    const [selectedMainCategoryId, setSelectedMainCategoryId] = useState('');
+    const [selectedSubCategoryId, setSelectedSubCategoryId] = useState('');
+    const [thumbnailImgUrl, setThumbnailImgUrl] = useState('');
+    const [ingredientImgUrl, setIngredientImgUrl] = useState('');
+    const thumbnailImgUrlRef = useRef('');
+    const ingredientImgUrlRef = useRef('');
     const [ingredients, setIngredients] = useState(['']);
-    const [cookingMethod, setCookingMethod] = useState('');
+    const [steps, setSteps] = useState(['']);
+    const [intro, setIntro] = useState('');
+
     const [hashtags, setHashtags] = useState([]);
     const [newHashtag, setNewHashtag] = useState('');
-    const [showEmailWarning, setShowEmailWarning] = useState(false);
 
-    const completedImageRef = useRef(null);
-    const ingredientsImageRef = useRef(null);
+    // const completedImageRef = useRef(null);
+    // const [completedImage, setCompletedImage] = useState('');
+    // const [cookingMethod, setCookingMethod] = useState('');
+
+    // useEffect(() => {
+    //     console.log('mainCategory : ', selectedMainCategoryId);
+    //     console.log('subCategory : ', selectedSubCategoryId);
+    // }, [selectedMainCategoryId, selectedSubCategoryId]);
 
     const handleImageUpload = (e, type) => {
         const file = e.target.files?.[0];
@@ -21,9 +49,9 @@ export function RecipeWrite({ onNavigate }) {
             reader.onloadend = () => {
                 const imageData = reader.result;
                 if (type === 'completed') {
-                    setCompletedImage(imageData);
+                    setThumbnailImgUrl(imageData);
                 } else {
-                    setIngredientsImage(imageData);
+                    setIngredientImgUrl(imageData);
                 }
             };
             reader.readAsDataURL(file);
@@ -71,31 +99,46 @@ export function RecipeWrite({ onNavigate }) {
         setHashtags(hashtags.filter((t) => t !== tag));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // Check email verification
-        const userProfile = localStorage.getItem('userProfile');
-        if (userProfile) {
-            const profile = JSON.parse(userProfile);
-            if (!profile.emailVerified) {
-                setShowEmailWarning(true);
-                return;
+
+        if (!principal) {
+            alert('잘못된 접근 입니다.');
+            return;
+        }
+
+        let minId = Infinity;
+        for (const r of principal.userRoles) {
+            if (r.roleId < minId) {
+                minId = r.roleId;
             }
-        } else {
+        }
+        console.log(minId);
+        if (minId >= 3) {
             setShowEmailWarning(true);
             return;
         }
 
-        // TODO: Implement recipe submission
-        console.log({
+        const addRecipeData = {
+            mainCategoryId: selectedMainCategoryId,
+            subCategoryId: selectedSubCategoryId,
             title,
-            completedImage,
-            ingredientsImage,
-            ingredients: ingredients.filter((i) => i.trim()),
-            cookingMethod,
-            hashtags,
-        });
-        alert('레시피가 등록되었습니다!');
-        onNavigate('home');
+            intro,
+            thumbnailImgUrl,
+            ingredients: JSON.stringify(ingredients),
+            ingredientImgUrl,
+            steps,
+        };
+        // TODO: Implement recipe submission
+        console.log(addRecipeData);
+        try {
+            await addRecipeMutate({ boardId: 1, data: addRecipeData });
+            alert('레시피가 등록되었습니다!');
+            onNavigate('/boards/1/recipe/');
+        } catch (error) {
+            console.error('레시피 등록 실패:', error);
+            alert('레시피 등록 중 오류가 발생했습니다.');
+        }
     };
 
     const handleGoToProfile = () => {
@@ -139,32 +182,122 @@ export function RecipeWrite({ onNavigate }) {
                             />
                         </div>
 
+                        {/* Category Filters */}
+                        <div className="p-6 border-b-2 border-[#e5dfd5]">
+                            <div className="mb-6">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Filter
+                                        size={18}
+                                        className="text-[#3d3226]"
+                                    />
+                                    <h3 className="text-sm uppercase tracking-wider text-[#6b5d4f]">
+                                        메인 카테고리
+                                    </h3>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {Object.entries(mainCategory).map(
+                                        ([id, label]) => (
+                                            <button
+                                                key={id}
+                                                onClick={() => {
+                                                    // 같은 카테고리를 다시 클릭하면 선택 취소
+                                                    if (
+                                                        selectedMainCategoryId ===
+                                                        id
+                                                    ) {
+                                                        setSelectedMainCategoryId(
+                                                            '',
+                                                        );
+                                                    } else {
+                                                        setSelectedMainCategoryId(
+                                                            id,
+                                                        );
+                                                    }
+                                                }}
+                                                className={`px-4 py-2 rounded-md border-2 transition-colors ${
+                                                    selectedMainCategoryId ===
+                                                    id
+                                                        ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                        : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                                }`}
+                                            >
+                                                {label}
+                                            </button>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Filter
+                                        size={18}
+                                        className="text-[#3d3226]"
+                                    />
+                                    <h3 className="text-sm uppercase tracking-wider text-[#6b5d4f]">
+                                        부 카테고리
+                                    </h3>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {Object.entries(subCategory).map(
+                                        ([id, label]) => (
+                                            <button
+                                                key={label}
+                                                onClick={() => {
+                                                    // 같은 카테고리를 다시 클릭하면 선택 취소
+                                                    if (
+                                                        selectedSubCategoryId ===
+                                                        id
+                                                    ) {
+                                                        setSelectedSubCategoryId(
+                                                            '',
+                                                        );
+                                                    } else {
+                                                        setSelectedSubCategoryId(
+                                                            id,
+                                                        );
+                                                    }
+                                                }}
+                                                className={`px-4 py-2 rounded-md border-2 transition-colors ${
+                                                    selectedSubCategoryId === id
+                                                        ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                        : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                                }`}
+                                            >
+                                                {label}
+                                            </button>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Completed Image */}
                         <div>
                             <label className="block text-sm mb-2 text-[#3d3226]">
                                 완성 사진 (썸네일)
                             </label>
                             <div className="flex gap-4">
-                                {completedImage && (
+                                {thumbnailImgUrl && (
                                     <img
-                                        src={completedImage}
+                                        src={thumbnailImgUrl}
                                         alt="완성"
                                         className="w-32 h-32 object-cover rounded-md"
                                     />
                                 )}
                                 <button
                                     onClick={() =>
-                                        completedImageRef.current?.click()
+                                        thumbnailImgUrlRef.current?.click()
                                     }
                                     className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors"
                                 >
                                     <Upload size={20} />
-                                    {completedImage
+                                    {thumbnailImgUrl
                                         ? '사진 변경'
                                         : '사진 업로드'}
                                 </button>
                                 <input
-                                    ref={completedImageRef}
+                                    ref={thumbnailImgUrlRef}
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) =>
@@ -181,26 +314,26 @@ export function RecipeWrite({ onNavigate }) {
                                 재료 전체 사진
                             </label>
                             <div className="flex gap-4">
-                                {ingredientsImage && (
+                                {ingredientImgUrl && (
                                     <img
-                                        src={ingredientsImage}
+                                        src={ingredientImgUrl}
                                         alt="재료"
                                         className="w-32 h-32 object-cover rounded-md"
                                     />
                                 )}
                                 <button
                                     onClick={() =>
-                                        ingredientsImageRef.current?.click()
+                                        ingredientImgUrlRef.current?.click()
                                     }
                                     className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors"
                                 >
                                     <Upload size={20} />
-                                    {ingredientsImage
+                                    {ingredientImgUrl
                                         ? '사진 변경'
                                         : '사진 업로드'}
                                 </button>
                                 <input
-                                    ref={ingredientsImageRef}
+                                    ref={ingredientImgUrlRef}
                                     type="file"
                                     accept="image/*"
                                     onChange={(e) =>
@@ -251,17 +384,26 @@ export function RecipeWrite({ onNavigate }) {
                                 ))}
                             </div>
                         </div>
-
+                        <div>
+                            <label className="block text-sm mb-2 text-[#3d3226]">
+                                요리 소개
+                            </label>
+                            <input
+                                type="text"
+                                value={intro}
+                                onChange={(e) => setIntro(e.target.value)}
+                                className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none w-full"
+                                placeholder="요리에 대한 간단한 소개를 입력해주세요."
+                            />
+                        </div>
                         {/* Cooking Method */}
                         <div>
                             <label className="block text-sm mb-2 text-[#3d3226]">
                                 조리 방법
                             </label>
                             <textarea
-                                value={cookingMethod}
-                                onChange={(e) =>
-                                    setCookingMethod(e.target.value)
-                                }
+                                value={steps}
+                                onChange={(e) => setSteps(e.target.value)}
                                 className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none resize-none"
                                 rows={8}
                                 placeholder="조리 방법을 상세히 입력해주세요..."
