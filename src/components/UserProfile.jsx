@@ -1,21 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-    Save,
-    Edit,
     ArrowLeft,
-    Upload,
     User as UserIcon,
-    FileText,
     MessageSquare,
     Bookmark,
-    UserX,
-    Trash2,
     Users,
     Mail,
     CheckCircle,
-    LoaderCircle,
-    RotateCcwKey,
 } from 'lucide-react';
+
 import { usePrincipalState } from '../store/usePrincipalState';
 import {
     currentUserComments,
@@ -24,11 +17,22 @@ import {
     currentUserRecipePosts,
 } from '../utils/recipeData';
 
+import { useApiErrorMessage } from '../hooks/useApiErrorMessage';
+import {
+    useChangeUsername,
+    getGetPrincipalQueryKey,
+} from '../apis/generated/user-account-controller/user-account-controller';
+import { useQueryClient } from '@tanstack/react-query';
+
+import UserProfileMyProfile from './UserProfileMyProfile';
+import UserProfileInfo from './UserProfileInfo';
+import UserProfileMyComments from './UserProfileMyComments';
+import UserProfileBookmarks from './UserProfileBookmarks';
+
 export function UserProfile({
     onNavigate,
     onRecipeClick,
     onLogout,
-    onEditRecipe,
     onFollowersClick,
     onFollowingClick,
     onCommunityPostClick,
@@ -36,29 +40,103 @@ export function UserProfile({
 }) {
     const principal = usePrincipalState((s) => s.principal);
     const login = usePrincipalState((s) => s.login);
+    const handleProfileImgUpdated = (newUrl) => {
+        // Info 탭(로컬 state) 즉시 반영
+        setProfileData((prev) => ({ ...prev, profileImgUrl: newUrl }));
+
+        // MyProfile 탭(principal) 즉시 반영
+        if (principal) {
+            login({ ...principal, profileImgUrl: newUrl });
+        }
+    };
 
     const [profileData, setProfileData] = useState({
-        gender: '',
-        age: '',
-        weight: '',
-        allergies: '',
+        userId: null,
         profileImgUrl: '',
         email: '',
         verifiedUser: false,
         username: '',
     });
 
-    // const [userData, setUserData] = useState(null); // Removed locally
-    const [isEditing, setIsEditing] = useState(true);
-    const [isSaved, setIsSaved] = useState(false);
     const [activeTab, setActiveTab] = useState('myProfile');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-    const [postType, setPostType] = useState('recipe'); // 레시피 또는 커뮤니티
-    const [myProfilePostType, setMyProfilePostType] = useState('recipe'); // My 프로필 내 게시글 타입
+
+    // MyProfile 탭 게시글 타입
+    const [myProfilePostType, setMyProfilePostType] = useState('recipe');
+
+    // 이미지 로딩
     const [isProfileImageLoading, setIsProfileImageLoading] = useState(true);
-    const fileInputRef = useRef(null);
     const imgRef = useRef(null);
 
+    // 프로필 이미지 업로드
+    const fileInputRef = useRef(null);
+
+    // 닉네임 편집 토글
+    const [isUsernameEditing, setIsUsernameEditing] = useState(false);
+    const [usernameDraft, setUsernameDraft] = useState('');
+    const usernameEditRef = useRef(null);
+
+    // 저장 완료 메시지
+    const [isSaved, setIsSaved] = useState(false);
+
+    const isRole3 = principal?.userRoles?.some(
+        (ur) => ur?.roleId === 3 || ur?.role?.roleId === 3,
+    );
+
+    const canEditProfileImg = !!principal && !isRole3;
+
+    // Mock data
+    const myPosts = currentUserRecipePosts;
+    const myCommunityPosts = currentUserCommunityPosts;
+    const myFavorites = currentUserFavorites;
+    const [myComments, setMyComments] = useState(currentUserComments);
+
+    const queryClient = useQueryClient();
+    const {
+        errorMessage: usernameError,
+        clearError,
+        handleApiError,
+    } = useApiErrorMessage();
+
+    const {
+        mutateAsync: changeUsernameMutateAsync,
+        isPending: isChangingUsername,
+    } = useChangeUsername();
+
+    // 바깥 클릭 시 닉네임 편집 취소
+    useEffect(() => {
+        if (!isUsernameEditing || isChangingUsername) return;
+
+        const handleOutsideClick = (e) => {
+            if (!usernameEditRef.current) return;
+            if (usernameEditRef.current.contains(e.target)) return;
+
+            setUsernameDraft(profileData.username || '');
+            setIsUsernameEditing(false);
+        };
+
+        document.addEventListener('mousedown', handleOutsideClick);
+        return () =>
+            document.removeEventListener('mousedown', handleOutsideClick);
+    }, [isUsernameEditing, isChangingUsername, profileData.username]);
+
+    // principal 로딩 → local state 동기화
+    useEffect(() => {
+        if (!principal) return;
+
+        const mappedData = {
+            userId: principal.userId ?? null,
+            profileImgUrl: principal.profileImgUrl || '',
+            email: principal.email || '',
+            verifiedUser: principal.verifiedUser || false,
+            username: principal.username || '',
+        };
+
+        setProfileData(mappedData);
+        setUsernameDraft(mappedData.username);
+    }, [principal]);
+
+    // 프로필 이미지 로딩 스피너 처리
     useEffect(() => {
         setIsProfileImageLoading(true);
         if (imgRef.current && imgRef.current.complete) {
@@ -66,79 +144,65 @@ export function UserProfile({
         }
     }, [principal?.profileImgUrl]);
 
-    // Mock data for posts, comments, and favorites
-    const myPosts = currentUserRecipePosts;
-    const myCommunityPosts = currentUserCommunityPosts;
-    const myFavorites = currentUserFavorites;
-
-    const [myComments, setMyComments] = useState(currentUserComments);
-
-    const handleChange = (field, value) => {
-        setProfileData((prev) => ({ ...prev, [field]: value }));
-    };
+    const handleImageLoad = () => setIsProfileImageLoading(false);
 
     const handleImageUpload = (e) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const imageData = reader.result;
-                setProfileData((prev) => ({
-                    ...prev,
-                    profileImgUrl: imageData,
-                }));
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const imageData = reader.result;
+            const next = { ...profileData, profileImgUrl: imageData };
+
+            setProfileData(next);
+            login(next); // mock 저장(추후 이미지 변경 API 연결 시 교체)
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 3000);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleSaveUsername = async () => {
+        clearError();
+
+        const nextUsername = usernameDraft.trim();
+        if (!nextUsername || !principal?.userId) return;
+
+        try {
+            await changeUsernameMutateAsync({
+                data: { userId: principal.userId, username: nextUsername },
+            });
+
+            const nextProfileData = { ...profileData, username: nextUsername };
+            setProfileData(nextProfileData);
+            login({ ...principal, username: nextUsername });
+
+            setIsUsernameEditing(false);
+
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 3000);
+
+            queryClient.invalidateQueries({
+                queryKey: getGetPrincipalQueryKey(),
+            });
+        } catch (e) {
+            await handleApiError(e, {
+                fallbackMessage:
+                    '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+            });
         }
-    };
-
-    const handleImageLoad = () => {
-        setIsProfileImageLoading(false);
-    };
-
-    const handleSave = () => {
-        login(profileData);
-        setIsEditing(false);
-        setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 3000);
-    };
-
-    const handleEdit = () => {
-        setIsEditing(true);
     };
 
     const handleDeleteAccount = () => {
-        // Call logout to return to login screen
-        if (onLogout) {
-            onLogout();
-        }
+        onLogout?.();
         setShowDeleteConfirm(false);
     };
 
     const handleDeleteComment = (commentId, e) => {
         e.stopPropagation();
-        setMyComments((prevComments) =>
-            prevComments.filter((comment) => comment.id !== commentId),
-        );
+        setMyComments((prev) => prev.filter((c) => c.id !== commentId));
     };
-
-    // Load saved profile from Store
-    useEffect(() => {
-        if (principal) {
-            const mappedData = {
-                gender: principal.gender || '',
-                age: principal.age || '',
-                weight: principal.weight || '',
-                allergies: principal.allergies || '',
-                profileImgUrl: principal.profileImgUrl || '',
-                email: principal.email || '',
-                verifiedUser: principal.verifiedUser || false,
-                username: principal.username || '',
-            };
-            setProfileData(mappedData);
-            setIsEditing(false);
-        }
-    }, [principal]);
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
@@ -161,6 +225,7 @@ export function UserProfile({
                                     건강한 식생활을 위한 정보를 입력해주세요
                                 </p>
                             </div>
+
                             {principal && (
                                 <div
                                     className={`px-4 py-2 rounded-full flex items-center gap-2 ${
@@ -203,6 +268,7 @@ export function UserProfile({
                                 <Users size={20} />
                                 My 프로필
                             </button>
+
                             <button
                                 onClick={() => setActiveTab('info')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${
@@ -214,6 +280,7 @@ export function UserProfile({
                                 <UserIcon size={20} />
                                 프로필 정보
                             </button>
+
                             <button
                                 onClick={() => setActiveTab('comments')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${
@@ -224,6 +291,7 @@ export function UserProfile({
                             >
                                 <MessageSquare size={20} />내 댓글
                             </button>
+
                             <button
                                 onClick={() => setActiveTab('favorites')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${
@@ -240,677 +308,59 @@ export function UserProfile({
 
                     {/* Tab Content */}
                     {activeTab === 'myProfile' && (
-                        <div className="p-8">
-                            {/* Profile Image and Nickname */}
-                            <div className="flex flex-col items-center mb-8">
-                                <div className="w-32 h-32 rounded-full border-4 border-[#d4cbbf] overflow-hidden bg-[#ebe5db] flex items-center justify-center relative">
-                                    {principal?.profileImgUrl ? (
-                                        <>
-                                            {isProfileImageLoading && (
-                                                <LoaderCircle className="w-8 h-8 text-[#6b5d4f] animate-spin absolute z-10" />
-                                            )}
-                                            <img
-                                                ref={imgRef}
-                                                key={principal.profileImgUrl}
-                                                src={principal.profileImgUrl}
-                                                alt="프로필"
-                                                className={`w-full h-full object-cover transition-opacity duration-300 ${isProfileImageLoading ? 'opacity-0' : 'opacity-100'}`}
-                                                onLoad={handleImageLoad}
-                                                onError={handleImageLoad}
-                                            />
-                                        </>
-                                    ) : (
-                                        <UserIcon
-                                            size={48}
-                                            className="text-[#6b5d4f]"
-                                        />
-                                    )}
-                                </div>
-                                <h2 className="text-2xl text-[#3d3226] mt-4">
-                                    {principal?.username || '닉네임 없음'}
-                                </h2>
-
-                                {/* Followers / Following */}
-                                <div className="flex gap-6 mt-4">
-                                    <button
-                                        onClick={onFollowersClick}
-                                        className="flex flex-col items-center gap-1 px-4 py-2 hover:bg-[#ebe5db] rounded-md transition-colors"
-                                    >
-                                        <span className="text-2xl font-bold text-[#3d3226]">
-                                            124
-                                        </span>
-                                        <span className="text-sm text-[#6b5d4f]">
-                                            팔로워
-                                        </span>
-                                    </button>
-                                    <div className="w-px bg-[#d4cbbf]" />
-                                    <button
-                                        onClick={onFollowingClick}
-                                        className="flex flex-col items-center gap-1 px-4 py-2 hover:bg-[#ebe5db] rounded-md transition-colors"
-                                    >
-                                        <span className="text-2xl font-bold text-[#3d3226]">
-                                            89
-                                        </span>
-                                        <span className="text-sm text-[#6b5d4f]">
-                                            팔로잉
-                                        </span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* User Posts */}
-                            <div>
-                                {/* Toggle Buttons */}
-                                <div className="flex items-center justify-between mb-6">
-                                    <h3 className="text-xl text-[#3d3226]">
-                                        내가 작성한 게시글
-                                    </h3>
-                                    <div className="flex gap-2 bg-[#ebe5db] p-1 rounded-md border-2 border-[#d4cbbf]">
-                                        <button
-                                            onClick={() =>
-                                                setMyProfilePostType('recipe')
-                                            }
-                                            className={`px-4 py-2 rounded-md transition-colors ${
-                                                myProfilePostType === 'recipe'
-                                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
-                                            }`}
-                                        >
-                                            레시피 게시판
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                setMyProfilePostType(
-                                                    'community',
-                                                )
-                                            }
-                                            className={`px-4 py-2 rounded-md transition-colors ${
-                                                myProfilePostType ===
-                                                'community'
-                                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                                                    : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
-                                            }`}
-                                        >
-                                            커뮤니티
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Recipe Posts */}
-                                {myProfilePostType === 'recipe' && (
-                                    <div className="grid grid-cols-2 gap-4">
-                                        {myPosts.map((post) => (
-                                            <div
-                                                key={post.id}
-                                                onClick={() =>
-                                                    onRecipeClick &&
-                                                    onRecipeClick(post.id)
-                                                }
-                                                className="cursor-pointer bg-white rounded-lg overflow-hidden border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
-                                            >
-                                                <img
-                                                    src={post.thumbnail}
-                                                    alt={post.title}
-                                                    className="w-full aspect-video object-cover"
-                                                />
-                                                <div className="p-4">
-                                                    <h4 className="text-lg text-[#3d3226] mb-2">
-                                                        {post.title}
-                                                    </h4>
-                                                    <p className="text-sm text-[#6b5d4f]">
-                                                        {post.date}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* Community Posts */}
-                                {myProfilePostType === 'community' && (
-                                    <div className="space-y-4">
-                                        {myCommunityPosts.map((post) => (
-                                            <div
-                                                key={post.id}
-                                                onClick={() =>
-                                                    onCommunityPostClick &&
-                                                    onCommunityPostClick(
-                                                        post.id,
-                                                    )
-                                                }
-                                                className="cursor-pointer p-6 bg-white rounded-lg border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
-                                            >
-                                                <h4 className="text-lg text-[#3d3226] mb-2">
-                                                    {post.title}
-                                                </h4>
-                                                <div className="flex items-center gap-4 text-sm text-[#6b5d4f]">
-                                                    <span>{post.date}</span>
-                                                    <span>
-                                                        조회 {post.views}
-                                                    </span>
-                                                    <span>
-                                                        댓글 {post.comments}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        <UserProfileMyProfile
+                            principal={principal}
+                            isProfileImageLoading={isProfileImageLoading}
+                            imgRef={imgRef}
+                            onImageLoad={handleImageLoad}
+                            onFollowersClick={onFollowersClick}
+                            onFollowingClick={onFollowingClick}
+                            myProfilePostType={myProfilePostType}
+                            setMyProfilePostType={setMyProfilePostType}
+                            myPosts={myPosts}
+                            myCommunityPosts={myCommunityPosts}
+                            onRecipeClick={onRecipeClick}
+                            onCommunityPostClick={onCommunityPostClick}
+                        />
                     )}
 
                     {activeTab === 'info' && (
-                        <>
-                            {/* Form - Only show when editing or no saved profile */}
-                            {isEditing && (
-                                <div className="p-8">
-                                    <div className="space-y-6">
-                                        {/* Profile Image */}
-                                        <div className="flex flex-col items-center mb-6">
-                                            <div className="relative">
-                                                <div className="w-32 h-32 rounded-full border-4 border-[#d4cbbf] overflow-hidden bg-[#ebe5db] flex items-center justify-center">
-                                                    {profileData.profileImgUrl ? (
-                                                        <img
-                                                            src={
-                                                                profileData.profileImgUrl
-                                                            }
-                                                            alt="프로필"
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <UserIcon
-                                                            size={48}
-                                                            className="text-[#6b5d4f]"
-                                                        />
-                                                    )}
-                                                </div>
-                                                <button
-                                                    onClick={() =>
-                                                        fileInputRef.current?.click()
-                                                    }
-                                                    className="absolute bottom-0 right-0 bg-[#3d3226] text-[#f5f1eb] p-2 rounded-full hover:bg-[#5d4a36] transition-colors"
-                                                >
-                                                    <Upload size={20} />
-                                                </button>
-                                                <input
-                                                    ref={fileInputRef}
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleImageUpload}
-                                                    className="hidden"
-                                                />
-                                            </div>
-                                            <p className="mt-4 text-sm text-[#6b5d4f]">
-                                                프로필 이미지를 업로드하세요
-                                            </p>
-                                        </div>
-
-                                        {/* Nickname Display */}
-                                        <div>
-                                            <label className="block text-sm mb-2 text-[#3d3226]">
-                                                닉네임
-                                            </label>
-                                            <div className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md bg-[#ebe5db] text-[#3d3226]">
-                                                {profileData.username ||
-                                                    '닉네임 없음'}
-                                            </div>
-                                        </div>
-
-                                        {/* Gender */}
-                                        <div>
-                                            <label className="block text-sm mb-2 text-[#3d3226]">
-                                                성별
-                                            </label>
-                                            <div className="flex gap-4">
-                                                <button
-                                                    onClick={() =>
-                                                        handleChange(
-                                                            'gender',
-                                                            '남성',
-                                                        )
-                                                    }
-                                                    className={`flex-1 px-6 py-3 rounded-md border-2 transition-colors ${
-                                                        profileData.gender ===
-                                                        '남성'
-                                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
-                                                    }`}
-                                                >
-                                                    남성
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        handleChange(
-                                                            'gender',
-                                                            '여성',
-                                                        )
-                                                    }
-                                                    className={`flex-1 px-6 py-3 rounded-md border-2 transition-colors ${
-                                                        profileData.gender ===
-                                                        '여성'
-                                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
-                                                    }`}
-                                                >
-                                                    여성
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        handleChange(
-                                                            'gender',
-                                                            '기타',
-                                                        )
-                                                    }
-                                                    className={`flex-1 px-6 py-3 rounded-md border-2 transition-colors ${
-                                                        profileData.gender ===
-                                                        '기타'
-                                                            ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                            : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
-                                                    }`}
-                                                >
-                                                    기타
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Age */}
-                                        <div>
-                                            <label className="block text-sm mb-2 text-[#3d3226]">
-                                                나이
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={profileData.age}
-                                                onChange={(e) =>
-                                                    handleChange(
-                                                        'age',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white"
-                                                placeholder="예: 25"
-                                            />
-                                        </div>
-
-                                        {/* Weight and Email */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-sm mb-2 text-[#3d3226]">
-                                                    체중 (kg)
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    value={profileData.weight}
-                                                    onChange={(e) =>
-                                                        handleChange(
-                                                            'weight',
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                    className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white"
-                                                    placeholder="예: 65"
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <label className="block text-sm mb-2 text-[#3d3226]">
-                                                    이메일
-                                                </label>
-                                                <div className="relative">
-                                                    <input
-                                                        type="email"
-                                                        value={
-                                                            profileData.email
-                                                        }
-                                                        onChange={(e) =>
-                                                            handleChange(
-                                                                'email',
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white pr-12"
-                                                        placeholder="email@example.com"
-                                                        disabled={
-                                                            profileData.verifiedUser
-                                                        }
-                                                    />
-                                                    {profileData.verifiedUser && (
-                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                                            <CheckCircle
-                                                                size={20}
-                                                                className="text-emerald-500"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Email Verification */}
-                                        {profileData.email && (
-                                            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-4 rounded-lg border-2 border-emerald-200">
-                                                {!profileData.verifiedUser ? (
-                                                    <div className="flex items-center justify-between">
-                                                        <div className="flex items-center gap-3">
-                                                            <Mail
-                                                                size={20}
-                                                                className="text-emerald-600"
-                                                            />
-                                                            <div>
-                                                                <p className="text-sm text-[#3d3226] font-medium">
-                                                                    이메일
-                                                                    인증이
-                                                                    필요합니다
-                                                                </p>
-                                                                <p className="text-xs text-[#6b5d4f]">
-                                                                    게시글
-                                                                    작성을 위해
-                                                                    이메일
-                                                                    인증을
-                                                                    완료해주세요
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => {
-                                                                // Mock email verification
-                                                                setProfileData(
-                                                                    (prev) => ({
-                                                                        ...prev,
-                                                                        verifiedUser: true,
-                                                                    }),
-                                                                );
-                                                                alert(
-                                                                    '이메일 인증이 완료되었습니다!',
-                                                                );
-                                                            }}
-                                                            className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md whitespace-nowrap"
-                                                        >
-                                                            이메일 인증
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-3">
-                                                        <CheckCircle
-                                                            size={20}
-                                                            className="text-emerald-600"
-                                                        />
-                                                        <div>
-                                                            <p className="text-sm text-[#3d3226] font-medium">
-                                                                ✓ 인증 완료
-                                                            </p>
-                                                            <p className="text-xs text-[#6b5d4f]">
-                                                                이메일 인증이
-                                                                완료되었습니다
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        {/* Allergies */}
-                                        <div>
-                                            <label className="block text-sm mb-2 text-[#3d3226]">
-                                                알레르기 / 제한 식품
-                                            </label>
-                                            <textarea
-                                                value={profileData.allergies}
-                                                onChange={(e) =>
-                                                    handleChange(
-                                                        'allergies',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white resize-none"
-                                                rows={4}
-                                                placeholder="예: 갑각류, 땅콩, 우유 등 알레르기가 있는 식품을 입력해주세요"
-                                            />
-                                        </div>
-
-                                        {/* Save Button */}
-                                        <button
-                                            onClick={handleSave}
-                                            className="w-full py-4 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            <Save size={20} />
-                                            프로필 저장
-                                        </button>
-
-                                        {/* Success Message */}
-                                        {isSaved && (
-                                            <div className="bg-green-100 border-2 border-green-500 text-green-700 px-4 py-3 rounded-md">
-                                                프로필이 성공적으로
-                                                저장되었습니다! ✓
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Saved Profile Display - Only show when saved and not editing */}
-                            {principal && !isEditing && (
-                                <div className="p-8">
-                                    {/* Profile Image and Nickname */}
-                                    <div className="flex flex-col items-center mb-8">
-                                        <div className="w-32 h-32 rounded-full border-4 border-[#d4cbbf] overflow-hidden bg-[#ebe5db] flex items-center justify-center">
-                                            {principal.profileImgUrl ? (
-                                                <img
-                                                    src={
-                                                        principal.profileImgUrl
-                                                    }
-                                                    alt="프로필"
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <UserIcon
-                                                    size={48}
-                                                    className="text-[#6b5d4f]"
-                                                />
-                                            )}
-                                        </div>
-                                        <h2 className="text-2xl text-[#3d3226] mt-4">
-                                            {principal.username ||
-                                                '닉네임 없음'}
-                                        </h2>
-                                    </div>
-
-                                    <h3 className="text-xl mb-6 text-[#3d3226]">
-                                        저장된 프로필 정보
-                                    </h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-[#ebe5db] p-5 rounded-md border-2 border-[#d4cbbf]">
-                                            <p className="text-sm text-[#6b5d4f] mb-2">
-                                                성별
-                                            </p>
-                                            <p className="text-lg text-[#3d3226]">
-                                                {principal.gender || '-'}
-                                            </p>
-                                        </div>
-                                        <div className="bg-[#ebe5db] p-5 rounded-md border-2 border-[#d4cbbf]">
-                                            <p className="text-sm text-[#6b5d4f] mb-2">
-                                                나이
-                                            </p>
-                                            <p className="text-lg text-[#3d3226]">
-                                                {principal.age
-                                                    ? `${principal.age}세`
-                                                    : '-'}
-                                            </p>
-                                        </div>
-                                        <div className="bg-[#ebe5db] p-5 rounded-md border-2 border-[#d4cbbf]">
-                                            <p className="text-sm text-[#6b5d4f] mb-2">
-                                                체중
-                                            </p>
-                                            <p className="text-lg text-[#3d3226]">
-                                                {principal.weight
-                                                    ? `${principal.weight}kg`
-                                                    : '-'}
-                                            </p>
-                                        </div>
-                                        <div className="bg-[#ebe5db] p-5 rounded-md border-2 border-[#d4cbbf]">
-                                            <p className="text-sm text-[#6b5d4f] mb-2">
-                                                이메일
-                                            </p>
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-lg text-[#3d3226] flex-1 truncate">
-                                                    {principal.email || '-'}
-                                                </p>
-                                                {principal.verifiedUser && (
-                                                    <CheckCircle
-                                                        size={18}
-                                                        className="text-emerald-500 flex-shrink-0"
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className="bg-[#ebe5db] p-5 rounded-md border-2 border-[#d4cbbf] col-span-2">
-                                            <p className="text-sm text-[#6b5d4f] mb-2">
-                                                알레르기 정보
-                                            </p>
-                                            <p className="text-lg text-[#3d3226]">
-                                                {principal.allergies || '-'}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Edit Button */}
-                                    <button
-                                        onClick={handleEdit}
-                                        className="w-full mt-6 py-4 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors flex items-center justify-center gap-2"
-                                    >
-                                        <Edit size={20} />
-                                        프로필 수정하기
-                                    </button>
-                                </div>
-                            )}
-                        </>
+                        <UserProfileInfo
+                            profileData={profileData}
+                            fileInputRef={fileInputRef}
+                            onImageUpload={handleImageUpload}
+                            usernameEditRef={usernameEditRef}
+                            isUsernameEditing={isUsernameEditing}
+                            setIsUsernameEditing={setIsUsernameEditing}
+                            usernameDraft={usernameDraft}
+                            setUsernameDraft={setUsernameDraft}
+                            onSaveUsername={handleSaveUsername}
+                            isSavingUsername={isChangingUsername}
+                            usernameError={usernameError}
+                            onChangePasswordClick={onChangePasswordClick}
+                            onOpenDeleteConfirm={() =>
+                                setShowDeleteConfirm(true)
+                            }
+                            isSaved={isSaved}
+                            canEditProfileImg={canEditProfileImg}
+                            onProfileImgUpdated={handleProfileImgUpdated}
+                        />
                     )}
 
-                    {/* My Comments Tab */}
                     {activeTab === 'comments' && (
-                        <div className="p-8">
-                            <h3 className="text-xl mb-6 text-[#3d3226]">
-                                내가 작성한 댓글
-                            </h3>
-                            <div className="space-y-4">
-                                {myComments.length > 0 ? (
-                                    myComments.map((comment) => (
-                                        <div
-                                            key={comment.id}
-                                            className="relative p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors"
-                                        >
-                                            <div
-                                                onClick={() => {
-                                                    if (
-                                                        comment.type ===
-                                                        'recipe'
-                                                    ) {
-                                                        if (onRecipeClick)
-                                                            onRecipeClick(
-                                                                comment.postId,
-                                                            );
-                                                    } else if (
-                                                        comment.type ===
-                                                        'community'
-                                                    ) {
-                                                        if (
-                                                            onCommunityPostClick
-                                                        )
-                                                            onCommunityPostClick(
-                                                                comment.postId,
-                                                            );
-                                                    }
-                                                }}
-                                                className="cursor-pointer pr-10"
-                                            >
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <span
-                                                        className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                                            comment.type ===
-                                                            'recipe'
-                                                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
-                                                                : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white'
-                                                        }`}
-                                                    >
-                                                        {comment.type ===
-                                                        'recipe'
-                                                            ? '📋 레시피'
-                                                            : '💬 커뮤니티'}
-                                                    </span>
-                                                    <span className="text-sm text-[#6b5d4f]">
-                                                        게시글:{' '}
-                                                        <span className="text-[#3d3226] font-medium">
-                                                            {comment.postTitle}
-                                                        </span>
-                                                    </span>
-                                                </div>
-                                                <p className="text-[#3d3226] mb-2">
-                                                    {comment.comment}
-                                                </p>
-                                                <p className="text-xs text-[#6b5d4f]">
-                                                    {comment.date}
-                                                </p>
-                                            </div>
-                                            <button
-                                                onClick={(e) =>
-                                                    handleDeleteComment(
-                                                        comment.id,
-                                                        e,
-                                                    )
-                                                }
-                                                className="absolute top-2 right-2 bg-red-600 text-white p-1.5 rounded-full hover:bg-red-700 transition-colors"
-                                                title="댓글 삭제"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-center text-[#6b5d4f] py-8">
-                                        작성한 댓글이 없습니다.
-                                    </p>
-                                )}
-                            </div>
-                        </div>
+                        <UserProfileMyComments
+                            myComments={myComments}
+                            onDeleteComment={handleDeleteComment}
+                            onRecipeClick={onRecipeClick}
+                            onCommunityPostClick={onCommunityPostClick}
+                        />
                     )}
 
-                    {/* My Favorites Tab */}
                     {activeTab === 'favorites' && (
-                        <div className="p-8">
-                            <h3 className="text-xl mb-6 text-[#3d3226]">
-                                저장한 게시물
-                            </h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                {myFavorites.length > 0 ? (
-                                    myFavorites.map((favorite) => (
-                                        <div
-                                            key={favorite.id}
-                                            onClick={() => {
-                                                if (onRecipeClick)
-                                                    onRecipeClick(favorite.id);
-                                            }}
-                                            className="cursor-pointer bg-white rounded-lg overflow-hidden border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
-                                        >
-                                            <img
-                                                src={favorite.thumbnail}
-                                                alt={favorite.title}
-                                                className="w-full aspect-video object-cover"
-                                            />
-                                            <div className="p-4">
-                                                <h4 className="text-lg text-[#3d3226]">
-                                                    {favorite.title}
-                                                </h4>
-                                            </div>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="col-span-2 text-center text-[#6b5d4f] py-8">
-                                        저장한 게시물이 없습니다.
-                                    </p>
-                                )}
-                            </div>
-                        </div>
+                        <UserProfileBookmarks
+                            myFavorites={myFavorites}
+                            onRecipeClick={onRecipeClick}
+                        />
                     )}
                 </div>
             </div>

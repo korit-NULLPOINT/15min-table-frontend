@@ -10,10 +10,10 @@ import {
     X,
     Search,
     Mail,
-} from "lucide-react";
-import { useState, useEffect } from "react";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
-import IngredientMap from "../components/map/IngredientMap";
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ImageWithFallback } from '../';
+import IngredientMap from '../components/map/';
 
 export function RecipeDetail({
     recipe,
@@ -29,15 +29,15 @@ export function RecipeDetail({
     const [ratingSum, setRatingSum] = useState(recipe.rating * 24); // 총 별점 합계
     const [showStoreMap, setShowStoreMap] = useState(false);
     const [showZipcodeModal, setShowZipcodeModal] = useState(false);
-    const [userZipcode, setUserZipcode] = useState("");
-    const [userAddress, setUserAddress] = useState("");
+    const [userZipcode, setUserZipcode] = useState('');
+    const [userAddress, setUserAddress] = useState('');
     const [nearbyPlaces, setNearbyPlaces] = useState([]);
     const [selectedPlaceId, setSelectedPlaceId] = useState(null);
     const [showEmailWarning, setShowEmailWarning] = useState(false);
     const ITEMS_PER_PAGE = 4;
     const [currentPage, setCurrentPage] = useState(1);
     const [autoSelected, setAutoSelected] = useState(false);
-    const ingredientsText = (recipe?.ingredients || []).join(" ");
+    const ingredientsText = (recipe?.ingredients || []).join(' ');
     const [originLocation, setOriginLocation] = useState(null);
     // { name, lat, lng }
 
@@ -45,8 +45,8 @@ export function RecipeDetail({
         const labels = new Set();
 
         if (ingredientsText.match(/고기|삼겹|돼지|소고기|닭|정육|베이컨/)) {
-            labels.add("시장");
-            labels.add("슈퍼마켓");
+            labels.add('시장');
+            labels.add('슈퍼마켓');
         }
 
         if (
@@ -54,8 +54,8 @@ export function RecipeDetail({
                 /양파|마늘|파|대파|감자|당근|버섯|배추|상추|오이|토마토|계란/,
             )
         ) {
-            labels.add("시장");
-            labels.add("슈퍼마켓");
+            labels.add('시장');
+            labels.add('슈퍼마켓');
         }
 
         if (
@@ -63,7 +63,7 @@ export function RecipeDetail({
                 /라면|컵라면|즉석|햇반|소시지|어묵|김밥|스낵|과자/,
             )
         ) {
-            labels.add("편의점");
+            labels.add('편의점');
         }
 
         return Array.from(labels);
@@ -72,23 +72,23 @@ export function RecipeDetail({
     const [comments, setComments] = useState([
         {
             id: 1,
-            author: "요리왕김치",
-            authorImage: "",
-            content: "정말 맛있어 보이네요! 저도 만들어봐야겠어요 👍",
-            createdAt: "5분 전",
+            author: '요리왕김치',
+            authorImage: '',
+            content: '정말 맛있어 보이네요! 저도 만들어봐야겠어요 👍',
+            createdAt: '5분 전',
             isMine: false,
         },
         {
             id: 2,
-            author: "자취생24",
-            authorImage: "",
+            author: '자취생24',
+            authorImage: '',
             content:
-                "간단하고 좋아요. 재료도 집에 다 있어서 바로 만들 수 있겠네요!",
-            createdAt: "1시간 전",
+                '간단하고 좋아요. 재료도 집에 다 있어서 바로 만들 수 있겠네요!',
+            createdAt: '1시간 전',
             isMine: false,
         },
     ]);
-    const [newComment, setNewComment] = useState("");
+    const [newComment, setNewComment] = useState('');
 
     const handleFavoriteClick = () => {
         if (!isLoggedIn) {
@@ -103,7 +103,7 @@ export function RecipeDetail({
         if (!nearbyPlaces || nearbyPlaces.length === 0) return;
 
         const valid = nearbyPlaces.filter(
-            (p) => typeof p.distance === "number",
+            (p) => typeof p.distance === 'number',
         );
         if (valid.length === 0) return;
 
@@ -178,13 +178,13 @@ export function RecipeDetail({
     };
 
     const averageRating =
-        totalRatings > 0 ? (ratingSum / totalRatings).toFixed(1) : "0.0";
+        totalRatings > 0 ? (ratingSum / totalRatings).toFixed(1) : '0.0';
 
     const mockHashtags = recipe.hashtags || [
-        "15분요리",
-        "간단레시피",
-        "자취생필수",
-        "초간단",
+        '15분요리',
+        '간단레시피',
+        '자취생필수',
+        '초간단',
     ];
 
     const handleCommentSubmit = () => {
@@ -194,7 +194,7 @@ export function RecipeDetail({
         }
 
         // Check email verification
-        const userProfile = localStorage.getItem("userProfile");
+        const userProfile = localStorage.getItem('userProfile');
         if (userProfile) {
             const profile = JSON.parse(userProfile);
             if (!profile.emailVerified) {
@@ -206,23 +206,23 @@ export function RecipeDetail({
             return;
         }
 
-        if (newComment.trim() === "") return;
+        if (newComment.trim() === '') return;
 
         const newCommentObj = {
             id: comments.length + 1,
-            author: currentUsername || "익명",
-            authorImage: "",
+            author: currentUsername || '익명',
+            authorImage: '',
             content: newComment,
-            createdAt: "방금 전",
+            createdAt: '방금 전',
             isMine: true,
         };
         setComments([...comments, newCommentObj]);
-        setNewComment("");
+        setNewComment('');
     };
 
     const handleGoToProfile = () => {
         setShowEmailWarning(false);
-        onNavigate("profile");
+        onNavigate('profile');
     };
 
     const handleCommentDelete = (commentId) => {
@@ -250,9 +250,9 @@ export function RecipeDetail({
         }
 
         // 아직 없으면 동적 로딩
-        const script = document.createElement("script");
+        const script = document.createElement('script');
         script.src =
-            "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+            'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
         script.async = true;
 
         script.onload = () => {
@@ -260,7 +260,7 @@ export function RecipeDetail({
         };
 
         script.onerror = () => {
-            alert("주소 검색 스크립트를 불러오지 못했습니다.");
+            alert('주소 검색 스크립트를 불러오지 못했습니다.');
         };
 
         document.body.appendChild(script);
@@ -272,11 +272,11 @@ export function RecipeDetail({
                 data.address || data.roadAddress || data.jibunAddress;
 
             if (!fullAddress) {
-                alert("주소를 다시 선택해주세요.");
+                alert('주소를 다시 선택해주세요.');
                 return;
             }
 
-            setUserZipcode(data.zonecode || "");
+            setUserZipcode(data.zonecode || '');
             setUserAddress(fullAddress);
 
             setShowZipcodeModal(false);
@@ -286,7 +286,7 @@ export function RecipeDetail({
 
     const handleZipcodeSubmit = () => {
         if (!userZipcode) {
-            alert("우편번호를 입력해주세요.");
+            alert('우편번호를 입력해주세요.');
             return;
         }
         setUserAddress(`우편번호 ${userZipcode} 지역`);
@@ -295,26 +295,26 @@ export function RecipeDetail({
     };
     const getDistanceMeta = (distance) => {
         if (distance == null) {
-            return { label: "거리 정보 없음", tone: "gray", move: "" };
+            return { label: '거리 정보 없음', tone: 'gray', move: '' };
         }
 
         if (distance <= 300) {
-            return { label: "아주 가까움", tone: "emerald", move: "도보 추천" };
+            return { label: '아주 가까움', tone: 'emerald', move: '도보 추천' };
         }
         if (distance <= 800) {
-            return { label: "가까움", tone: "green", move: "도보 / 자전거" };
+            return { label: '가까움', tone: 'green', move: '도보 / 자전거' };
         }
         if (distance <= 2000) {
             return {
-                label: "조금 멀어요",
-                tone: "amber",
-                move: "자전거 / 대중교통",
+                label: '조금 멀어요',
+                tone: 'amber',
+                move: '자전거 / 대중교통',
             };
         }
         if (distance <= 5000) {
-            return { label: "멀어요", tone: "orange", move: "차량 추천" };
+            return { label: '멀어요', tone: 'orange', move: '차량 추천' };
         }
-        return { label: "많이 멀어요", tone: "red", move: "차량 필수" };
+        return { label: '많이 멀어요', tone: 'red', move: '차량 필수' };
     };
 
     // Load Daum Postcode API
@@ -324,8 +324,9 @@ export function RecipeDetail({
             <div className="max-w-5xl mx-auto px-6 py-12">
                 {/* Back Button */}
                 <button
-                    onClick={() => onNavigate("home")}
-                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md">
+                    onClick={() => onNavigate('home')}
+                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
+                >
                     <ArrowLeft size={20} />
                     목록으로 돌아가기
                 </button>
@@ -354,7 +355,8 @@ export function RecipeDetail({
                                     onClick={() =>
                                         onAuthorClick &&
                                         onAuthorClick(recipe.author)
-                                    }>
+                                    }
+                                >
                                     {recipe.author}
                                 </span>
                             </div>
@@ -387,18 +389,19 @@ export function RecipeDetail({
                                     <button
                                         key={star}
                                         onClick={() => handleRatingClick(star)}
-                                        className="transition-transform hover:scale-110">
+                                        className="transition-transform hover:scale-110"
+                                    >
                                         <Star
                                             size={32}
                                             fill={
                                                 star <= userRating
-                                                    ? "#f59e0b"
-                                                    : "none"
+                                                    ? '#f59e0b'
+                                                    : 'none'
                                             }
                                             className={
                                                 star <= userRating
-                                                    ? "text-[#f59e0b]"
-                                                    : "text-[#d4cbbf]"
+                                                    ? 'text-[#f59e0b]'
+                                                    : 'text-[#d4cbbf]'
                                             }
                                         />
                                     </button>
@@ -417,12 +420,13 @@ export function RecipeDetail({
                                 onClick={handleFavoriteClick}
                                 className={`flex items-center gap-2 px-6 py-3 rounded-md border-2 transition-colors ${
                                     isFavorited
-                                        ? "bg-blue-100 border-blue-500 text-blue-700"
-                                        : "border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226]"
-                                }`}>
+                                        ? 'bg-blue-100 border-blue-500 text-blue-700'
+                                        : 'border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226]'
+                                }`}
+                            >
                                 <Bookmark
                                     size={20}
-                                    fill={isFavorited ? "currentColor" : "none"}
+                                    fill={isFavorited ? 'currentColor' : 'none'}
                                 />
                                 저장하기
                             </button>
@@ -445,7 +449,8 @@ export function RecipeDetail({
                         <h2 className="text-2xl text-[#3d3226]">재료</h2>
                         <button
                             onClick={handleAIStoreMap}
-                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md">
+                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md"
+                        >
                             <Sparkles size={16} />내 근처 재료 찾기
                         </button>
                     </div>
@@ -454,7 +459,8 @@ export function RecipeDetail({
                         {recipe.ingredients.map((ingredient, index) => (
                             <li
                                 key={index}
-                                className="flex items-start gap-3 text-[#6b5d4f]">
+                                className="flex items-start gap-3 text-[#6b5d4f]"
+                            >
                                 <span className="w-2 h-2 bg-[#3d3226] rounded-full mt-2 flex-shrink-0" />
                                 <span className="text-lg">{ingredient}</span>
                             </li>
@@ -474,7 +480,8 @@ export function RecipeDetail({
                             <div className="flex items-center justify-end gap-2 mb-3">
                                 <button
                                     onClick={() => setShowZipcodeModal(true)}
-                                    className="px-3 py-2 text-sm bg-white border-2 border-[#d4cbbf] rounded-md text-[#3d3226] hover:border-[#3d3226] transition-colors">
+                                    className="px-3 py-2 text-sm bg-white border-2 border-[#d4cbbf] rounded-md text-[#3d3226] hover:border-[#3d3226] transition-colors"
+                                >
                                     주소 다시 선택
                                 </button>
 
@@ -486,14 +493,15 @@ export function RecipeDetail({
 
                                         // IngredientMap이 address 변경 시 initMap을 다시 돌기 때문에
                                         // address가 동일할 땐 리렌더 트릭을 써야 함:
-                                        setUserAddress((prev) => prev + " "); // 공백 추가
+                                        setUserAddress((prev) => prev + ' '); // 공백 추가
                                         setTimeout(() => {
                                             setUserAddress((prev) =>
                                                 prev.trim(),
                                             ); // 다시 원복
                                         }, 0);
                                     }}
-                                    className="px-3 py-2 text-sm bg-[#3d3226] text-[#f5f1eb] border-2 border-[#3d3226] rounded-md hover:bg-[#5c4c40] transition-colors">
+                                    className="px-3 py-2 text-sm bg-[#3d3226] text-[#f5f1eb] border-2 border-[#3d3226] rounded-md hover:bg-[#5c4c40] transition-colors"
+                                >
                                     이 주소로 재검색
                                 </button>
                             </div>
@@ -513,7 +521,8 @@ export function RecipeDetail({
                                     {/* 리스트 */}
                                     <div
                                         id="nearby-place-list"
-                                        className="mt-4 space-y-2">
+                                        className="mt-4 space-y-2"
+                                    >
                                         {pagedPlaces.map((p) => {
                                             const isSelected =
                                                 selectedPlaceId === p.id;
@@ -529,9 +538,10 @@ export function RecipeDetail({
                                                     }}
                                                     className={`w-full text-left p-4 rounded-lg border-2 transition-colors cursor-pointer ${
                                                         isSelected
-                                                            ? "bg-[#f3efe9] border-[#3d3226]"
-                                                            : "bg-white border-[#d4cbbf] hover:border-[#3d3226]"
-                                                    }`}>
+                                                            ? 'bg-[#f3efe9] border-[#3d3226]'
+                                                            : 'bg-white border-[#d4cbbf] hover:border-[#3d3226]'
+                                                    }`}
+                                                >
                                                     <div className="flex items-start justify-between gap-3">
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2 mb-1">
@@ -595,7 +605,7 @@ export function RecipeDetail({
                                                                             !userAddress
                                                                         ) {
                                                                             alert(
-                                                                                "출발지 주소를 먼저 선택해주세요.",
+                                                                                '출발지 주소를 먼저 선택해주세요.',
                                                                             );
                                                                             return;
                                                                         }
@@ -604,7 +614,7 @@ export function RecipeDetail({
                                                                             !originLocation
                                                                         ) {
                                                                             alert(
-                                                                                "출발지 위치 정보를 불러오지 못했습니다.",
+                                                                                '출발지 위치 정보를 불러오지 못했습니다.',
                                                                             );
                                                                             return;
                                                                         }
@@ -617,17 +627,18 @@ export function RecipeDetail({
 
                                                                         window.open(
                                                                             url,
-                                                                            "_blank",
+                                                                            '_blank',
                                                                         );
                                                                     }}
-                                                                    className="ml-auto text-xs px-3 py-1 border border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors">
+                                                                    className="ml-auto text-xs px-3 py-1 border border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors"
+                                                                >
                                                                     길찾기
                                                                 </button>
                                                             </div>
 
                                                             <div className="text-sm text-[#6b5d4f]">
                                                                 {p.address ||
-                                                                    "주소 정보 없음"}
+                                                                    '주소 정보 없음'}
                                                             </div>
 
                                                             {p.distance &&
@@ -640,7 +651,8 @@ export function RecipeDetail({
                                                                     return (
                                                                         <div className="mt-1 flex items-center gap-2 text-xs">
                                                                             <span
-                                                                                className={`px-2 py-0.5 rounded-full bg-${meta.tone}-100 text-${meta.tone}-700`}>
+                                                                                className={`px-2 py-0.5 rounded-full bg-${meta.tone}-100 text-${meta.tone}-700`}
+                                                                            >
                                                                                 {
                                                                                     meta.label
                                                                                 }
@@ -649,8 +661,8 @@ export function RecipeDetail({
                                                                             <span className="text-[#8b7c6a]">
                                                                                 {
                                                                                     meta.move
-                                                                                }{" "}
-                                                                                ·{" "}
+                                                                                }{' '}
+                                                                                ·{' '}
                                                                                 {
                                                                                     p.distance
                                                                                 }
@@ -687,9 +699,10 @@ export function RecipeDetail({
                                                         }
                                                         className={`w-8 h-8 rounded-md border text-sm transition-colors ${
                                                             isActive
-                                                                ? "bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]"
-                                                                : "bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]"
-                                                        }`}>
+                                                                ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                                : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                                        }`}
+                                                    >
                                                         {page}
                                                     </button>
                                                 );
@@ -727,7 +740,8 @@ export function RecipeDetail({
                         {mockHashtags.map((tag) => (
                             <button
                                 key={tag}
-                                className="px-4 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors">
+                                className="px-4 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors"
+                            >
                                 #{tag}
                             </button>
                         ))}
@@ -767,7 +781,8 @@ export function RecipeDetail({
                                                         comment.id,
                                                     )
                                                 }
-                                                className="ml-2 text-red-500">
+                                                className="ml-2 text-red-500"
+                                            >
                                                 <Trash2 size={16} />
                                             </button>
                                         )}
@@ -789,7 +804,8 @@ export function RecipeDetail({
                         />
                         <button
                             onClick={handleCommentSubmit}
-                            className="mt-4 px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5c4c40] transition-colors">
+                            className="mt-4 px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5c4c40] transition-colors"
+                        >
                             댓글 작성
                         </button>
                     </div>
@@ -804,7 +820,8 @@ export function RecipeDetail({
                             <h3 className="text-xl">우편번호 찾기</h3>
                             <button
                                 onClick={handleZipcodeModalClose}
-                                className="hover:bg-[#5d4a36] p-1 rounded transition-colors">
+                                className="hover:bg-[#5d4a36] p-1 rounded transition-colors"
+                            >
                                 <X size={24} />
                             </button>
                         </div>
@@ -817,7 +834,8 @@ export function RecipeDetail({
                             <div className="space-y-4">
                                 <button
                                     onClick={handleDaumPostcode}
-                                    className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors flex items-center justify-center gap-2 shadow-md">
+                                    className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors flex items-center justify-center gap-2 shadow-md"
+                                >
                                     <Search size={20} />
                                     주소 검색
                                 </button>
@@ -869,12 +887,14 @@ export function RecipeDetail({
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowEmailWarning(false)}
-                                    className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] text-[#3d3226] rounded-md hover:border-[#3d3226] transition-colors">
+                                    className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] text-[#3d3226] rounded-md hover:border-[#3d3226] transition-colors"
+                                >
                                     취소
                                 </button>
                                 <button
                                     onClick={handleGoToProfile}
-                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-md">
+                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-md"
+                                >
                                     이메일 인증하기
                                 </button>
                             </div>

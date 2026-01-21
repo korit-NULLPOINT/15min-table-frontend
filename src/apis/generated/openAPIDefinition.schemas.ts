@@ -174,10 +174,10 @@ export interface PrincipalUser {
   status?: string;
   userRoles?: UserRole[];
   authorities?: GrantedAuthority[];
-  enabled?: boolean;
-  credentialsNonExpired?: boolean;
   accountNonExpired?: boolean;
+  credentialsNonExpired?: boolean;
   accountNonLocked?: boolean;
+  enabled?: boolean;
 }
 
 export interface ApiRespDtoPrincipalUser {
@@ -242,6 +242,8 @@ export interface CommentRespDto {
   commentId?: number;
   recipeId?: number;
   userId?: number;
+  username?: string;
+  profileImgUrl?: string;
   content?: string;
   createDt?: string;
   updateDt?: string;
@@ -293,11 +295,15 @@ export interface ApiRespDtoListBoard {
 
 export interface RecipeListRespDto {
   recipeId?: number;
+  userId?: number;
   thumbnailImgUrl?: string;
   viewCount?: number;
   avgRating?: number;
   title?: string;
   username?: string;
+  profileImgUrl?: string;
+  mainCategoryId?: number;
+  subCategoryId?: number;
 }
 
 export interface RecipeListPageRespDto {
@@ -320,6 +326,7 @@ export interface RecipeDetailRespDto {
   subCategoryId?: number;
   userId?: number;
   username?: string;
+  profileImgUrl?: string;
   title?: string;
   intro?: string;
   thumbnailImgUrl?: string;
