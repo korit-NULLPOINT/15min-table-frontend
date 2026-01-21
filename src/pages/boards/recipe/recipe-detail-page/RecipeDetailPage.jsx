@@ -2,14 +2,17 @@ import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { RecipeDetail } from '../../../../components/RecipeDetail';
 import { recipeDetailsMap } from '../../../../utils/recipeData';
+import { useGetRecipeDetail } from '../../../../apis/generated/recipe-controller/recipe-controller';
 
 export default function RecipeDetailPage() {
     const { boardId, recipeId } = useParams();
     const navigate = useNavigate();
 
     const recipe = useMemo(() => {
-        const id = Number(recipeId);
-        const fromMap = recipeDetailsMap?.[id];
+        const rId = Number(recipeId);
+        const bId = Number(boardId);
+        const fromMap = useGetRecipeDetail(rId, bId);
+        console.log(fromMap);
         if (fromMap) return fromMap;
 
         const saved = JSON.parse(localStorage.getItem('recipes') || '[]');
@@ -24,7 +27,8 @@ export default function RecipeDetailPage() {
                 </h2>
                 <button
                     className="mt-4 px-4 py-2 rounded bg-[#3d3226] text-[#f5f1eb]"
-                    onClick={() => navigate(`/boards/${boardId}/recipe`)}>
+                    onClick={() => navigate(`/boards/${boardId}/recipe`)}
+                >
                     목록으로
                 </button>
             </div>

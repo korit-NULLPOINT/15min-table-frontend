@@ -11,6 +11,7 @@ export default function RecipeListPage() {
 
     return (
         <RecipeBoard
+            onNavigate={navigate}
             onRecipeClick={handleRecipeClick}
             isLoggedIn={false}
             onOpenAuth={() => {}}

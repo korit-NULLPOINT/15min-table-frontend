@@ -10,48 +10,32 @@ import {
 } from 'lucide-react';
 import { usePrincipalState } from '../store/usePrincipalState';
 import { useAddRecipe } from '../apis/generated/recipe-controller/recipe-controller';
+import { mainCategory, subCategory } from '../utils/categoryData';
 
 export function RecipeWrite({ onNavigate }) {
-    const [title, setTitle] = useState('');
-    // const [completedImage, setCompletedImage] = useState('');\
-    const [thumbnailImgUrl, setThumbnailImgUrl] = useState('');
-    const [ingredientImgUrl, setIngredientImgUrl] = useState('');
-    const [ingredients, setIngredients] = useState(['']);
-    // const [cookingMethod, setCookingMethod] = useState('');
-    const [hashtags, setHashtags] = useState([]);
-    const [newHashtag, setNewHashtag] = useState('');
     const [showEmailWarning, setShowEmailWarning] = useState(false);
-
-    const mainCategory = {
-        7: '가공식품',
-        10: '간편식 / 즉석식품',
-        3: '계란',
-        1: '고기류',
-        5: '김치 / 발효식품',
-        8: '냉동식품',
-        6: '두부 / 콩류',
-        4: '밥 / 면',
-        9: '채소',
-        2: '해산물',
-    };
-
-    const subCategory = {
-        1: '5분 요리',
-        4: '불 없이 요리',
-        3: '재료 3개 이하',
-        2: '전자레인지',
-        5: '혼밥 / 한그릇',
-    };
-
     const principal = usePrincipalState((s) => s.principal);
     const logout = usePrincipalState((s) => s.logout);
+
+    const { mutateAsync: addRecipeMutate } = useAddRecipe();
+
+    const [title, setTitle] = useState('');
     const [selectedMainCategoryId, setSelectedMainCategoryId] = useState('');
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState('');
+    const [thumbnailImgUrl, setThumbnailImgUrl] = useState('');
+    const [ingredientImgUrl, setIngredientImgUrl] = useState('');
+    const thumbnailImgUrlRef = useRef('');
+    const ingredientImgUrlRef = useRef('');
+    const [ingredients, setIngredients] = useState(['']);
     const [steps, setSteps] = useState(['']);
     const [intro, setIntro] = useState('');
+
+    const [hashtags, setHashtags] = useState([]);
+    const [newHashtag, setNewHashtag] = useState('');
+
     // const completedImageRef = useRef(null);
-    const thumbnailImgUrlRef = useRef('https://picsum.photos/500');
-    const ingredientImgUrlRef = useRef('https://picsum.photos/500');
+    // const [completedImage, setCompletedImage] = useState('');
+    // const [cookingMethod, setCookingMethod] = useState('');
 
     // useEffect(() => {
     //     console.log('mainCategory : ', selectedMainCategoryId);
@@ -115,7 +99,7 @@ export function RecipeWrite({ onNavigate }) {
         setHashtags(hashtags.filter((t) => t !== tag));
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         // Check email verification
 
         if (!principal) {
@@ -147,9 +131,14 @@ export function RecipeWrite({ onNavigate }) {
         };
         // TODO: Implement recipe submission
         console.log(addRecipeData);
-        useAddRecipe(addRecipeData);
-        alert('레시피가 등록되었습니다!');
-        onNavigate('/');
+        try {
+            await addRecipeMutate({ boardId: 1, data: addRecipeData });
+            alert('레시피가 등록되었습니다!');
+            onNavigate('/boards/1/recipe/');
+        } catch (error) {
+            console.error('레시피 등록 실패:', error);
+            alert('레시피 등록 중 오류가 발생했습니다.');
+        }
     };
 
     const handleGoToProfile = () => {
