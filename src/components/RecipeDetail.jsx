@@ -1,6 +1,5 @@
 import {
     ArrowLeft,
-    Clock,
     User as UserIcon,
     Star,
     Share2,
@@ -11,9 +10,10 @@ import {
     X,
     Search,
     Mail,
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
+import IngredientMap from "../components/map/IngredientMap";
 
 export function RecipeDetail({
     recipe,
@@ -29,29 +29,66 @@ export function RecipeDetail({
     const [ratingSum, setRatingSum] = useState(recipe.rating * 24); // 총 별점 합계
     const [showStoreMap, setShowStoreMap] = useState(false);
     const [showZipcodeModal, setShowZipcodeModal] = useState(false);
-    const [userZipcode, setUserZipcode] = useState('');
-    const [userAddress, setUserAddress] = useState('');
+    const [userZipcode, setUserZipcode] = useState("");
+    const [userAddress, setUserAddress] = useState("");
+    const [nearbyPlaces, setNearbyPlaces] = useState([]);
+    const [selectedPlaceId, setSelectedPlaceId] = useState(null);
     const [showEmailWarning, setShowEmailWarning] = useState(false);
+    const ITEMS_PER_PAGE = 4;
+    const [currentPage, setCurrentPage] = useState(1);
+    const [autoSelected, setAutoSelected] = useState(false);
+    const ingredientsText = (recipe?.ingredients || []).join(" ");
+    const [originLocation, setOriginLocation] = useState(null);
+    // { name, lat, lng }
+
+    const preferredLabels = (() => {
+        const labels = new Set();
+
+        if (ingredientsText.match(/고기|삼겹|돼지|소고기|닭|정육|베이컨/)) {
+            labels.add("시장");
+            labels.add("슈퍼마켓");
+        }
+
+        if (
+            ingredientsText.match(
+                /양파|마늘|파|대파|감자|당근|버섯|배추|상추|오이|토마토|계란/,
+            )
+        ) {
+            labels.add("시장");
+            labels.add("슈퍼마켓");
+        }
+
+        if (
+            ingredientsText.match(
+                /라면|컵라면|즉석|햇반|소시지|어묵|김밥|스낵|과자/,
+            )
+        ) {
+            labels.add("편의점");
+        }
+
+        return Array.from(labels);
+    })();
+
     const [comments, setComments] = useState([
         {
             id: 1,
-            author: '요리왕김치',
-            authorImage: '',
-            content: '정말 맛있어 보이네요! 저도 만들어봐야겠어요 👍',
-            createdAt: '5분 전',
+            author: "요리왕김치",
+            authorImage: "",
+            content: "정말 맛있어 보이네요! 저도 만들어봐야겠어요 👍",
+            createdAt: "5분 전",
             isMine: false,
         },
         {
             id: 2,
-            author: '자취생24',
-            authorImage: '',
+            author: "자취생24",
+            authorImage: "",
             content:
-                '간단하고 좋아요. 재료도 집에 다 있어서 바로 만들 수 있겠네요!',
-            createdAt: '1시간 전',
+                "간단하고 좋아요. 재료도 집에 다 있어서 바로 만들 수 있겠네요!",
+            createdAt: "1시간 전",
             isMine: false,
         },
     ]);
-    const [newComment, setNewComment] = useState('');
+    const [newComment, setNewComment] = useState("");
 
     const handleFavoriteClick = () => {
         if (!isLoggedIn) {
@@ -60,6 +97,58 @@ export function RecipeDetail({
         }
         setIsFavorited(!isFavorited);
         // TODO: Save to localStorage or backend
+    };
+    useEffect(() => {
+        if (autoSelected) return;
+        if (!nearbyPlaces || nearbyPlaces.length === 0) return;
+
+        const valid = nearbyPlaces.filter(
+            (p) => typeof p.distance === "number",
+        );
+        if (valid.length === 0) return;
+
+        const preferred = preferredLabels.length
+            ? valid.filter((p) => preferredLabels.includes(p.label))
+            : [];
+
+        const pool = preferred.length ? preferred : valid;
+
+        const best = pool.reduce((a, b) => (a.distance < b.distance ? a : b));
+
+        setSelectedPlaceId(best.id);
+        setAutoSelected(true);
+    }, [nearbyPlaces, autoSelected, preferredLabels]);
+
+    // ✅ 실제로 화면에 보여줄 장소 목록 (핵심)
+    const visiblePlaces = nearbyPlaces
+        .filter((p) => p.fitScore > 0)
+        .sort((a, b) => {
+            const aPref = preferredLabels.includes(a.label) ? 1 : 0;
+            const bPref = preferredLabels.includes(b.label) ? 1 : 0;
+
+            // 1️⃣ 레시피 적합 우선
+            if (aPref !== bPref) return bPref - aPref;
+
+            // 2️⃣ fitScore
+            if (b.fitScore !== a.fitScore) return b.fitScore - a.fitScore;
+
+            // 3️⃣ 거리
+            if (a.distance != null && b.distance != null)
+                return a.distance - b.distance;
+
+            return 0;
+        });
+
+    const pagedPlaces = visiblePlaces.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE,
+    );
+
+    // 페이지 수 계산도 visiblePlaces 기준으로
+    const totalPages = Math.ceil(visiblePlaces.length / ITEMS_PER_PAGE);
+    // ADD: 페이지 클릭 시 리스트 상단으로 스크롤
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
     };
 
     const handleRatingClick = (rating) => {
@@ -89,13 +178,13 @@ export function RecipeDetail({
     };
 
     const averageRating =
-        totalRatings > 0 ? (ratingSum / totalRatings).toFixed(1) : '0.0';
+        totalRatings > 0 ? (ratingSum / totalRatings).toFixed(1) : "0.0";
 
     const mockHashtags = recipe.hashtags || [
-        '15분요리',
-        '간단레시피',
-        '자취생필수',
-        '초간단',
+        "15분요리",
+        "간단레시피",
+        "자취생필수",
+        "초간단",
     ];
 
     const handleCommentSubmit = () => {
@@ -105,7 +194,7 @@ export function RecipeDetail({
         }
 
         // Check email verification
-        const userProfile = localStorage.getItem('userProfile');
+        const userProfile = localStorage.getItem("userProfile");
         if (userProfile) {
             const profile = JSON.parse(userProfile);
             if (!profile.emailVerified) {
@@ -117,22 +206,23 @@ export function RecipeDetail({
             return;
         }
 
-        if (newComment.trim() === '') return;
+        if (newComment.trim() === "") return;
+
         const newCommentObj = {
             id: comments.length + 1,
-            author: currentUsername || '익명',
-            authorImage: '',
+            author: currentUsername || "익명",
+            authorImage: "",
             content: newComment,
-            createdAt: '방금 전',
+            createdAt: "방금 전",
             isMine: true,
         };
         setComments([...comments, newCommentObj]);
-        setNewComment('');
+        setNewComment("");
     };
 
     const handleGoToProfile = () => {
         setShowEmailWarning(false);
-        onNavigate('profile');
+        onNavigate("profile");
     };
 
     const handleCommentDelete = (commentId) => {
@@ -148,125 +238,93 @@ export function RecipeDetail({
         }
     };
 
-    const handleZipcodeModalOpen = () => {
-        setShowZipcodeModal(true);
-    };
-
     const handleZipcodeModalClose = () => {
         setShowZipcodeModal(false);
     };
 
-    const handleDaumPostcode = () => {
+    const loadDaumPostcodeAndOpen = (onComplete) => {
+        // 이미 로드돼 있으면 바로 실행
         if (window.daum && window.daum.Postcode) {
-            new window.daum.Postcode({
-                oncomplete: function (data) {
-                    // 선택한 주소 정보를 처리
-                    const fullAddress = data.address; // 전체 주소
-                    const zonecode = data.zonecode; // 우편번호
-
-                    setUserZipcode(zonecode);
-                    setUserAddress(fullAddress);
-                    setShowZipcodeModal(false);
-                    setShowStoreMap(true);
-                },
-            }).open();
-        } else {
-            alert(
-                '우편번호 검색 서비스를 불러오는 중입니다. 잠시 후 다시 시도해주세요.',
-            );
+            new window.daum.Postcode({ oncomplete: onComplete }).open();
+            return;
         }
+
+        // 아직 없으면 동적 로딩
+        const script = document.createElement("script");
+        script.src =
+            "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+        script.async = true;
+
+        script.onload = () => {
+            new window.daum.Postcode({ oncomplete: onComplete }).open();
+        };
+
+        script.onerror = () => {
+            alert("주소 검색 스크립트를 불러오지 못했습니다.");
+        };
+
+        document.body.appendChild(script);
+    };
+
+    const handleDaumPostcode = () => {
+        loadDaumPostcodeAndOpen((data) => {
+            const fullAddress =
+                data.address || data.roadAddress || data.jibunAddress;
+
+            if (!fullAddress) {
+                alert("주소를 다시 선택해주세요.");
+                return;
+            }
+
+            setUserZipcode(data.zonecode || "");
+            setUserAddress(fullAddress);
+
+            setShowZipcodeModal(false);
+            setShowStoreMap(true);
+        });
     };
 
     const handleZipcodeSubmit = () => {
         if (!userZipcode) {
-            alert('우편번호를 입력해주세요.');
+            alert("우편번호를 입력해주세요.");
             return;
         }
-        // 우편번호를 기반으로 주소 생성 (예시)
         setUserAddress(`우편번호 ${userZipcode} 지역`);
-        handleZipcodeModalClose();
+        setShowZipcodeModal(false);
         setShowStoreMap(true);
+    };
+    const getDistanceMeta = (distance) => {
+        if (distance == null) {
+            return { label: "거리 정보 없음", tone: "gray", move: "" };
+        }
+
+        if (distance <= 300) {
+            return { label: "아주 가까움", tone: "emerald", move: "도보 추천" };
+        }
+        if (distance <= 800) {
+            return { label: "가까움", tone: "green", move: "도보 / 자전거" };
+        }
+        if (distance <= 2000) {
+            return {
+                label: "조금 멀어요",
+                tone: "amber",
+                move: "자전거 / 대중교통",
+            };
+        }
+        if (distance <= 5000) {
+            return { label: "멀어요", tone: "orange", move: "차량 추천" };
+        }
+        return { label: "많이 멀어요", tone: "red", move: "차량 필수" };
     };
 
     // Load Daum Postcode API
-    useEffect(() => {
-        const script = document.createElement('script');
-        script.src =
-            '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
-        script.async = true;
-        document.body.appendChild(script);
-
-        return () => {
-            if (document.body.contains(script)) {
-                document.body.removeChild(script);
-            }
-        };
-    }, []);
-
-    // Handle Kakao Map directions
-    const handleKakaoMapDirections = (destination) => {
-        // Kakao Map Directions URL
-        // 카카오맵 길찾기는 URL 스킴으로 연결됩니다
-        const encodedDestination = encodeURIComponent(destination);
-        const encodedOrigin = encodeURIComponent(userAddress);
-
-        // 카카오맵 앱/웹으로 길찾기 열기
-        const kakaoMapUrl = `https://map.kakao.com/link/to/${encodedDestination},${destination}`;
-
-        // 새 창으로 카카오맵 길찾기 열기
-        window.open(kakaoMapUrl, '_blank');
-    };
-
-    // Mock 주변 매장 데이터
-    const nearbyStores = [
-        {
-            id: 1,
-            name: '이마트 강남점',
-            type: '대형마트',
-            distance: '350m',
-            address: '서울 강남구 강남대로',
-            rating: 4.5,
-        },
-        {
-            id: 2,
-            name: '동네슈퍼 편의점',
-            type: '슈퍼마켓',
-            distance: '120m',
-            address: '서울 강남구 논현동',
-            rating: 4.2,
-        },
-        {
-            id: 3,
-            name: '중앙시장',
-            type: '전통시장',
-            distance: '480m',
-            address: '서울 강남구 역삼동',
-            rating: 4.7,
-        },
-        {
-            id: 4,
-            name: 'GS25 논현점',
-            type: '편의점',
-            distance: '200m',
-            address: '서울 강남구 논현동',
-            rating: 4.0,
-        },
-        {
-            id: 5,
-            name: '롯데마트 서초점',
-            type: '대형마트',
-            distance: '520m',
-            address: '서울 서초구 서초대로',
-            rating: 4.6,
-        },
-    ];
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
             <div className="max-w-5xl mx-auto px-6 py-12">
                 {/* Back Button */}
                 <button
-                    onClick={() => onNavigate('home')}
+                    onClick={() => onNavigate("home")}
                     className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md">
                     <ArrowLeft size={20} />
                     목록으로 돌아가기
@@ -293,14 +351,10 @@ export function RecipeDetail({
                                 <UserIcon size={18} />
                                 <span
                                     className="cursor-pointer hover:underline"
-                                    onClick={() => {
-                                        const authorId = recipe.authorId;
-                                        if (!authorId) return; // authorId 없으면 아무것도 안 함(또는 alert)
-                                        onAuthorClick?.(
-                                            authorId,
-                                            recipe.author,
-                                        );
-                                    }}>
+                                    onClick={() =>
+                                        onAuthorClick &&
+                                        onAuthorClick(recipe.author)
+                                    }>
                                     {recipe.author}
                                 </span>
                             </div>
@@ -313,6 +367,7 @@ export function RecipeDetail({
                                 <span className="font-bold text-[#3d3226]">
                                     {averageRating}
                                 </span>
+
                                 <span className="text-sm text-[#6b5d4f]">
                                     ({totalRatings}명)
                                 </span>
@@ -337,13 +392,13 @@ export function RecipeDetail({
                                             size={32}
                                             fill={
                                                 star <= userRating
-                                                    ? '#f59e0b'
-                                                    : 'none'
+                                                    ? "#f59e0b"
+                                                    : "none"
                                             }
                                             className={
                                                 star <= userRating
-                                                    ? 'text-[#f59e0b]'
-                                                    : 'text-[#d4cbbf]'
+                                                    ? "text-[#f59e0b]"
+                                                    : "text-[#d4cbbf]"
                                             }
                                         />
                                     </button>
@@ -362,12 +417,12 @@ export function RecipeDetail({
                                 onClick={handleFavoriteClick}
                                 className={`flex items-center gap-2 px-6 py-3 rounded-md border-2 transition-colors ${
                                     isFavorited
-                                        ? 'bg-blue-100 border-blue-500 text-blue-700'
-                                        : 'border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226]'
+                                        ? "bg-blue-100 border-blue-500 text-blue-700"
+                                        : "border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226]"
                                 }`}>
                                 <Bookmark
                                     size={20}
-                                    fill={isFavorited ? 'currentColor' : 'none'}
+                                    fill={isFavorited ? "currentColor" : "none"}
                                 />
                                 저장하기
                             </button>
@@ -405,82 +460,247 @@ export function RecipeDetail({
                             </li>
                         ))}
                     </ul>
-
-                    {/* AI Store Map */}
-                    {showStoreMap && (
+                    {showStoreMap && userAddress && (
                         <div className="mt-6 pt-6 border-t-2 border-[#d4cbbf]">
-                            <div className="flex items-center gap-2 mb-4">
-                                <MapPin size={20} className="text-[#3d3226]" />
-                                <h3 className="text-xl text-[#3d3226]">
-                                    내 근처 재료 구입 가능 매장
-                                </h3>
-                            </div>
-                            <p className="text-sm text-[#6b5d4f] mb-4">
-                                현재 위치 기준으로 가까운 순서로 표시됩니다
-                            </p>
-
-                            <div className="space-y-3">
-                                {nearbyStores.map((store) => (
-                                    <div
-                                        key={store.id}
-                                        className="p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors cursor-pointer">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <h4 className="font-bold text-[#3d3226]">
-                                                        {store.name}
-                                                    </h4>
-                                                    <span className="px-2 py-1 bg-white text-xs text-[#6b5d4f] rounded-full border border-[#d4cbbf]">
-                                                        {store.type}
-                                                    </span>
-                                                </div>
-                                                <p className="text-sm text-[#6b5d4f] mb-2">
-                                                    {store.address}
-                                                </p>
-                                                <div className="flex items-center gap-3 text-sm">
-                                                    <div className="flex items-center gap-1 text-[#3d3226]">
-                                                        <MapPin size={14} />
-                                                        <span className="font-medium">
-                                                            {store.distance}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <Star
-                                                            size={14}
-                                                            fill="#f59e0b"
-                                                            className="text-[#f59e0b]"
-                                                        />
-                                                        <span className="text-[#3d3226]">
-                                                            {store.rating}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() =>
-                                                    handleKakaoMapDirections(
-                                                        store.address,
-                                                    )
-                                                }
-                                                className="px-4 py-2 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors text-sm">
-                                                길찾기
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-                                <p className="text-sm text-blue-800">
-                                    💡 <strong>Tip:</strong> 매장을 클릭하면
-                                    해당 매장의 상세 정보와 위치를 확인할 수
-                                    있습니다.
+                            <div className="mb-3 p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf]">
+                                <p className="text-xs text-[#6b5d4f] mb-1">
+                                    선택한 주소
+                                </p>
+                                <p className="text-[#3d3226] font-medium">
+                                    {userAddress}
                                 </p>
                             </div>
+                            {/* ADD: 주소 다시 선택 / 재검색 버튼 */}
+                            <div className="flex items-center justify-end gap-2 mb-3">
+                                <button
+                                    onClick={() => setShowZipcodeModal(true)}
+                                    className="px-3 py-2 text-sm bg-white border-2 border-[#d4cbbf] rounded-md text-[#3d3226] hover:border-[#3d3226] transition-colors">
+                                    주소 다시 선택
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        // ✅ 현재 주소로 '강제 재검색' 트리거
+                                        setSelectedPlaceId(null);
+                                        setCurrentPage(1);
+
+                                        // IngredientMap이 address 변경 시 initMap을 다시 돌기 때문에
+                                        // address가 동일할 땐 리렌더 트릭을 써야 함:
+                                        setUserAddress((prev) => prev + " "); // 공백 추가
+                                        setTimeout(() => {
+                                            setUserAddress((prev) =>
+                                                prev.trim(),
+                                            ); // 다시 원복
+                                        }, 0);
+                                    }}
+                                    className="px-3 py-2 text-sm bg-[#3d3226] text-[#f5f1eb] border-2 border-[#3d3226] rounded-md hover:bg-[#5c4c40] transition-colors">
+                                    이 주소로 재검색
+                                </button>
+                            </div>
+
+                            <div className="bg-[#ebe5db] p-3 rounded-xl border-2 border-[#d4cbbf]">
+                                <IngredientMap
+                                    address={userAddress}
+                                    onPlacesChange={setNearbyPlaces}
+                                    selectedPlaceId={selectedPlaceId}
+                                    onOriginChange={setOriginLocation}
+                                />
+                            </div>
+
+                            {/* 추천 장소 리스트 */}
+                            {nearbyPlaces.length > 0 && (
+                                <>
+                                    {/* 리스트 */}
+                                    <div
+                                        id="nearby-place-list"
+                                        className="mt-4 space-y-2">
+                                        {pagedPlaces.map((p) => {
+                                            const isSelected =
+                                                selectedPlaceId === p.id;
+
+                                            return (
+                                                <div
+                                                    key={p.id}
+                                                    onClick={() => {
+                                                        setAutoSelected(true); //자동 추천 종료
+                                                        setSelectedPlaceId(
+                                                            p.id,
+                                                        ); //쉼표 제거
+                                                    }}
+                                                    className={`w-full text-left p-4 rounded-lg border-2 transition-colors cursor-pointer ${
+                                                        isSelected
+                                                            ? "bg-[#f3efe9] border-[#3d3226]"
+                                                            : "bg-white border-[#d4cbbf] hover:border-[#3d3226]"
+                                                    }`}>
+                                                    <div className="flex items-start justify-between gap-3">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <span className="font-bold text-[#3d3226]">
+                                                                    {p.name}
+                                                                </span>
+                                                                {p.fitScore >=
+                                                                    3 && (
+                                                                    <span className="ml-2 text-xs px-2 py-1 rounded-full bg-emerald-500 text-white">
+                                                                        강력
+                                                                        추천
+                                                                    </span>
+                                                                )}
+
+                                                                {p.fitScore ===
+                                                                    2 && (
+                                                                    <span className="ml-2 text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                                                                        추천
+                                                                    </span>
+                                                                )}
+
+                                                                {p.fitScore ===
+                                                                    1 && (
+                                                                    <span className="ml-2 text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                                                                        가능
+                                                                    </span>
+                                                                )}
+
+                                                                {/* 사용자가 직접 클릭한 경우 */}
+                                                                {p.id ===
+                                                                    selectedPlaceId &&
+                                                                    !autoSelected && (
+                                                                        <span className="ml-2 text-xs px-2 py-1 rounded-full bg-[#3d3226] text-white">
+                                                                            선택한
+                                                                            장소
+                                                                        </span>
+                                                                    )}
+
+                                                                <span className="px-2 py-1 text-xs rounded-full border border-[#d4cbbf] bg-[#ebe5db] text-[#3d3226]">
+                                                                    {p.label}
+                                                                </span>
+
+                                                                {preferredLabels.includes(
+                                                                    p.label,
+                                                                ) && (
+                                                                    <span className="ml-2 text-xs px-2 py-1 rounded-full border border-emerald-500 text-emerald-600 bg-emerald-50">
+                                                                        이
+                                                                        레시피에
+                                                                        적합
+                                                                    </span>
+                                                                )}
+
+                                                                {/* 길찾기 버튼 */}
+                                                                <button
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) => {
+                                                                        e.stopPropagation();
+
+                                                                        if (
+                                                                            !userAddress
+                                                                        ) {
+                                                                            alert(
+                                                                                "출발지 주소를 먼저 선택해주세요.",
+                                                                            );
+                                                                            return;
+                                                                        }
+
+                                                                        if (
+                                                                            !originLocation
+                                                                        ) {
+                                                                            alert(
+                                                                                "출발지 위치 정보를 불러오지 못했습니다.",
+                                                                            );
+                                                                            return;
+                                                                        }
+
+                                                                        const url = `https://map.kakao.com/link/from/${encodeURIComponent(
+                                                                            originLocation.name,
+                                                                        )},${originLocation.lat},${originLocation.lng}/to/${encodeURIComponent(
+                                                                            p.name,
+                                                                        )},${p.y},${p.x}`;
+
+                                                                        window.open(
+                                                                            url,
+                                                                            "_blank",
+                                                                        );
+                                                                    }}
+                                                                    className="ml-auto text-xs px-3 py-1 border border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors">
+                                                                    길찾기
+                                                                </button>
+                                                            </div>
+
+                                                            <div className="text-sm text-[#6b5d4f]">
+                                                                {p.address ||
+                                                                    "주소 정보 없음"}
+                                                            </div>
+
+                                                            {p.distance &&
+                                                                (() => {
+                                                                    const meta =
+                                                                        getDistanceMeta(
+                                                                            p.distance,
+                                                                        );
+
+                                                                    return (
+                                                                        <div className="mt-1 flex items-center gap-2 text-xs">
+                                                                            <span
+                                                                                className={`px-2 py-0.5 rounded-full bg-${meta.tone}-100 text-${meta.tone}-700`}>
+                                                                                {
+                                                                                    meta.label
+                                                                                }
+                                                                            </span>
+
+                                                                            <span className="text-[#8b7c6a]">
+                                                                                {
+                                                                                    meta.move
+                                                                                }{" "}
+                                                                                ·{" "}
+                                                                                {
+                                                                                    p.distance
+                                                                                }
+
+                                                                                m
+                                                                            </span>
+                                                                        </div>
+                                                                    );
+                                                                })()}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* 페이지네이션 */}
+                                    {totalPages > 1 && (
+                                        <div className="flex justify-center gap-2 mt-4">
+                                            {Array.from({
+                                                length: totalPages,
+                                            }).map((_, idx) => {
+                                                const page = idx + 1;
+                                                const isActive =
+                                                    page === currentPage;
+
+                                                return (
+                                                    <button
+                                                        key={page}
+                                                        onClick={() =>
+                                                            handlePageChange(
+                                                                page,
+                                                            )
+                                                        }
+                                                        className={`w-8 h-8 rounded-md border text-sm transition-colors ${
+                                                            isActive
+                                                                ? "bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]"
+                                                                : "bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]"
+                                                        }`}>
+                                                        {page}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
-
                 {/* Cooking Steps */}
                 <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8">
                     <h2 className="text-2xl mb-6 text-[#3d3226]">조리 방법</h2>
@@ -501,7 +721,7 @@ export function RecipeDetail({
                 </div>
 
                 {/* Hashtags */}
-                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8">
+                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8 mt-8">
                     <h2 className="text-2xl mb-4 text-[#3d3226]">해시태그</h2>
                     <div className="flex flex-wrap gap-3">
                         {mockHashtags.map((tag) => (
@@ -531,6 +751,7 @@ export function RecipeDetail({
                                         comment.author[0]
                                     )}
                                 </div>
+
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold text-[#3d3226]">
@@ -558,6 +779,7 @@ export function RecipeDetail({
                             </div>
                         ))}
                     </div>
+
                     <div className="mt-6">
                         <textarea
                             value={newComment}
@@ -593,7 +815,6 @@ export function RecipeDetail({
                             </p>
 
                             <div className="space-y-4">
-                                {/* Daum Postcode Button */}
                                 <button
                                     onClick={handleDaumPostcode}
                                     className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors flex items-center justify-center gap-2 shadow-md">
