@@ -24,7 +24,6 @@ export default function RootLayout() {
     const handleAuthSuccess = async () => {
         await fetchUser();
     };
-
     const handleLogout = () => {
         logout();
         navigate('/');

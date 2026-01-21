@@ -1,45 +1,29 @@
 import { useState } from 'react';
 import { ArrowLeft, Search, Filter, Star } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import { recipes } from '../utils/recipeData';
+import { useGetRecipeList } from '../apis/generated/recipe-controller/recipe-controller';
+import { mainCategory, subCategory } from '../utils/categoryData';
 
 export function RecipeBoard({ onNavigate, onRecipeClick }) {
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedMainCategory, setSelectedMainCategory] = useState('');
-    const [selectedSubCategory, setSelectedSubCategory] = useState('');
+    const [selectedMainCategoryId, setSelectedMainCategoryId] = useState(0);
+    const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(0);
 
-    const mainCategories = [
-        '고기류',
-        '해산물',
-        '계란',
-        '밥 / 면',
-        '김치 / 발효식품',
-        '두부 / 콩류',
-        '가공식품',
-        '냉동식품',
-        '채소',
-        '간편식 / 즉석식품',
-        '기타',
-    ];
-    const subCategories = [
-        '5분 요리',
-        '전자레인지',
-        '재료 3개 이하',
-        '불 없이 요리',
-        '혼밥 / 한 그릇',
-        '기타',
-    ];
+    // boardId=1 (레시피 게시판)
+    const { data: recipeData, isLoading } = useGetRecipeList(1);
+    const recipes = recipeData?.data?.data?.items || [];
 
+    // console.log(recipes);
     const filteredRecipes = recipes.filter((recipe) => {
         const matchesSearch = recipe.title
             .toLowerCase()
             .includes(searchQuery.toLowerCase());
         const matchesMainCategory =
-            selectedMainCategory === '' ||
-            recipe.mainCategory === selectedMainCategory;
+            selectedMainCategoryId === 0 ||
+            recipe.mainCategoryId === selectedMainCategoryId;
         const matchesSubCategory =
-            selectedSubCategory === '' ||
-            recipe.subCategory === selectedSubCategory;
+            selectedSubCategoryId === 0 ||
+            recipe.subCategoryId === selectedSubCategoryId;
         return matchesSearch && matchesMainCategory && matchesSubCategory;
     });
 
@@ -47,7 +31,7 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
             <div className="max-w-7xl mx-auto px-6 py-12">
                 <button
-                    onClick={() => onNavigate('home')}
+                    onClick={() => onNavigate('/')}
                     className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                 >
                     <ArrowLeft size={20} />
@@ -73,7 +57,10 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                             <input
                                 type="text"
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => {
+                                    // console.log(e.target.value);
+                                    setSearchQuery(e.target.value);
+                                }}
                                 placeholder="레시피 검색..."
                                 className="w-full pl-12 pr-4 py-4 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white text-[#3d3226]"
                             />
@@ -90,31 +77,37 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                 </h3>
                             </div>
                             <div className="flex flex-wrap gap-2">
-                                {mainCategories.map((category) => (
-                                    <button
-                                        key={category}
-                                        onClick={() => {
-                                            // 같은 카테고리를 다시 클릭하면 선택 취소
-                                            if (
-                                                selectedMainCategory ===
-                                                category
-                                            ) {
-                                                setSelectedMainCategory('');
-                                            } else {
-                                                setSelectedMainCategory(
-                                                    category,
-                                                );
-                                            }
-                                        }}
-                                        className={`px-4 py-2 rounded-md border-2 transition-colors ${
-                                            selectedMainCategory === category
-                                                ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
-                                        }`}
-                                    >
-                                        {category}
-                                    </button>
-                                ))}
+                                {Object.entries(mainCategory).map(
+                                    ([id, label]) => (
+                                        <button
+                                            key={id}
+                                            onClick={() => {
+                                                const categoryId = Number(id);
+                                                // 같은 카테고리 클릭 시 해제
+                                                if (
+                                                    selectedMainCategoryId ===
+                                                    categoryId
+                                                ) {
+                                                    setSelectedMainCategoryId(
+                                                        0,
+                                                    );
+                                                } else {
+                                                    setSelectedMainCategoryId(
+                                                        categoryId,
+                                                    );
+                                                }
+                                            }}
+                                            className={`px-4 py-2 rounded-md border-2 transition-colors ${
+                                                selectedMainCategoryId ===
+                                                Number(id)
+                                                    ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                    : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                            }`}
+                                        >
+                                            {label}
+                                        </button>
+                                    ),
+                                )}
                             </div>
                         </div>
 
@@ -126,30 +119,34 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                 </h3>
                             </div>
                             <div className="flex flex-wrap gap-2">
-                                {subCategories.map((category) => (
-                                    <button
-                                        key={category}
-                                        onClick={() => {
-                                            // 같은 카테고리를 다시 클릭하면 선택 취소
-                                            if (
-                                                selectedSubCategory === category
-                                            ) {
-                                                setSelectedSubCategory('');
-                                            } else {
-                                                setSelectedSubCategory(
-                                                    category,
-                                                );
-                                            }
-                                        }}
-                                        className={`px-4 py-2 rounded-md border-2 transition-colors ${
-                                            selectedSubCategory === category
-                                                ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
-                                        }`}
-                                    >
-                                        {category}
-                                    </button>
-                                ))}
+                                {Object.entries(subCategory).map(
+                                    ([id, label]) => (
+                                        <button
+                                            key={id}
+                                            onClick={() => {
+                                                const categoryId = Number(id);
+                                                if (
+                                                    selectedSubCategoryId ===
+                                                    categoryId
+                                                ) {
+                                                    setSelectedSubCategoryId(0);
+                                                } else {
+                                                    setSelectedSubCategoryId(
+                                                        categoryId,
+                                                    );
+                                                }
+                                            }}
+                                            className={`px-4 py-2 rounded-md border-2 transition-colors ${
+                                                selectedSubCategoryId ===
+                                                Number(id)
+                                                    ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
+                                                    : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
+                                            }`}
+                                        >
+                                            {label}
+                                        </button>
+                                    ),
+                                )}
                             </div>
                         </div>
                     </div>
@@ -167,19 +164,33 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredRecipes.map((recipe) => (
                                 <div
-                                    key={recipe.id}
+                                    key={recipe.recipeId}
                                     onClick={() =>
                                         onRecipeClick &&
-                                        onRecipeClick(recipe.id)
+                                        onRecipeClick(recipe.recipeId)
                                     }
                                     className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border-2 border-[#e5dfd5] hover:border-[#3d3226]"
                                 >
                                     <div className="relative aspect-video overflow-hidden">
                                         <ImageWithFallback
-                                            src={recipe.image}
+                                            src={
+                                                recipe.thumbnailImgUrl ||
+                                                `https://picsum.photos/seed/${recipe.recipeId}/500`
+                                            }
                                             alt={recipe.title}
                                             className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                                         />
+                                        {!recipe.thumbnailImgUrl && (
+                                            <div
+                                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold pointer-events-none whitespace-nowrap"
+                                                style={{
+                                                    textShadow:
+                                                        '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0px 0px 5px rgba(0,0,0,0.8)',
+                                                }}
+                                            >
+                                                랜덤이미지 입니다.
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="p-4">
@@ -187,18 +198,18 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                             {recipe.title}
                                         </h3>
                                         <div className="flex items-center justify-between text-sm text-[#6b5d4f]">
-                                            <span>by {recipe.author}</span>
+                                            <span>by {recipe.username}</span>
                                             <span className="flex items-center gap-1">
                                                 <Star
                                                     size={14}
                                                     fill="#f59e0b"
                                                     className="text-[#f59e0b]"
                                                 />
-                                                {recipe.rating}
+                                                {recipe.avgRating}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-3 mt-2 text-xs text-[#6b5d4f]">
-                                            <span>👁 {recipe.views}</span>
+                                            <span>👁 {recipe.viewCount}</span>
                                         </div>
                                     </div>
                                 </div>
