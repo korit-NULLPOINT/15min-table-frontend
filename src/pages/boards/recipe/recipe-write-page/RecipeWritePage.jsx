@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { RecipeWrite } from '../../../../components/RecipeWrite';
+import { RecipeWrite } from '../../../../components/recipe/RecipeWrite';
 
 export default function RecipeWritePage() {
     const { boardId } = useParams();

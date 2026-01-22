@@ -4,7 +4,7 @@ import {
     useGetRating,
     useUpsertRating,
     useDeleteRating,
-} from '../../../../apis/generated/rating-controller/rating-controller';
+} from '../../apis/generated/rating-controller/rating-controller';
 
 export default function RecipeRatingPage({
     recipeId,

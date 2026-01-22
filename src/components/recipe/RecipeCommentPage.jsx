@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Trash2, Mail } from 'lucide-react';
-import { ImageWithFallback } from '../../../../components/figma/ImageWithFallback';
+import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { useQueryClient } from '@tanstack/react-query';
-import { usePrincipalState } from '../../../../store/usePrincipalState';
+import { usePrincipalState } from '../../store/usePrincipalState';
 import {
     addComment,
     getGetCommentListByRecipeIdQueryKey,
     deleteComment,
-} from '../../../../apis/generated/comment-controller/comment-controller';
+} from '../../apis/generated/comment-controller/comment-controller';
 
 export default function RecipeCommentPage({
     comments,

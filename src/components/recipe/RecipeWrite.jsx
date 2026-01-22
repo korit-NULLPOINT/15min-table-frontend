@@ -8,9 +8,9 @@ import {
     Mail,
     Filter,
 } from 'lucide-react';
-import { usePrincipalState } from '../store/usePrincipalState';
-import { useAddRecipe } from '../apis/generated/recipe-controller/recipe-controller';
-import { mainCategory, subCategory } from '../utils/categoryData';
+import { usePrincipalState } from '../../store/usePrincipalState';
+import { useAddRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
+import { mainCategory, subCategory } from '../../utils/categoryData';
 
 export function RecipeWrite({ onNavigate }) {
     const [showEmailWarning, setShowEmailWarning] = useState(false);
@@ -32,15 +32,6 @@ export function RecipeWrite({ onNavigate }) {
 
     const [hashtags, setHashtags] = useState([]);
     const [newHashtag, setNewHashtag] = useState('');
-
-    // const completedImageRef = useRef(null);
-    // const [completedImage, setCompletedImage] = useState('');
-    // const [cookingMethod, setCookingMethod] = useState('');
-
-    // useEffect(() => {
-    //     console.log('mainCategory : ', selectedMainCategoryId);
-    //     console.log('subCategory : ', selectedSubCategoryId);
-    // }, [selectedMainCategoryId, selectedSubCategoryId]);
 
     const handleImageUpload = (e, type) => {
         const file = e.target.files?.[0];
