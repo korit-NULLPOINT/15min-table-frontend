@@ -9,19 +9,19 @@ import {
     CheckCircle,
 } from 'lucide-react';
 
-import { usePrincipalState } from '../store/usePrincipalState';
+import { usePrincipalState } from '../../store/usePrincipalState';
 import {
     currentUserComments,
     currentUserCommunityPosts,
     currentUserFavorites,
     currentUserRecipePosts,
-} from '../utils/recipeData';
+} from '../../utils/recipeData';
 
-import { useApiErrorMessage } from '../hooks/useApiErrorMessage';
+import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
 import {
     useChangeUsername,
     getGetPrincipalQueryKey,
-} from '../apis/generated/user-account-controller/user-account-controller';
+} from '../../apis/generated/user-account-controller/user-account-controller';
 import { useQueryClient } from '@tanstack/react-query';
 
 import UserProfileMyProfile from './UserProfileMyProfile';
@@ -328,7 +328,6 @@ export function UserProfile({
                         <UserProfileInfo
                             profileData={profileData}
                             fileInputRef={fileInputRef}
-                            onImageUpload={handleImageUpload}
                             usernameEditRef={usernameEditRef}
                             isUsernameEditing={isUsernameEditing}
                             setIsUsernameEditing={setIsUsernameEditing}
@@ -337,13 +336,13 @@ export function UserProfile({
                             onSaveUsername={handleSaveUsername}
                             isSavingUsername={isChangingUsername}
                             usernameError={usernameError}
-                            onChangePasswordClick={onChangePasswordClick}
                             onOpenDeleteConfirm={() =>
                                 setShowDeleteConfirm(true)
                             }
                             isSaved={isSaved}
                             canEditProfileImg={canEditProfileImg}
                             onProfileImgUpdated={handleProfileImgUpdated}
+                            onLogout={onLogout}
                         />
                     )}
 

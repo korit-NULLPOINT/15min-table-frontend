@@ -10,7 +10,6 @@ import { useState, useRef, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { ImageWithFallback } from './figma/ImageWithFallback';
-import AiStoreMapPage from '../pages/boards/recipe/recipe-detail-page/AiStoreMapPage';
 import RecipeCommentPage from '../pages/boards/recipe/recipe-detail-page/RecipeCommentPage';
 import RecipeRatingPage from '../pages/boards/recipe/recipe-detail-page/RecipeRatingPage';
 
@@ -19,6 +18,7 @@ import {
     useAddBookmark,
     useDeleteBookmark,
 } from '../apis/generated/bookmark-controller/bookmark-controller';
+import KakaoMap from './KakaoMap';
 
 function safeJsonArray(value, fallback = []) {
     if (Array.isArray(value)) return value;
@@ -85,12 +85,18 @@ export function RecipeDetail({
     const mapRef = useRef(null);
 
     const handleAIStoreMap = () => {
-        if (mapRef.current && typeof mapRef.current.handleAIStoreMap === 'function') {
+        if (
+            mapRef.current &&
+            typeof mapRef.current.handleAIStoreMap === 'function'
+        ) {
             mapRef.current.handleAIStoreMap();
             return;
         }
+
         // ref 메서드가 없을 때도 사용자 경험은 유지
-        alert('지도 기능을 불러오지 못했습니다. (AiStoreMapPage ref 확인 필요)');
+        alert(
+            '지도 기능을 불러오지 못했습니다. (KakaoMap ref 연결/메서드 노출 확인)',
+        );
     };
 
     // --- ingredient modal ---
@@ -103,7 +109,8 @@ export function RecipeDetail({
 
     const ingredientImgSrc = useMemo(() => {
         // 서버 필드 우선, 없으면 seed로 대체
-        if (recipeDetail?.ingredientImgUrl) return recipeDetail.ingredientImgUrl;
+        if (recipeDetail?.ingredientImgUrl)
+            return recipeDetail.ingredientImgUrl;
 
         const str =
             typeof recipeDetail?.ingredients === 'string'
@@ -186,12 +193,14 @@ export function RecipeDetail({
     };
 
     const mockHashtags = useMemo(() => {
-        return recipeDetail.hashtags || [
-            '15분요리',
-            '간단레시피',
-            '자취생필수',
-            '초간단',
-        ];
+        return (
+            recipeDetail.hashtags || [
+                '15분요리',
+                '간단레시피',
+                '자취생필수',
+                '초간단',
+            ]
+        );
     }, [recipeDetail.hashtags]);
 
     // onNavigate가 (type) 형태로 쓰이기도 하고, 단순 함수로 쓰이기도 해서 안전하게
@@ -285,7 +294,9 @@ export function RecipeDetail({
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <span>조회수 {recipeDetail.viewCount}</span>
+                                        <span>
+                                            조회수 {recipeDetail.viewCount}
+                                        </span>
                                         <span className="w-1 h-1 bg-[#d4cbbf] rounded-full" />
                                         <span>
                                             {recipeDetail.updateDt &&
@@ -359,8 +370,7 @@ export function RecipeDetail({
                             onClick={handleAIStoreMap}
                             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md"
                         >
-                            <Sparkles size={16} />
-                            내 근처 재료 찾기
+                            <Sparkles size={16} />내 근처 재료 찾기
                         </button>
                     </div>
 
@@ -402,7 +412,7 @@ export function RecipeDetail({
                     </div>
 
                     {/* ✅ 카카오맵 기능은 이 컴포넌트에서 유지 */}
-                    <AiStoreMapPage ref={mapRef} />
+                    <KakaoMap ref={mapRef} ingredients={ingredientsArr} />
                 </div>
 
                 {/* Steps */}

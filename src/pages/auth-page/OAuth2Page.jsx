@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { AuthModal } from '../../components/AuthModal';
+import { AuthModal } from '../../components/layout/AuthModal';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { LoaderCircle } from 'lucide-react';
 
@@ -14,14 +14,16 @@ const OAuth2Page = () => {
         email: searchParams.get('email'),
         provider: searchParams.get('provider'),
         name: searchParams.get('name'),
-        providerUserId: searchParams.get('providerId') || searchParams.get('providerUserId')
+        providerUserId:
+            searchParams.get('providerId') ||
+            searchParams.get('providerUserId'),
     });
 
     useEffect(() => {
         const accessToken = searchParams.get('accessToken');
         if (accessToken) {
             localStorage.setItem('AccessToken', accessToken);
-            
+
             fetchUser().finally(() => {
                 navigate('/');
             });
@@ -31,14 +33,20 @@ const OAuth2Page = () => {
     if (searchParams.get('accessToken')) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-[#f5f1eb]">
-                <p className="text-[#6b5d4f] text-lg font-medium animate-pulse">로그인 처리중...</p>
+                <p className="text-[#6b5d4f] text-lg font-medium animate-pulse">
+                    로그인 처리중...
+                </p>
                 <LoaderCircle className="w-12 h-12 text-[#3d3226] animate-spin mb-4" />
             </div>
         );
     }
 
     if (!socialData) {
-        return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                Loading...
+            </div>
+        );
     }
 
     const handleLinkAccount = () => {
@@ -53,14 +61,20 @@ const OAuth2Page = () => {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-[#f5f1eb] p-4">
-             <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8 border-2 border-[#3d3226] text-center">
+            <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8 border-2 border-[#3d3226] text-center">
                 <h1 className="text-2xl font-serif text-[#3d3226] mb-6">
                     SNS 계정 연동
                 </h1>
                 <p className="text-[#6b5d4f] mb-8">
                     반갑습니다! <br />
-                    <span className="font-bold text-[#3d3226]">{socialData.email || '사용자'}</span>님, <br/>
-                    <span className="capitalize font-bold text-[#3d3226]">{socialData.provider}</span> 계정으로 인증되었습니다.
+                    <span className="font-bold text-[#3d3226]">
+                        {socialData.email || '사용자'}
+                    </span>
+                    님, <br />
+                    <span className="capitalize font-bold text-[#3d3226]">
+                        {socialData.provider}
+                    </span>{' '}
+                    계정으로 인증되었습니다.
                 </p>
 
                 <div className="space-y-4">
@@ -70,13 +84,15 @@ const OAuth2Page = () => {
                     >
                         <span>기존 계정과 연동하기</span>
                     </button>
-                    
+
                     <div className="relative py-2">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-[#d4cbbf]"></div>
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white text-[#6b5d4f]">또는</span>
+                            <span className="px-4 bg-white text-[#6b5d4f]">
+                                또는
+                            </span>
                         </div>
                     </div>
 
@@ -94,11 +110,11 @@ const OAuth2Page = () => {
                 onClose={() => setIsAuthModalOpen(false)}
                 mode={authMode}
                 onModeChange={setAuthMode}
-                onAuthSuccess={() => navigate('/')} 
+                onAuthSuccess={() => navigate('/')}
                 socialData={socialData}
             />
         </div>
     );
-}
+};
 
 export default OAuth2Page;

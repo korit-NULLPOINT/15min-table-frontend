@@ -10,18 +10,17 @@ import {
     UserX,
     LoaderCircle,
 } from 'lucide-react';
-
-import { useSendMail } from '../apis/generated/mail-controller/mail-controller';
+import { useSendMail } from '../../apis/generated/mail-controller/mail-controller';
 import {
     useChangeProfileImg,
     getGetPrincipalQueryKey,
-} from '../apis/generated/user-account-controller/user-account-controller';
+} from '../../apis/generated/user-account-controller/user-account-controller';
 
-import { useApiErrorMessage } from '../hooks/useApiErrorMessage';
+import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
-import { storage } from '../apis/utils/config/firebaseConfig'; // ✅ 네 경로 맞게 유지
+import { storage } from '../../apis/utils/config/firebaseConfig'; // ✅ 네 경로 맞게 유지
 import { v4 as uuid } from 'uuid';
 
 export default function UserProfileInfo({

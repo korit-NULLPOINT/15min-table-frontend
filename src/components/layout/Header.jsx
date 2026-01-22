@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Menu, User, PenSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import { usePrincipalState } from '../store/usePrincipalState';
+import { usePrincipalState } from '../../store/usePrincipalState';
 import { Sidebar } from './Sidebar';
 import { LogoButton } from './LogoButton';
 import { NotificationCenter } from './NotificationCenter';

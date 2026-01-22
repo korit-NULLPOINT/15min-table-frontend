@@ -7,7 +7,6 @@ export default function MyPageRouter() {
     return (
         <Routes>
             <Route path="" element={<MyProfilePage />} />
-            {/* <Route path="notifications" element={<NotificationsPage />} /> */}
             <Route
                 path="followers"
                 element={<FollowListPage type="followers" />}

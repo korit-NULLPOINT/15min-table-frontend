@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import {
     useSignin,
     useSignup,
-} from '../apis/generated/user-auth-controller/user-auth-controller';
+} from '../../apis/generated/user-auth-controller/user-auth-controller';
 import {
     useMerge,
     useSignup1,
-} from '../apis/generated/o-auth-2-auth-controller/o-auth-2-auth-controller';
+} from '../../apis/generated/o-auth-2-auth-controller/o-auth-2-auth-controller';
 
 /**
  * 리팩토링된 orval(customInstance) 기준 AuthModal

@@ -1,6 +1,6 @@
 // src/pages/me/follow-list-page/FollowListPage.jsx
 import { useNavigate } from 'react-router-dom';
-import { FollowList } from '../../../components/FollowList';
+import { FollowList } from '../../../components/user-profile/FollowList';
 
 export default function FollowListPage({ type }) {
     const navigate = useNavigate();

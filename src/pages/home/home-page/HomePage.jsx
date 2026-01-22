@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { TopRecipes } from '../../../components/TopRecipes';
-import { HighRatedSlider } from '../../../components/HighRatedSlider';
+import { TopRecipes } from '../../../components/home/TopRecipes';
+import { HighRatedSlider } from '../../../components/home/HighRatedSlider';
 
 export default function HomePage() {
     const navigate = useNavigate();

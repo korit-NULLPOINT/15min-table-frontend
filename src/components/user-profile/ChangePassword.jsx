@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 
-import { changePassword } from '../../../apis/generated/user-account-controller/user-account-controller';
-import { usePrincipalState } from '../../../store/usePrincipalState';
+import { changePassword } from '../../apis/generated/user-account-controller/user-account-controller';
+import { usePrincipalState } from '../../store/usePrincipalState';
 
-function ChangePasswordPage({ onClose }) {
+function ChangePassword({ onClose }) {
     const navigate = useNavigate();
 
     const [oldPassword, setOldPassword] = useState('');
@@ -181,4 +181,4 @@ function ChangePasswordPage({ onClose }) {
     );
 }
 
-export default ChangePasswordPage;
+export default ChangePassword;

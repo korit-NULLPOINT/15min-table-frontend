@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePrincipalState } from '../../../../store/usePrincipalState';
-import { AuthModal } from '../../../../components/AuthModal';
+import { AuthModal } from '../../../../components/layout/AuthModal';
 import { RecipeDetail } from '../../../../components/RecipeDetail';
 import { useGetRecipeDetail } from '../../../../apis/generated/recipe-controller/recipe-controller';
 import { useGetCommentListByRecipeId } from '../../../../apis/generated/comment-controller/comment-controller';
@@ -23,7 +23,10 @@ export default function RecipeDetailPage() {
 
     // ✅ 레시피 상세
     const recipeQuery = useGetRecipeDetail(bId, rId, {
-        query: { refetchOnWindowFocus: false, enabled: Number.isFinite(bId) && Number.isFinite(rId) },
+        query: {
+            refetchOnWindowFocus: false,
+            enabled: Number.isFinite(bId) && Number.isFinite(rId),
+        },
     });
     const recipeDetail = recipeQuery?.data?.data?.data;
 

@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Header } from '../components/Header';
-import { AuthModal } from '../components/AuthModal';
+import { Header } from '../components/layout/Header';
+import { AuthModal } from '../components/layout/AuthModal';
 import { usePrincipalState } from '../store/usePrincipalState';
 
 export default function RootLayout() {

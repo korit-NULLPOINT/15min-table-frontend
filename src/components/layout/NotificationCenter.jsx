@@ -8,9 +8,9 @@ import {
     CheckCheck,
 } from 'lucide-react';
 
-import { usePrincipalState } from '../store/usePrincipalState';
-import { useNotificationStore } from '../store/useNotificationStore';
-import { mockNotifications } from '../utils/recipeData';
+import { usePrincipalState } from '../../store/usePrincipalState';
+import { useNotificationStore } from '../../store/useNotificationStore';
+import { mockNotifications } from '../../utils/recipeData';
 
 // mock paging
 function selectMockPage(cursor, size) {
