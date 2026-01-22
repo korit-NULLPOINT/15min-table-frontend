@@ -10,6 +10,7 @@ import {
     UserX,
     LoaderCircle,
 } from 'lucide-react';
+
 import { useSendMail } from '../../apis/generated/mail-controller/mail-controller';
 import {
     useChangeProfileImg,
@@ -19,9 +20,8 @@ import {
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
 import { useQueryClient } from '@tanstack/react-query';
 
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
-import { storage } from '../../apis/utils/config/firebaseConfig'; // ✅ 네 경로 맞게 유지
-import { v4 as uuid } from 'uuid';
+import { storage } from '../../apis/utils/config/firebaseConfig';
+import { useFirebaseImageUpload } from '../../hooks/useFirebaseImageUpload';
 
 export default function UserProfileInfo({
     profileData,
@@ -45,7 +45,9 @@ export default function UserProfileInfo({
 }) {
     const queryClient = useQueryClient();
 
-    // 메일 발송
+
+    // 1) 이메일 인증 메일 발송
+
     const {
         errorMessage: mailError,
         clearError: clearMailError,
@@ -92,29 +94,32 @@ export default function UserProfileInfo({
 
     const isVerifyButtonDisabled = isSendingMail || cooldownLeft > 0;
 
-    /* -----------------------------
-     * 2) 프로필 이미지 업로드 (Firebase -> 백 API)
-     * ----------------------------- */
+
+     // 프로필 이미지 업로드 (Firebase -> 백 API) : 공통 훅 사용
+
     const {
         errorMessage: imgError,
         clearError: clearImgError,
         handleApiError: handleImgApiError,
     } = useApiErrorMessage();
 
-    // ✅ 최신 orval 훅 이름: useChangeProfileImg
     const {
         mutateAsync: changeProfileImgMutateAsync,
         isPending: isChangingProfileImg,
     } = useChangeProfileImg();
 
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
+    const {
+        upload: uploadImage,
+        isUploading,
+        progress: uploadProgress,
+        resetProgress,
+    } = useFirebaseImageUpload(storage, {
+        maxMB: 2,
+        allowTypes: ['image/jpeg', 'image/png', 'image/webp'],
+    });
 
     const isUploadDisabled =
         !canEditProfileImg || isUploading || isChangingProfileImg;
-
-    const MAX_MB = 2;
-    const ALLOW_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
     const handleSelectProfileImage = () => {
         if (isUploadDisabled) return;
@@ -139,25 +144,7 @@ export default function UserProfileInfo({
         }
 
         clearImgError();
-
-        // ✅ 타입 제한
-        if (!ALLOW_TYPES.includes(file.type)) {
-            await handleImgApiError(new Error('INVALID_FILE_TYPE'), {
-                fallbackMessage:
-                    '지원하지 않는 이미지 형식입니다. JPG/PNG/WEBP만 업로드할 수 있어요.',
-            });
-            resetInput();
-            return;
-        }
-
-        // ✅ 용량 제한
-        if (file.size > MAX_MB * 1024 * 1024) {
-            await handleImgApiError(new Error('FILE_TOO_LARGE'), {
-                fallbackMessage: `이미지 용량이 너무 큽니다. ${MAX_MB}MB 이하로 업로드해주세요.`,
-            });
-            resetInput();
-            return;
-        }
+        resetProgress();
 
         // ✅ userId 없으면 업로드 불가
         if (!profileData?.userId) {
@@ -175,43 +162,12 @@ export default function UserProfileInfo({
         }
 
         try {
-            setIsUploading(true);
-            setUploadProgress(0);
-
-            const ext =
-                file.name.split('.').pop()?.toLowerCase() ||
-                (file.type === 'image/png'
-                    ? 'png'
-                    : file.type === 'image/webp'
-                      ? 'webp'
-                      : 'jpg');
-
-            const filename = `${uuid()}.${ext}`;
-            const imageRef = ref(
-                storage,
-                `profile-img/${profileData.userId}/${filename}`,
-            );
-
-            const uploadTask = uploadBytesResumable(imageRef, file);
-
-            await new Promise((resolve, reject) => {
-                uploadTask.on(
-                    'state_changed',
-                    (snapshot) => {
-                        const p = Math.round(
-                            (snapshot.bytesTransferred / snapshot.totalBytes) *
-                                100,
-                        );
-                        setUploadProgress(p);
-                    },
-                    reject,
-                    resolve,
-                );
+            // ✅ Firebase 업로드 (공통 훅)
+            const downloadUrl = await uploadImage(file, {
+                dir: `profile-img/${profileData.userId}`,
             });
 
-            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-
-            // ✅ 최신 DTO 필드명: profileImgUrl
+            // ✅ 백 API 호출
             await changeProfileImgMutateAsync({
                 data: {
                     userId: profileData.userId,
@@ -220,24 +176,25 @@ export default function UserProfileInfo({
             });
 
             onProfileImgUpdated?.(downloadUrl);
+
             // ✅ react-query principal 갱신
             queryClient.invalidateQueries({
                 queryKey: getGetPrincipalQueryKey(),
             });
         } catch (err) {
+            // 훅에서 err.code를 붙여서 던짐
             await handleImgApiError(err, {
                 fallbackMessage:
+                    err?.message ||
                     '프로필 이미지 변경에 실패했습니다. 잠시 후 다시 시도해주세요.',
             });
         } finally {
-            setIsUploading(false);
             resetInput();
         }
     };
 
-    /* -----------------------------
-     * 3) 닉네임
-     * ----------------------------- */
+
+    // 닉네임
     const isUsernameDisabled = useMemo(() => {
         return (
             isSavingUsername ||

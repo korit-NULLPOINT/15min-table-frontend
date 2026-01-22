@@ -18,6 +18,7 @@ export interface ModifyRecipeReqDto {
 export interface ApiRespDtoVoid {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: unknown;
 }
 
@@ -35,6 +36,7 @@ export interface SigninReqDto {
 export interface ApiRespDtoString {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: string;
 }
 
@@ -67,6 +69,7 @@ export interface HashtagRespDto {
 export interface ApiRespDtoListHashtagRespDto {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: HashtagRespDto[];
 }
 
@@ -87,6 +90,7 @@ export interface RecipeRatingRespDto {
 export interface ApiRespDtoRecipeRatingRespDto {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: RecipeRatingRespDto;
 }
 
@@ -122,6 +126,7 @@ export interface Comment {
 export interface ApiRespDtoComment {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: Comment;
 }
 
@@ -144,7 +149,43 @@ export interface AddRecipeReqDto {
 export interface ApiRespDtoInteger {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: number;
+}
+
+export interface AiHashtagReqDto {
+  title?: string;
+  intro?: string;
+  ingredients?: string;
+  steps?: string;
+  limit?: number;
+}
+
+export interface AiHashtagRespDto {
+  hashtags?: string[];
+}
+
+export interface ApiRespDtoAiHashtagRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: AiHashtagRespDto;
+}
+
+export interface UserProfileRespDto {
+  userId?: number;
+  username?: string;
+  profileImgUrl?: string;
+  followersCount?: number;
+  followingsCount?: number;
+  isFollowing?: boolean;
+}
+
+export interface ApiRespDtoUserProfileRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: UserProfileRespDto;
 }
 
 export interface Role {
@@ -174,16 +215,46 @@ export interface PrincipalUser {
   status?: string;
   userRoles?: UserRole[];
   authorities?: GrantedAuthority[];
-  accountNonExpired?: boolean;
-  credentialsNonExpired?: boolean;
-  accountNonLocked?: boolean;
   enabled?: boolean;
+  credentialsNonExpired?: boolean;
+  accountNonExpired?: boolean;
+  accountNonLocked?: boolean;
 }
 
 export interface ApiRespDtoPrincipalUser {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: PrincipalUser;
+}
+
+export interface RecipeListRespDto {
+  recipeId?: number;
+  userId?: number;
+  thumbnailImgUrl?: string;
+  viewCount?: number;
+  avgRating?: number;
+  title?: string;
+  username?: string;
+  profileImgUrl?: string;
+  mainCategoryId?: number;
+  subCategoryId?: number;
+  createDt?: string;
+  updateDt?: string;
+}
+
+export interface RecipeListPageRespDto {
+  items?: RecipeListRespDto[];
+  totalCount?: number;
+  page?: number;
+  size?: number;
+}
+
+export interface ApiRespDtoRecipeListPageRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: RecipeListPageRespDto;
 }
 
 export interface RatingSummaryRespDto {
@@ -194,6 +265,7 @@ export interface RatingSummaryRespDto {
 export interface ApiRespDtoRatingSummaryRespDto {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: RatingSummaryRespDto;
 }
 
@@ -211,6 +283,7 @@ export interface NotificationRespDto {
 export interface ApiRespDtoListNotificationRespDto {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: NotificationRespDto[];
 }
 
@@ -221,6 +294,7 @@ export interface FollowStatusRespDto {
 export interface ApiRespDtoFollowStatusRespDto {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: FollowStatusRespDto;
 }
 
@@ -235,7 +309,20 @@ export interface FollowRespDto {
 export interface ApiRespDtoListFollowRespDto {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: FollowRespDto[];
+}
+
+export interface FollowCountRespDto {
+  followerCount?: number;
+  followingCount?: number;
+}
+
+export interface ApiRespDtoFollowCountRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: FollowCountRespDto;
 }
 
 export interface CommentRespDto {
@@ -252,12 +339,14 @@ export interface CommentRespDto {
 export interface ApiRespDtoListCommentRespDto {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: CommentRespDto[];
 }
 
 export interface ApiRespDtoBoolean {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: boolean;
 }
 
@@ -269,6 +358,7 @@ export interface BookmarkRespDto {
 export interface ApiRespDtoListBookmarkRespDto {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: BookmarkRespDto[];
 }
 
@@ -290,33 +380,8 @@ export interface Board {
 export interface ApiRespDtoListBoard {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: Board[];
-}
-
-export interface RecipeListRespDto {
-  recipeId?: number;
-  userId?: number;
-  thumbnailImgUrl?: string;
-  viewCount?: number;
-  avgRating?: number;
-  title?: string;
-  username?: string;
-  profileImgUrl?: string;
-  mainCategoryId?: number;
-  subCategoryId?: number;
-}
-
-export interface RecipeListPageRespDto {
-  items?: RecipeListRespDto[];
-  totalCount?: number;
-  page?: number;
-  size?: number;
-}
-
-export interface ApiRespDtoRecipeListPageRespDto {
-  status?: string;
-  message?: string;
-  data?: RecipeListPageRespDto;
 }
 
 export interface RecipeDetailRespDto {
@@ -345,6 +410,7 @@ export interface RecipeDetailRespDto {
 export interface ApiRespDtoRecipeDetailRespDto {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: RecipeDetailRespDto;
 }
 
@@ -365,14 +431,26 @@ export interface User {
 export interface ApiRespDtoUser {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: User;
 }
 
 export interface ApiRespDtoListUser {
   status?: string;
   message?: string;
+  /** 응답 데이터(없으면 null) */
   data?: User[];
 }
+
+export type GetRecipeListByUserIdParams = {
+page?: number;
+size?: number;
+};
+
+export type GetMyRecipeListParams = {
+page?: number;
+size?: number;
+};
 
 export type SearchHashtagsParams = {
 keyword: string;
