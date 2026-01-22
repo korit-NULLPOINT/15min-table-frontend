@@ -10,9 +10,9 @@ import { useState, useRef, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import AiStoreMapPage from './AiStoreMapPage';
 import RecipeCommentPage from './RecipeCommentPage';
 import RecipeRatingPage from './RecipeRatingPage';
+import KakaoMap from '../KakaoMap';
 
 import {
     useExistsByRecipeId,
@@ -411,7 +411,7 @@ export function RecipeDetail({
                     </div>
 
                     {/* ✅ 카카오맵 기능은 이 컴포넌트에서 유지 */}
-                    <AiStoreMapPage ref={mapRef} />
+                    <KakaoMap ref={mapRef} ingredients = {ingredientsArr}></KakaoMap>
                 </div>
 
                 {/* Steps */}
