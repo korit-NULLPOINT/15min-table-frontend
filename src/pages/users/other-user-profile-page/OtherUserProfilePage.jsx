@@ -1,7 +1,7 @@
 // src/pages/users/other-user-profile-page/OtherUserProfilePage.jsx
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { OtherUserProfile } from '../../../components/OtherUserProfile';
+import { OtherUserProfile } from '../../../components/user-profile/OtherUserProfile';
 
 const RECIPE_BOARD_ID = 1;
 const COMMUNITY_BOARD_ID = 2;
@@ -31,7 +31,8 @@ export default function OtherUserProfilePage() {
                         </h1>
                         <button
                             onClick={() => navigate(-1)}
-                            className="mt-4 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md">
+                            className="mt-4 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
+                        >
                             뒤로가기
                         </button>
                     </div>

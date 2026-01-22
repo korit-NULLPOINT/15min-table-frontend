@@ -1,9 +1,7 @@
 import { Star, ChevronLeft, ChevronRight, Award } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import { highRatedRecipes } from '../utils/recipeData';
-
-
+import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { highRatedRecipes } from '../../utils/recipeData';
 
 export function HighRatedSlider({ onRecipeClick }) {
     const scrollContainerRef = useRef(null);

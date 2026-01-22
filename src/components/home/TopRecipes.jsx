@@ -1,8 +1,6 @@
 import { Eye, Clock, Star, TrendingUp } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
-import { topRecipes } from '../utils/recipeData';
-
-
+import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { topRecipes } from '../../utils/recipeData';
 
 export function TopRecipes({ onRecipeClick }) {
     return (

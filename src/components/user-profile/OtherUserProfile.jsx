@@ -3,7 +3,7 @@ import { ArrowLeft, User as UserIcon } from 'lucide-react';
 import {
     otherUserCommunityPosts,
     otherUserRecipePosts,
-} from '../utils/recipeData';
+} from '../../utils/recipeData';
 
 export function OtherUserProfile({
     userId,
