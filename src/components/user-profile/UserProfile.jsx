@@ -7,15 +7,11 @@ import {
     Users,
     Mail,
     CheckCircle,
+    FileText,
 } from 'lucide-react';
 
 import { usePrincipalState } from '../../store/usePrincipalState';
-import {
-    currentUserComments,
-    currentUserCommunityPosts,
-    currentUserFavorites,
-    currentUserRecipePosts,
-} from '../../utils/recipeData';
+import { currentUserFavorites } from '../../utils/recipeData';
 
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
 import {
@@ -25,9 +21,12 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 
 import UserProfileMyProfile from './UserProfileMyProfile';
-import UserProfileInfo from './UserProfileInfo';
-import UserProfileMyComments from './UserProfileMyComments';
+import UserProfileMyPosts from './UserProfileMyPosts';
 import UserProfileBookmarks from './UserProfileBookmarks';
+import { useGetRecipeList } from '../../apis/generated/recipe-controller/recipe-controller';
+import { useGetBookmarkListByUserId } from '../../apis/generated/bookmark-controller/bookmark-controller';
+import { useGetMyRecipeList } from '../../apis/generated/user-recipe-controller/user-recipe-controller';
+import { useGetMyCommentList } from '../../apis/generated/comment-controller/comment-controller';
 
 export function UserProfile({
     onNavigate,
@@ -61,9 +60,6 @@ export function UserProfile({
     const [activeTab, setActiveTab] = useState('myProfile');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-    // MyProfile 탭 게시글 타입
-    const [myProfilePostType, setMyProfilePostType] = useState('recipe');
-
     // 이미지 로딩
     const [isProfileImageLoading, setIsProfileImageLoading] = useState(true);
     const imgRef = useRef(null);
@@ -85,11 +81,19 @@ export function UserProfile({
 
     const canEditProfileImg = !!principal && !isRole3;
 
-    // Mock data
-    const myPosts = currentUserRecipePosts;
-    const myCommunityPosts = currentUserCommunityPosts;
-    const myFavorites = currentUserFavorites;
-    const [myComments, setMyComments] = useState(currentUserComments);
+    const { data: myRecipeData } = useGetMyRecipeList();
+    const myPostList = myRecipeData?.data?.data?.items || [];
+
+    const { data: allRecipeList } = useGetRecipeList(1);
+    const recipeList = allRecipeList?.data?.data?.items || [];
+
+    const { data: commentData } = useGetMyCommentList();
+    const myCommentList = commentData?.data?.data || [];
+
+    // 북마크 로드
+    const bookmarkList = useGetBookmarkListByUserId();
+    const myBookmarkList = bookmarkList?.data?.data?.data;
+    // console.log(myBookmarkList);
 
     const queryClient = useQueryClient();
     const {
@@ -199,11 +203,6 @@ export function UserProfile({
         setShowDeleteConfirm(false);
     };
 
-    const handleDeleteComment = (commentId, e) => {
-        e.stopPropagation();
-        setMyComments((prev) => prev.filter((c) => c.id !== commentId));
-    };
-
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
             <div className="max-w-4xl mx-auto px-6 py-12">
@@ -257,7 +256,7 @@ export function UserProfile({
                     {/* Tabs */}
                     <div className="border-b-2 border-[#e5dfd5] bg-[#ebe5db]">
                         <div className="flex">
-                            <button
+                            {/* <button
                                 onClick={() => setActiveTab('myProfile')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${
                                     activeTab === 'myProfile'
@@ -267,12 +266,12 @@ export function UserProfile({
                             >
                                 <Users size={20} />
                                 My 프로필
-                            </button>
+                            </button> */}
 
                             <button
-                                onClick={() => setActiveTab('info')}
+                                onClick={() => setActiveTab('myProfile')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${
-                                    activeTab === 'info'
+                                    activeTab === 'myProfile'
                                         ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
                                         : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                 }`}
@@ -282,14 +281,14 @@ export function UserProfile({
                             </button>
 
                             <button
-                                onClick={() => setActiveTab('comments')}
+                                onClick={() => setActiveTab('posts')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${
-                                    activeTab === 'comments'
+                                    activeTab === 'posts'
                                         ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
                                         : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                                 }`}
                             >
-                                <MessageSquare size={20} />내 댓글
+                                <FileText size={20} />내 게시물
                             </button>
 
                             <button
@@ -307,60 +306,49 @@ export function UserProfile({
                     </div>
 
                     {/* Tab Content */}
-                    {activeTab === 'myProfile' && (
-                        <UserProfileMyProfile
-                            principal={principal}
-                            isProfileImageLoading={isProfileImageLoading}
-                            imgRef={imgRef}
-                            onImageLoad={handleImageLoad}
-                            onFollowersClick={onFollowersClick}
-                            onFollowingClick={onFollowingClick}
-                            myProfilePostType={myProfilePostType}
-                            setMyProfilePostType={setMyProfilePostType}
-                            myPosts={myPosts}
-                            myCommunityPosts={myCommunityPosts}
-                            onRecipeClick={onRecipeClick}
-                            onCommunityPostClick={onCommunityPostClick}
-                        />
-                    )}
+                    <div className="h-[550px] scrollbar-hide scrollbar-thin scrollbar-track-gray-200 scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full overflow-y-auto">
+                        {activeTab === 'myProfile' && (
+                            <UserProfileMyProfile
+                                profileData={profileData}
+                                fileInputRef={fileInputRef}
+                                usernameEditRef={usernameEditRef}
+                                isUsernameEditing={isUsernameEditing}
+                                setIsUsernameEditing={setIsUsernameEditing}
+                                usernameDraft={usernameDraft}
+                                setUsernameDraft={setUsernameDraft}
+                                onSaveUsername={handleSaveUsername}
+                                isSavingUsername={isChangingUsername}
+                                usernameError={usernameError}
+                                onOpenDeleteConfirm={() =>
+                                    setShowDeleteConfirm(true)
+                                }
+                                isSaved={isSaved}
+                                canEditProfileImg={canEditProfileImg}
+                                onProfileImgUpdated={handleProfileImgUpdated}
+                                onLogout={onLogout}
+                                onFollowersClick={onFollowersClick}
+                                onFollowingClick={onFollowingClick}
+                            />
+                        )}
 
-                    {activeTab === 'info' && (
-                        <UserProfileInfo
-                            profileData={profileData}
-                            fileInputRef={fileInputRef}
-                            usernameEditRef={usernameEditRef}
-                            isUsernameEditing={isUsernameEditing}
-                            setIsUsernameEditing={setIsUsernameEditing}
-                            usernameDraft={usernameDraft}
-                            setUsernameDraft={setUsernameDraft}
-                            onSaveUsername={handleSaveUsername}
-                            isSavingUsername={isChangingUsername}
-                            usernameError={usernameError}
-                            onOpenDeleteConfirm={() =>
-                                setShowDeleteConfirm(true)
-                            }
-                            isSaved={isSaved}
-                            canEditProfileImg={canEditProfileImg}
-                            onProfileImgUpdated={handleProfileImgUpdated}
-                            onLogout={onLogout}
-                        />
-                    )}
+                        {activeTab === 'posts' && (
+                            <UserProfileMyPosts
+                                onRecipeClick={onRecipeClick}
+                                onCommunityPostClick={onCommunityPostClick}
+                                myPostList={myPostList}
+                                recipeList={recipeList}
+                                myCommentList={myCommentList}
+                            />
+                        )}
 
-                    {activeTab === 'comments' && (
-                        <UserProfileMyComments
-                            myComments={myComments}
-                            onDeleteComment={handleDeleteComment}
-                            onRecipeClick={onRecipeClick}
-                            onCommunityPostClick={onCommunityPostClick}
-                        />
-                    )}
-
-                    {activeTab === 'favorites' && (
-                        <UserProfileBookmarks
-                            myFavorites={myFavorites}
-                            onRecipeClick={onRecipeClick}
-                        />
-                    )}
+                        {activeTab === 'favorites' && (
+                            <UserProfileBookmarks
+                                myBookmarkList={myBookmarkList}
+                                onRecipeClick={onRecipeClick}
+                                recipeList={recipeList}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
 

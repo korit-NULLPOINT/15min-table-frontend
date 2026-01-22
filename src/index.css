@@ -77,3 +77,52 @@ li {
     margin: 0;
     padding: 0;
 }
+
+@keyframes shake {
+    0%,
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+    20% {
+        transform: rotate(-10deg) scale(1.13);
+    }
+    40% {
+        transform: rotate(10deg) scale(1.1);
+    }
+    60% {
+        transform: rotate(-5deg) scale(1.06);
+    }
+    80% {
+        transform: rotate(5deg) scale(1.03);
+    }
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+.animate-shake {
+    animation: shake 0.4s ease-in-out;
+}
+
+/* Custom Scrollbar */
+html {
+    overflow-y: auto; /* Scrollbar only appears when needed */
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f5f1eb; /* Match app background */
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d4cbbf; /* Scrollbar color */
+    border-radius: 6px;
+    border: 3px solid #f5f1eb; /* Creates padding effect */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3d3226; /* Hover color */
+}

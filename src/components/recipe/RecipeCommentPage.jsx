@@ -8,6 +8,7 @@ import {
     getGetCommentListByRecipeIdQueryKey,
     deleteComment,
 } from '../../apis/generated/comment-controller/comment-controller';
+import { formatDate } from '../../apis/utils/formatDate';
 
 export default function RecipeCommentPage({
     comments,
@@ -20,32 +21,6 @@ export default function RecipeCommentPage({
 
     const { principal } = usePrincipalState();
     const queryClient = useQueryClient();
-
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMS = now - date; // difference in milliseconds
-        const diffMins = Math.floor(diffMS / (1000 * 60));
-        const diffHours = Math.floor(diffMS / (1000 * 60 * 60));
-
-        if (diffMins < 60) {
-            return `${diffMins}분 전`;
-        }
-        if (diffHours < 12) {
-            return `${diffHours}시간 전`;
-        }
-
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = date.getHours();
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const formattedHour = String(hours % 12 || 12).padStart(2, '0');
-
-        return `${year}.${month}.${day} ${formattedHour}:${minutes} (${ampm})`;
-    };
 
     const handleCommentSubmit = async () => {
         if (!principal) {
@@ -73,7 +48,7 @@ export default function RecipeCommentPage({
                 recipeId: recipeDetail.recipeId,
                 content: newComment,
             });
-            console.log('Submit comment:', response?.data?.data);
+            // console.log('Submit comment:', response?.data?.data);
             setNewComment('');
             // alert('댓글이 등록되었습니다.');
             await queryClient.invalidateQueries({
