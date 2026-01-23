@@ -1,4 +1,4 @@
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { usePrincipalState } from '../../../../store/usePrincipalState';
 import { RecipeDetail } from '../../../../components/recipe/RecipeDetail';
 import { useGetRecipeDetail } from '../../../../apis/generated/recipe-controller/recipe-controller';
@@ -8,8 +8,7 @@ export default function RecipeDetailPage() {
     const { boardId, recipeId } = useParams();
     const navigate = useNavigate();
 
-    // ✅ RootLayout에서 내려준 전역 AuthModal 오픈 함수
-    const { openAuthModal } = useOutletContext();
+    // const { openAuthModal } = useOutletContext();
 
     const rId = Number(recipeId);
     const bId = Number(boardId);

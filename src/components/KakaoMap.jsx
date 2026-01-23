@@ -7,14 +7,9 @@ import {
 } from 'react';
 import { X, Search } from 'lucide-react';
 
-// ✅ TODO: 프로젝트 경로에 맞게 "이 한 줄"만 맞춰줘
 import IngredientMap from './map/IngredientMap';
-// 예: import IngredientMap from '../components/map/IngredientMap';
 
 const ITEMS_PER_PAGE = 4;
-
-// Tailwind 동적 클래스(bg-${tone}-100 ...)는 purge로 날아갈 수 있어서
-// ✅ 안전한 고정 클래스 매핑
 const toneClass = {
     gray: { badge: 'bg-gray-100 text-gray-700' },
     emerald: { badge: 'bg-emerald-100 text-emerald-700' },
@@ -41,73 +36,30 @@ function getDistanceMeta(distance) {
         return { label: '멀어요', tone: 'orange', move: '차량 추천' };
     return { label: '많이 멀어요', tone: 'red', move: '차량 필수' };
 }
-
 function loadDaumPostcodeAndOpen(onComplete) {
     if (window.daum && window.daum.Postcode) {
         new window.daum.Postcode({ oncomplete: onComplete }).open();
         return;
     }
-
     const script = document.createElement('script');
     script.src =
         'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
     script.async = true;
-
     script.onload = () =>
         new window.daum.Postcode({ oncomplete: onComplete }).open();
     script.onerror = () => alert('주소 검색 스크립트를 불러오지 못했습니다.');
-
     document.body.appendChild(script);
 }
-
-const KakaoMap = forwardRef(function KakaoMap(
-    { ingredients = [] }, // RecipeDetail에서 ingredientsArr 넘겨주기
-    ref,
-) {
+const KakaoMap = forwardRef(function KakaoMap({ ingredients = [] }, ref) {
     const [showStoreMap, setShowStoreMap] = useState(false);
     const [showZipcodeModal, setShowZipcodeModal] = useState(false);
-
     const [userAddress, setUserAddress] = useState('');
-
     const [nearbyPlaces, setNearbyPlaces] = useState([]);
     const [selectedPlaceId, setSelectedPlaceId] = useState(null);
-    const [originLocation, setOriginLocation] = useState(null); // { name, lat, lng }
-
+    const [originLocation, setOriginLocation] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [autoSelected, setAutoSelected] = useState(false);
 
-    const ingredientsText = useMemo(
-        () => (ingredients || []).join(' '),
-        [ingredients],
-    );
-
-    const preferredLabels = useMemo(() => {
-        const labels = new Set();
-
-        if (ingredientsText.match(/고기|삼겹|돼지|소고기|닭|정육|베이컨/)) {
-            labels.add('시장');
-            labels.add('슈퍼마켓');
-        }
-        if (
-            ingredientsText.match(
-                /양파|마늘|파|대파|감자|당근|버섯|배추|상추|오이|토마토|계란/,
-            )
-        ) {
-            labels.add('시장');
-            labels.add('슈퍼마켓');
-        }
-        if (
-            ingredientsText.match(
-                /라면|컵라면|즉석|햇반|소시지|어묵|김밥|스낵|과자/,
-            )
-        ) {
-            labels.add('편의점');
-        }
-
-        return Array.from(labels);
-    }, [ingredientsText]);
-
-    // ✅ RecipeDetail 버튼에서 ref로 트리거: "주소 없으면 모달, 있으면 지도 토글"
     useImperativeHandle(ref, () => ({
         handleAIStoreMap() {
             if (!userAddress) {
@@ -118,42 +70,35 @@ const KakaoMap = forwardRef(function KakaoMap(
         },
     }));
 
-    // 자동 추천 (가까운 곳 우선, preferredLabels 있으면 우선)
     useEffect(() => {
         if (autoSelected) return;
-        if (!nearbyPlaces || nearbyPlaces.length === 0) return;
+        if (!nearbyPlaces.length) return;
 
-        const valid = nearbyPlaces.filter(
-            (p) => typeof p.distance === 'number',
-        );
-        if (valid.length === 0) return;
+        const best = nearbyPlaces
+            .filter((p) => typeof p.distance === 'number')
+            .sort((a, b) => {
+                // 1️⃣ fitScore 높은 게 우선
+                if (b.fitScore !== a.fitScore) return b.fitScore - a.fitScore;
+                // 2️⃣ 같으면 더 가까운 곳
+                return a.distance - b.distance;
+            })[0];
 
-        const preferred = preferredLabels.length
-            ? valid.filter((p) => preferredLabels.includes(p.label))
-            : [];
+        if (best) {
+            setSelectedPlaceId(best.id);
+            setAutoSelected(true);
+        }
+    }, [nearbyPlaces, autoSelected]);
 
-        const pool = preferred.length ? preferred : valid;
-        const best = pool.reduce((a, b) => (a.distance < b.distance ? a : b));
-
-        setSelectedPlaceId(best.id);
-        setAutoSelected(true);
-    }, [nearbyPlaces, autoSelected, preferredLabels]);
-
-    // 화면 표시용 목록 정렬/필터
     const visiblePlaces = useMemo(() => {
         return (nearbyPlaces || [])
             .filter((p) => p.fitScore > 0)
             .sort((a, b) => {
-                const aPref = preferredLabels.includes(a.label) ? 1 : 0;
-                const bPref = preferredLabels.includes(b.label) ? 1 : 0;
-
-                if (aPref !== bPref) return bPref - aPref;
                 if (b.fitScore !== a.fitScore) return b.fitScore - a.fitScore;
                 if (a.distance != null && b.distance != null)
                     return a.distance - b.distance;
                 return 0;
             });
-    }, [nearbyPlaces, preferredLabels]);
+    }, [nearbyPlaces]);
 
     const totalPages = Math.ceil(visiblePlaces.length / ITEMS_PER_PAGE);
     const pagedPlaces = visiblePlaces.slice(
@@ -190,7 +135,6 @@ const KakaoMap = forwardRef(function KakaoMap(
     const handleReselectAddress = () => setShowZipcodeModal(true);
 
     const handleResearchSameAddress = () => {
-        // ✅ 같은 주소라도 IngredientMap이 initMap 다시 돌도록 트릭
         setSelectedPlaceId(null);
         setCurrentPage(1);
         setAutoSelected(false);
@@ -201,7 +145,6 @@ const KakaoMap = forwardRef(function KakaoMap(
 
     return (
         <>
-            {/* ✅ 지도/추천 리스트 영역 */}
             {showStoreMap && userAddress && (
                 <div className="mt-6 pt-6 border-t-2 border-[#d4cbbf]">
                     <div className="mb-3 p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf]">
@@ -237,7 +180,12 @@ const KakaoMap = forwardRef(function KakaoMap(
                             onOriginChange={setOriginLocation}
                         />
                     </div>
-
+                    {nearbyPlaces.length === 0 && (
+                        <p className="text-center text-sm text-[#6b5d4f] mt-4">
+                            근처에서 재료를 구매할 수 있는 장소를 찾지 못했어요
+                            😢
+                        </p>
+                    )}
                     {nearbyPlaces.length > 0 && (
                         <>
                             <div
@@ -287,14 +235,11 @@ const KakaoMap = forwardRef(function KakaoMap(
                                                             {p.label}
                                                         </span>
 
-                                                        {preferredLabels.includes(
-                                                            p.label,
-                                                        ) && (
-                                                            <span className="text-xs px-2 py-1 rounded-full border border-emerald-500 text-emerald-600 bg-emerald-50">
-                                                                이 레시피에 적합
+                                                        {p.subLabel && (
+                                                            <span className="hidden sm:inline-block px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+                                                                {p.subLabel}
                                                             </span>
                                                         )}
-
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
@@ -333,7 +278,6 @@ const KakaoMap = forwardRef(function KakaoMap(
                                                         </button>
                                                     </div>
 
-                                                    {/* ✅ 오타 수정: text-sm */}
                                                     <div className="text-sm text-[#6b5d4f]">
                                                         {p.address ||
                                                             '주소 정보 없음'}
