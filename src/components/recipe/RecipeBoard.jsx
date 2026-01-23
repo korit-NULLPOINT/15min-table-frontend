@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ArrowLeft, Search, Filter, Star } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { mainCategory, subCategory } from '../../utils/categoryData';
@@ -21,18 +21,20 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
     const recipes = recipeData?.data?.data?.items || [];
 
     // Filter Logic
-    const filteredRecipes = recipes.filter((recipe) => {
-        const matchesSearch = recipe.title
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase());
-        const matchesMainCategory =
-            selectedMainCategoryId === 0 ||
-            recipe.mainCategoryId === selectedMainCategoryId;
-        const matchesSubCategory =
-            selectedSubCategoryId === 0 ||
-            recipe.subCategoryId === selectedSubCategoryId;
-        return matchesSearch && matchesMainCategory && matchesSubCategory;
-    });
+    const filteredRecipes = useMemo(() => {
+        return recipes.filter((recipe) => {
+            const matchesSearch = recipe.title
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase());
+            const matchesMainCategory =
+                selectedMainCategoryId === 0 ||
+                recipe.mainCategoryId === selectedMainCategoryId;
+            const matchesSubCategory =
+                selectedSubCategoryId === 0 ||
+                recipe.subCategoryId === selectedSubCategoryId;
+            return matchesSearch && matchesMainCategory && matchesSubCategory;
+        });
+    }, [recipes, searchQuery, selectedMainCategoryId, selectedSubCategoryId]);
 
     // Pagination Logic
     const totalItems = filteredRecipes.length;
@@ -265,22 +267,45 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
 
                             {/* Simple Page Numbers */}
                             <div className="flex items-center gap-1">
-                                {Array.from(
-                                    { length: totalPages },
-                                    (_, i) => i + 1,
-                                ).map((pageNum) => (
-                                    <button
-                                        key={pageNum}
-                                        onClick={() => setCurrentPage(pageNum)}
-                                        className={`w-10 h-10 rounded-md font-bold transition-colors ${
-                                            currentPage === pageNum
-                                                ? 'bg-[#3d3226] text-[#f5f1eb]'
-                                                : 'text-[#3d3226] hover:bg-[#d4cbbf]'
-                                        }`}
-                                    >
-                                        {pageNum}
-                                    </button>
-                                ))}
+                                {(() => {
+                                    const maxButtons = 5; // 한 번에 보여줄 버튼 개수
+                                    let startPage = Math.max(
+                                        1,
+                                        currentPage -
+                                            Math.floor(maxButtons / 2),
+                                    );
+                                    let endPage = Math.min(
+                                        totalPages,
+                                        startPage + maxButtons - 1,
+                                    );
+
+                                    // 끝쪽 페이지에 도달했을 때 startPage 조정
+                                    if (endPage - startPage + 1 < maxButtons) {
+                                        startPage = Math.max(
+                                            1,
+                                            endPage - maxButtons + 1,
+                                        );
+                                    }
+
+                                    return Array.from(
+                                        { length: endPage - startPage + 1 },
+                                        (_, i) => startPage + i,
+                                    ).map((pageNum) => (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() =>
+                                                setCurrentPage(pageNum)
+                                            }
+                                            className={`w-10 h-10 rounded-md font-bold transition-colors ${
+                                                currentPage === pageNum
+                                                    ? 'bg-[#3d3226] text-[#f5f1eb]'
+                                                    : 'text-[#3d3226] hover:bg-[#d4cbbf]'
+                                            }`}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    ));
+                                })()}
                             </div>
 
                             <button
