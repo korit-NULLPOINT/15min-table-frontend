@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
     Upload,
@@ -7,71 +8,109 @@ import {
     Sparkles,
     Mail,
     Filter,
-    LoaderCircle,
 } from 'lucide-react';
-
 import { usePrincipalState } from '../../store/usePrincipalState';
-import { useAddRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
+import {
+    useModifyRecipe,
+    useGetRecipeDetail,
+} from '../../apis/generated/recipe-controller/recipe-controller';
+import { useAddRecipeHashtags } from '../../apis/generated/recipe-hashtag-controller/recipe-hashtag-controller';
 import { mainCategory, subCategory } from '../../utils/categoryData';
 
-import { storage } from '../../apis/utils/config/firebaseConfig';
-import { useFirebaseImageUpload } from '../../hooks/useFirebaseImageUpload';
-import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
-
-export function RecipeWrite({ onNavigate }) {
+export function RecipeEdit({ recipeId, boardId = 1 }) {
+    const navigate = useNavigate();
     const [showEmailWarning, setShowEmailWarning] = useState(false);
-
     const principal = usePrincipalState((s) => s.principal);
 
-    const { mutateAsync: addRecipeMutate, isPending: isAdding } =
-        useAddRecipe();
+    const { mutateAsync: modifyRecipeMutate } = useModifyRecipe();
+    const { mutateAsync: addHashtagsMutate } = useAddRecipeHashtags();
+    const { data: recipeQueryData, isLoading } = useGetRecipeDetail(
+        boardId,
+        recipeId,
+        {
+            query: {
+                enabled: !!recipeId,
+            },
+        },
+    );
+
+    useEffect(() => {
+        if (isLoading) return;
+
+        if (!principal) {
+            alert('잘못된 접근입니다.');
+            navigate('/', { replace: true });
+            return;
+        }
+
+        const recipeOwnerId = recipeQueryData?.data?.data?.userId;
+        if (recipeOwnerId && principal.userId !== recipeOwnerId) {
+            alert('권한이 없습니다.');
+            navigate('/', { replace: true });
+        }
+    }, [principal, navigate, recipeQueryData, isLoading]);
 
     const [title, setTitle] = useState('');
     const [selectedMainCategoryId, setSelectedMainCategoryId] = useState('');
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState('');
     const [thumbnailImgUrl, setThumbnailImgUrl] = useState('');
     const [ingredientImgUrl, setIngredientImgUrl] = useState('');
-
-    const thumbnailInputRef = useRef(null);
-    const ingredientInputRef = useRef(null);
-
+    const thumbnailImgUrlRef = useRef('');
+    const ingredientImgUrlRef = useRef('');
     const inputRefs = useRef([]);
     const [ingredients, setIngredients] = useState(['']);
-    const [intro, setIntro] = useState('');
     const [steps, setSteps] = useState('');
+    const [intro, setIntro] = useState('');
 
     const [hashtags, setHashtags] = useState([]);
     const [newHashtag, setNewHashtag] = useState('');
 
-    /* -----------------------------
-     * 1) 에러 메시지 훅(레시피 등록)
-     * ----------------------------- */
-    const {
-        errorMessage: submitError,
-        clearError: clearSubmitError,
-        handleApiError: handleSubmitApiError,
-    } = useApiErrorMessage();
+    useEffect(() => {
+        const recipeDetail = recipeQueryData?.data?.data;
+        if (recipeDetail) {
+            setTitle(recipeDetail.title || '');
+            // 카테고리 ID가 문자열인지 숫자인지 확인 필요하나 state는 초기값에 맞춰 들어갈 것
+            // API 응답에 카테고리 ID가 포함되어 있다고 가정
+            setSelectedMainCategoryId(
+                recipeDetail.mainCategoryId?.toString() || '',
+            );
+            setSelectedSubCategoryId(
+                recipeDetail.subCategoryId?.toString() || '',
+            );
+            setThumbnailImgUrl(recipeDetail.thumbnailImgUrl || '');
+            setIngredientImgUrl(recipeDetail.ingredientImgUrl || '');
 
-    /* -----------------------------
-     * 2) Firebase 이미지 업로드 훅(썸네일/재료)
-     * ----------------------------- */
-    const {
-        errorMessage: imgError,
-        clearError: clearImgError,
-        handleApiError: handleImgApiError,
-    } = useApiErrorMessage();
+            try {
+                const parsed =
+                    typeof recipeDetail.ingredients === 'string'
+                        ? JSON.parse(recipeDetail.ingredients)
+                        : recipeDetail.ingredients;
+                setIngredients(Array.isArray(parsed) ? parsed : ['']);
+            } catch {
+                setIngredients(['']);
+            }
 
-    const {
-        upload: uploadImage,
-        isUploading,
-        progress: uploadProgress,
-        resetProgress,
-    } = useFirebaseImageUpload(storage, {
-        maxMB: 2,
-        allowTypes: ['image/jpeg', 'image/png', 'image/webp'],
-    });
+            setSteps(recipeDetail.steps || '');
+            setIntro(recipeDetail.intro || '');
+            setHashtags(recipeDetail.hashtags || []);
+        }
+    }, [recipeQueryData]);
 
-    const isSubmitDisabled = isAdding || isUploading;
+    const handleImageUpload = (e, type) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const imageData = reader.result;
+                if (type === 'completed') {
+                    setThumbnailImgUrl(imageData);
+                } else {
+                    setIngredientImgUrl(imageData);
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleIngredientChange = (index, value) => {
         const newIngredients = [...ingredients];
@@ -108,7 +147,7 @@ export function RecipeWrite({ onNavigate }) {
     };
 
     const generateAIHashtags = () => {
-        // Mock AI hashtag generation
+        // Todo : 현재 mockdata, AI 호출 API 구현 해야 함
         const aiHashtags = ['15분요리', '간단레시피', '자취생필수', '초간단'];
         setHashtags([
             ...hashtags,
@@ -127,174 +166,82 @@ export function RecipeWrite({ onNavigate }) {
         setHashtags(hashtags.filter((t) => t !== tag));
     };
 
-    const checkEmailVerifiedOrWarn = () => {
-        if (!principal) return false;
-
-        let minId = Infinity;
-        for (const r of principal.userRoles ?? []) {
-            if (r.roleId < minId) minId = r.roleId;
-        }
-        // TEMP_USER >= 3 가정 (너 코드 기준)
-        if (minId >= 3) {
-            setShowEmailWarning(true);
-            return false;
-        }
-        return true;
-    };
-
-    const handleGoToProfile = () => {
-        setShowEmailWarning(false);
-        onNavigate?.('profile');
-    };
-
-    const uploadAndSetImage = async (file, kind) => {
-        // kind: 'thumbnail' | 'ingredient'
-        clearImgError();
-        resetProgress();
-
-        if (!principal?.userId) {
-            await handleImgApiError(new Error('NO_USER_ID'), {
-                fallbackMessage: '사용자 정보가 없어 업로드할 수 없습니다.',
-            });
-            return;
-        }
-
-        try {
-            // ✅ 경로를 구분해두면 관리가 쉬움
-            const dir =
-                kind === 'thumbnail'
-                    ? `recipe-thumbnail/${principal.userId}`
-                    : `recipe-ingredients/${principal.userId}`;
-
-            const url = await uploadImage(file, { dir });
-
-            if (kind === 'thumbnail') setThumbnailImgUrl(url);
-            else setIngredientImgUrl(url);
-        } catch (e) {
-            await handleImgApiError(e, {
-                fallbackMessage:
-                    e?.message ||
-                    '이미지 업로드에 실패했습니다. 잠시 후 다시 시도해주세요.',
-            });
-        }
-    };
-
-    const handleThumbnailChange = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const resetInput = () => {
-            try {
-                e.target.value = '';
-            } catch {}
-        };
-
-        if (isSubmitDisabled) {
-            resetInput();
-            return;
-        }
-
-        await uploadAndSetImage(file, 'thumbnail');
-        resetInput();
-    };
-
-    const handleIngredientImageChange = async (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const resetInput = () => {
-            try {
-                e.target.value = '';
-            } catch {}
-        };
-
-        if (isSubmitDisabled) {
-            resetInput();
-            return;
-        }
-
-        await uploadAndSetImage(file, 'ingredient');
-        resetInput();
-    };
-
     const handleSubmit = async () => {
-        clearSubmitError();
-
         if (!principal) {
             alert('잘못된 접근 입니다.');
             return;
         }
 
-        if (!checkEmailVerifiedOrWarn()) return;
+        let minId = Infinity;
+        for (const r of principal.userRoles) {
+            if (r.roleId < minId) {
+                minId = r.roleId;
+            }
+        }
 
-        const addRecipeData = {
-            mainCategoryId: selectedMainCategoryId
-                ? Number(selectedMainCategoryId)
-                : undefined,
-            subCategoryId: selectedSubCategoryId
-                ? Number(selectedSubCategoryId)
-                : undefined,
+        if (minId >= 3) {
+            setShowEmailWarning(true);
+            return;
+        }
+
+        const modifyData = {
+            mainCategoryId: selectedMainCategoryId,
+            subCategoryId: selectedSubCategoryId,
             title,
             intro,
             thumbnailImgUrl,
             ingredients: JSON.stringify(ingredients),
             ingredientImgUrl,
-            steps, // 지금은 string textarea 기준
-            // ✅ 해시태그는 추후 API 있으면 여기서 같이 보내거나 별도 API 호출
+            steps,
+            hashtags, // API DTO에 해시태그가 포함되어 있다면 추가
         };
 
         try {
-            await addRecipeMutate({ boardId: 1, data: addRecipeData });
-            alert('레시피가 등록되었습니다!');
-            onNavigate?.('board');
-        } catch (e) {
-            await handleSubmitApiError(e, {
-                fallbackMessage: '레시피 등록 중 오류가 발생했습니다.',
-                map: (msg, status) => {
-                    if (status === 401) return '로그인이 필요합니다.';
-                    if (status === 403) return '권한이 없습니다.';
-                    return msg;
-                },
+            await modifyRecipeMutate({
+                boardId,
+                recipeId,
+                data: modifyData,
             });
+            if (hashtags.length > 0) {
+                await addHashtagsMutate({
+                    data: { recipeId, hashtagNames: hashtags },
+                });
+            }
+            alert('레시피가 수정되었습니다!');
+            navigate(`/boards/${boardId}/recipe/${recipeId}`); // 수정 후 상세 페이지로 이동
+        } catch (error) {
+            console.error('레시피 수정 실패:', error);
+            alert('레시피 수정 중 오류가 발생했습니다.');
         }
+    };
+
+    const handleGoToProfile = () => {
+        setShowEmailWarning(false);
+        navigate('/users/me');
     };
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
-                    onClick={() => onNavigate?.('home')}
+                    onClick={() => navigate(-1)} // 이전 페이지로 돌아가기
                     className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                 >
                     <ArrowLeft size={20} />
-                    돌아가기
+                    취소하고 돌아가기
                 </button>
 
                 <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden">
                     {/* Header */}
                     <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
-                        <h1 className="text-3xl mb-2">레시피 작성하기</h1>
+                        <h1 className="text-3xl mb-2">레시피 수정하기</h1>
                         <p className="text-[#e5dfd5]">
-                            나만의 특별한 레시피를 공유해보세요
+                            레시피 내용을 수정하고 저장하세요
                         </p>
                     </div>
 
                     {/* Form */}
                     <div className="p-8 space-y-6">
-                        {/* Submit error */}
-                        {submitError && (
-                            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-md">
-                                {submitError}
-                            </div>
-                        )}
-
-                        {/* Image error */}
-                        {imgError && (
-                            <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-md">
-                                {imgError}
-                            </div>
-                        )}
-
                         {/* Title */}
                         <div>
                             <label className="block text-sm mb-2 text-[#3d3226]">
@@ -327,12 +274,18 @@ export function RecipeWrite({ onNavigate }) {
                                             <button
                                                 key={id}
                                                 onClick={() => {
-                                                    setSelectedMainCategoryId(
+                                                    if (
                                                         selectedMainCategoryId ===
-                                                            id
-                                                            ? ''
-                                                            : id,
-                                                    );
+                                                        id
+                                                    ) {
+                                                        setSelectedMainCategoryId(
+                                                            '',
+                                                        );
+                                                    } else {
+                                                        setSelectedMainCategoryId(
+                                                            id,
+                                                        );
+                                                    }
                                                 }}
                                                 className={`px-4 py-2 rounded-md border-2 transition-colors ${
                                                     selectedMainCategoryId ===
@@ -362,14 +315,20 @@ export function RecipeWrite({ onNavigate }) {
                                     {Object.entries(subCategory).map(
                                         ([id, label]) => (
                                             <button
-                                                key={id}
+                                                key={label}
                                                 onClick={() => {
-                                                    setSelectedSubCategoryId(
+                                                    if (
                                                         selectedSubCategoryId ===
-                                                            id
-                                                            ? ''
-                                                            : id,
-                                                    );
+                                                        id
+                                                    ) {
+                                                        setSelectedSubCategoryId(
+                                                            '',
+                                                        );
+                                                    } else {
+                                                        setSelectedSubCategoryId(
+                                                            id,
+                                                        );
+                                                    }
                                                 }}
                                                 className={`px-4 py-2 rounded-md border-2 transition-colors ${
                                                     selectedSubCategoryId === id
@@ -390,7 +349,7 @@ export function RecipeWrite({ onNavigate }) {
                             <label className="block text-sm mb-2 text-[#3d3226]">
                                 완성 사진 (썸네일)
                             </label>
-                            <div className="flex gap-4 items-center">
+                            <div className="flex gap-4">
                                 {thumbnailImgUrl && (
                                     <img
                                         src={thumbnailImgUrl}
@@ -398,40 +357,26 @@ export function RecipeWrite({ onNavigate }) {
                                         className="w-32 h-32 object-cover rounded-md"
                                     />
                                 )}
-
                                 <button
-                                    disabled={isSubmitDisabled}
                                     onClick={() =>
-                                        thumbnailInputRef.current?.click()
+                                        thumbnailImgUrlRef.current?.click()
                                     }
-                                    className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors"
                                 >
-                                    {isUploading ? (
-                                        <LoaderCircle
-                                            size={20}
-                                            className="animate-spin"
-                                        />
-                                    ) : (
-                                        <Upload size={20} />
-                                    )}
+                                    <Upload size={20} />
                                     {thumbnailImgUrl
                                         ? '사진 변경'
                                         : '사진 업로드'}
                                 </button>
-
                                 <input
-                                    ref={thumbnailInputRef}
+                                    ref={thumbnailImgUrlRef}
                                     type="file"
                                     accept="image/*"
-                                    onChange={handleThumbnailChange}
+                                    onChange={(e) =>
+                                        handleImageUpload(e, 'completed')
+                                    }
                                     className="hidden"
                                 />
-
-                                {isUploading && (
-                                    <span className="text-xs text-[#6b5d4f]">
-                                        업로드 중... {uploadProgress}%
-                                    </span>
-                                )}
                             </div>
                         </div>
 
@@ -440,7 +385,7 @@ export function RecipeWrite({ onNavigate }) {
                             <label className="block text-sm mb-2 text-[#3d3226]">
                                 재료 전체 사진
                             </label>
-                            <div className="flex gap-4 items-center">
+                            <div className="flex gap-4">
                                 {ingredientImgUrl && (
                                     <img
                                         src={ingredientImgUrl}
@@ -448,40 +393,26 @@ export function RecipeWrite({ onNavigate }) {
                                         className="w-32 h-32 object-cover rounded-md"
                                     />
                                 )}
-
                                 <button
-                                    disabled={isSubmitDisabled}
                                     onClick={() =>
-                                        ingredientInputRef.current?.click()
+                                        ingredientImgUrlRef.current?.click()
                                     }
-                                    className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                                    className="flex items-center gap-2 px-6 py-3 border-2 border-[#d4cbbf] rounded-md hover:border-[#3d3226] transition-colors"
                                 >
-                                    {isUploading ? (
-                                        <LoaderCircle
-                                            size={20}
-                                            className="animate-spin"
-                                        />
-                                    ) : (
-                                        <Upload size={20} />
-                                    )}
+                                    <Upload size={20} />
                                     {ingredientImgUrl
                                         ? '사진 변경'
                                         : '사진 업로드'}
                                 </button>
-
                                 <input
-                                    ref={ingredientInputRef}
+                                    ref={ingredientImgUrlRef}
                                     type="file"
                                     accept="image/*"
-                                    onChange={handleIngredientImageChange}
+                                    onChange={(e) =>
+                                        handleImageUpload(e, 'ingredients')
+                                    }
                                     className="hidden"
                                 />
-
-                                {isUploading && (
-                                    <span className="text-xs text-[#6b5d4f]">
-                                        업로드 중... {uploadProgress}%
-                                    </span>
-                                )}
                             </div>
                         </div>
 
@@ -528,8 +459,6 @@ export function RecipeWrite({ onNavigate }) {
                                 ))}
                             </div>
                         </div>
-
-                        {/* Intro */}
                         <div>
                             <label className="block text-sm mb-2 text-[#3d3226]">
                                 요리 소개
@@ -542,7 +471,6 @@ export function RecipeWrite({ onNavigate }) {
                                 placeholder="요리에 대한 간단한 소개를 입력해주세요."
                             />
                         </div>
-
                         {/* Cooking Method */}
                         <div>
                             <label className="block text-sm mb-2 text-[#3d3226]">
@@ -614,21 +542,10 @@ export function RecipeWrite({ onNavigate }) {
 
                         {/* Submit Button */}
                         <button
-                            disabled={isSubmitDisabled}
                             onClick={handleSubmit}
-                            className="w-full py-4 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors font-medium text-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors font-medium text-lg"
                         >
-                            {isAdding ? (
-                                <>
-                                    <LoaderCircle
-                                        size={20}
-                                        className="animate-spin"
-                                    />
-                                    등록 중...
-                                </>
-                            ) : (
-                                '레시피 등록하기'
-                            )}
+                            레시피 수정완료
                         </button>
                     </div>
                 </div>

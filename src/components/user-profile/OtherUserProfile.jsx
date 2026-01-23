@@ -1,39 +1,176 @@
-import { useState } from 'react';
-import { ArrowLeft, User as UserIcon } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, Eye, Star, User as UserIcon } from 'lucide-react';
+import { usePrincipalState } from '../../store/usePrincipalState';
+
+import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
+
+import { useGetUserProfile } from '../../apis/generated/user-profile-controller/user-profile-controller';
+import { useGetRecipeListByUserId } from '../../apis/generated/user-recipe-controller/user-recipe-controller';
 import {
-    otherUserCommunityPosts,
-    otherUserRecipePosts,
-} from '../../utils/recipeData';
+    useFollow,
+    useUnfollow,
+} from '../../apis/generated/follow-controller/follow-controller';
+
+const RECIPE_BOARD_ID = 1;
 
 export function OtherUserProfile({
     userId,
-    username, // (선택) 추후 fetch 후 넣어줄 값
     onNavigate,
     onRecipeClick,
-    onCommunityPostClick,
+    onCommunityPostClick, // 아직 커뮤니티 연결 전이면 안 써도 됨
 }) {
-    const [isFollowing, setIsFollowing] = useState(false);
+    const principal = usePrincipalState((s) => s.principal);
+    const isLoggedIn = !!principal;
+
     const [postType, setPostType] = useState('recipe'); // 'recipe' | 'community'
+    const [page, setPage] = useState(1);
+    const size = 12;
 
-    // ✅ userId만 있어도 화면 안 깨지게
-    const displayName = username?.trim() ? username : `사용자#${userId ?? '?'}`;
+    // ✅ 에러 메시지 훅(케이스별로 분리 - UserProfileInfo 패턴)
+    const {
+        errorMessage: profileError,
+        clearError: clearProfileError,
+        handleApiError: handleProfileApiError,
+    } = useApiErrorMessage();
 
-    // Mock user posts (추후 API로 교체)
-    const userRecipePosts = otherUserRecipePosts;
-    const userCommunityPosts = otherUserCommunityPosts;
+    const {
+        errorMessage: recipeError,
+        clearError: clearRecipeError,
+        handleApiError: handleRecipeApiError,
+    } = useApiErrorMessage();
+
+    const {
+        errorMessage: followError,
+        clearError: clearFollowError,
+        handleApiError: handleFollowApiError,
+    } = useApiErrorMessage();
+
+    // ✅ 프로필 (username/profileImgUrl/followersCount/followingsCount/isFollowing)
+    const profileQuery = useGetUserProfile(userId, {
+        query: {
+            enabled: Number.isFinite(userId),
+            refetchOnWindowFocus: false,
+        },
+    });
+    const profile = profileQuery?.data?.data?.data;
+
+    // ✅ 프로필 조회 에러 -> 훅 처리
+    useEffect(() => {
+        if (!profileQuery.isError) return;
+        clearProfileError();
+        handleProfileApiError(profileQuery.error, {
+            fallbackMessage: '프로필을 불러오지 못했습니다.',
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [profileQuery.isError, profileQuery.error]);
+
+    // ✅ 레시피 목록 (userId 기준)
+    const recipesQuery = useGetRecipeListByUserId(
+        userId,
+        { page, size },
+        {
+            query: {
+                enabled: Number.isFinite(userId) && postType === 'recipe',
+                refetchOnWindowFocus: false,
+                keepPreviousData: true,
+            },
+        },
+    );
+    const recipePage = recipesQuery?.data?.data?.data;
+    const recipeItems = recipePage?.items ?? [];
+    const totalCount = recipePage?.totalCount ?? 0;
+
+    const totalPages = useMemo(() => {
+        const t = Math.ceil((totalCount || 0) / size);
+        return t <= 0 ? 1 : t;
+    }, [totalCount, size]);
+
+    // ✅ 레시피 조회 에러 -> 훅 처리 (레시피 탭일 때만)
+    useEffect(() => {
+        if (postType !== 'recipe') return;
+        if (!recipesQuery.isError) return;
+
+        clearRecipeError();
+        handleRecipeApiError(recipesQuery.error, {
+            fallbackMessage: '레시피 목록을 불러오지 못했습니다.',
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [postType, recipesQuery.isError, recipesQuery.error]);
+
+    // 탭 바꾸면 레시피 관련 에러는 정리
+    useEffect(() => {
+        if (postType !== 'recipe') {
+            clearRecipeError();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [postType]);
+
+    // ✅ 팔로우 토글
+    const followMut = useFollow();
+    const unfollowMut = useUnfollow();
+    const isFollowLoading = followMut.isPending || unfollowMut.isPending;
+
+    const onToggleFollow = async () => {
+        if (!isLoggedIn) {
+            // 전역 AuthModal open 함수가 있으면 여기서 호출하도록 추후 개선
+            clearFollowError();
+            await handleFollowApiError(new Error('UNAUTHORIZED'), {
+                fallbackMessage: '로그인이 필요합니다.',
+            });
+            return;
+        }
+
+        clearFollowError();
+
+        try {
+            if (profile?.isFollowing) {
+                await unfollowMut.mutateAsync({ targetUserId: userId });
+            } else {
+                await followMut.mutateAsync({ targetUserId: userId });
+            }
+            await profileQuery.refetch(); // ✅ count + isFollowing 갱신
+        } catch (e) {
+            await handleFollowApiError(e, {
+                fallbackMessage: '요청 처리 중 오류가 발생했습니다.',
+            });
+        }
+    };
+
+    const displayName = profile?.username?.trim() || `사용자#${userId}`;
+
+    // ✅ 로딩/에러 처리
+    if (profileQuery.isLoading) {
+        return <div className="pt-20 max-w-4xl mx-auto px-6">로딩 중...</div>;
+    }
+
+    if (profileQuery.isError || !profile) {
+        return (
+            <div className="pt-20 max-w-4xl mx-auto px-6">
+                <div className="mb-3 text-red-600 text-sm">
+                    {profileError || '프로필을 불러오지 못했습니다.'}
+                </div>
+                <button
+                    className="px-3 py-1 border rounded"
+                    onClick={() => onNavigate?.('back')}
+                >
+                    뒤로가기
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
                     onClick={() => onNavigate?.('back')}
-                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md">
+                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
+                >
                     <ArrowLeft size={20} />
                     돌아가기
                 </button>
 
                 <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden">
-                    {/* Header */}
                     <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
                         <h1 className="text-3xl mb-2">
                             {displayName}님의 프로필
@@ -43,24 +180,32 @@ export function OtherUserProfile({
                         </p>
                     </div>
 
-                    {/* Profile Info */}
                     <div className="p-8">
+                        {/* 상단 프로필 */}
                         <div className="flex flex-col items-center mb-8">
                             <div className="w-32 h-32 rounded-full border-4 border-[#d4cbbf] overflow-hidden bg-[#ebe5db] flex items-center justify-center">
-                                <UserIcon
-                                    size={48}
-                                    className="text-[#6b5d4f]"
-                                />
+                                {profile.profileImgUrl ? (
+                                    <img
+                                        src={profile.profileImgUrl}
+                                        alt={displayName}
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <UserIcon
+                                        size={48}
+                                        className="text-[#6b5d4f]"
+                                    />
+                                )}
                             </div>
+
                             <h2 className="text-2xl text-[#3d3226] mt-4">
                                 {displayName}
                             </h2>
 
-                            {/* Followers / Following (추후 API로 교체) */}
                             <div className="flex gap-6 mt-4">
                                 <div className="flex flex-col items-center gap-1 px-4 py-2">
                                     <span className="text-2xl font-bold text-[#3d3226]">
-                                        84
+                                        {profile.followersCount ?? 0}
                                     </span>
                                     <span className="text-sm text-[#6b5d4f]">
                                         팔로워
@@ -69,7 +214,7 @@ export function OtherUserProfile({
                                 <div className="w-px bg-[#d4cbbf]" />
                                 <div className="flex flex-col items-center gap-1 px-4 py-2">
                                     <span className="text-2xl font-bold text-[#3d3226]">
-                                        52
+                                        {profile.followingsCount ?? 0}
                                     </span>
                                     <span className="text-sm text-[#6b5d4f]">
                                         팔로잉
@@ -77,101 +222,195 @@ export function OtherUserProfile({
                                 </div>
                             </div>
 
-                            {/* Follow Button */}
                             <button
-                                onClick={() => setIsFollowing((prev) => !prev)}
-                                className={`mt-6 px-8 py-3 rounded-md transition-colors ${
-                                    isFollowing
+                                disabled={isFollowLoading}
+                                onClick={onToggleFollow}
+                                className={`mt-6 px-8 py-3 rounded-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                                    profile.isFollowing
                                         ? 'bg-[#3d3226] text-[#f5f1eb] hover:bg-[#5d4a36]'
                                         : 'border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb]'
-                                }`}>
-                                {isFollowing ? '팔로잉' : '팔로우'}
+                                }`}
+                            >
+                                {isFollowLoading
+                                    ? '처리중...'
+                                    : profile.isFollowing
+                                      ? '팔로잉'
+                                      : '팔로우'}
                             </button>
+
+                            {/* ✅ 팔로우 액션 에러 메시지 */}
+                            {followError && (
+                                <p className="mt-3 text-sm text-red-600">
+                                    {followError}
+                                </p>
+                            )}
                         </div>
 
-                        {/* Posts */}
-                        <div>
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-xl text-[#3d3226]">
-                                    {displayName}님이 작성한 게시글
-                                </h3>
+                        {/* 탭 */}
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl text-[#3d3226]">
+                                {displayName}님이 작성한 게시글
+                            </h3>
 
-                                {/* ✅ MyProfile 스타일 토글 */}
-                                <div className="flex gap-2 bg-[#ebe5db] p-1 rounded-md border-2 border-[#d4cbbf]">
-                                    <button
-                                        onClick={() => setPostType('recipe')}
-                                        className={`px-4 py-2 rounded-md transition-colors ${
-                                            postType === 'recipe'
-                                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                                                : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
-                                        }`}>
-                                        레시피 게시판
-                                    </button>
-                                    <button
-                                        onClick={() => setPostType('community')}
-                                        className={`px-4 py-2 rounded-md transition-colors ${
-                                            postType === 'community'
-                                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                                                : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
-                                        }`}>
-                                        커뮤니티
-                                    </button>
-                                </div>
+                            <div className="flex gap-2 bg-[#ebe5db] p-1 rounded-md border-2 border-[#d4cbbf]">
+                                <button
+                                    onClick={() => {
+                                        clearRecipeError();
+                                        setPostType('recipe');
+                                        setPage(1);
+                                    }}
+                                    className={`px-4 py-2 rounded-md transition-colors ${
+                                        postType === 'recipe'
+                                            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                            : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                    }`}
+                                >
+                                    레시피 게시판
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        clearRecipeError();
+                                        setPostType('community');
+                                        setPage(1);
+                                    }}
+                                    className={`px-4 py-2 rounded-md transition-colors ${
+                                        postType === 'community'
+                                            ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                            : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                    }`}
+                                >
+                                    커뮤니티
+                                </button>
                             </div>
-
-                            {/* Recipe Posts */}
-                            {postType === 'recipe' && (
-                                <div className="grid grid-cols-2 gap-4">
-                                    {userRecipePosts.map((post) => (
-                                        <div
-                                            key={post.id}
-                                            onClick={() =>
-                                                onRecipeClick?.(post.id)
-                                            }
-                                            className="cursor-pointer bg-white rounded-lg overflow-hidden border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors">
-                                            <img
-                                                src={post.thumbnail}
-                                                alt={post.title}
-                                                className="w-full aspect-video object-cover"
-                                            />
-                                            <div className="p-4">
-                                                <h4 className="text-lg text-[#3d3226] mb-2">
-                                                    {post.title}
-                                                </h4>
-                                                <p className="text-sm text-[#6b5d4f]">
-                                                    {post.date}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Community Posts */}
-                            {postType === 'community' && (
-                                <div className="space-y-4">
-                                    {userCommunityPosts.map((post) => (
-                                        <div
-                                            key={post.id}
-                                            onClick={() =>
-                                                onCommunityPostClick?.(post.id)
-                                            }
-                                            className="cursor-pointer p-6 bg-white rounded-lg border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors">
-                                            <h4 className="text-lg text-[#3d3226] mb-2">
-                                                {post.title}
-                                            </h4>
-                                            <div className="flex items-center gap-4 text-sm text-[#6b5d4f]">
-                                                <span>{post.date}</span>
-                                                <span>조회 {post.views}</span>
-                                                <span>
-                                                    댓글 {post.comments}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
                         </div>
+
+                        {/* 레시피 탭 */}
+                        {postType === 'recipe' && (
+                            <>
+                                {recipesQuery.isLoading && (
+                                    <div className="p-10 text-center text-[#6b5d4f]">
+                                        로딩 중...
+                                    </div>
+                                )}
+
+                                {/* ✅ 레시피 조회 에러 메시지 (훅 사용) */}
+                                {recipeError && (
+                                    <div className="p-6 text-center text-red-600 text-sm">
+                                        {recipeError}
+                                    </div>
+                                )}
+
+                                {!recipesQuery.isLoading &&
+                                    !recipesQuery.isError &&
+                                    recipeItems.length === 0 && (
+                                        <div className="p-10 text-center border-2 border-dashed border-[#d4cbbf] rounded-lg text-[#6b5d4f]">
+                                            작성한 레시피가 아직 없어요.
+                                        </div>
+                                    )}
+
+                                {!recipesQuery.isError &&
+                                    recipeItems.length > 0 && (
+                                        <>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {recipeItems.map((post) => (
+                                                    <div
+                                                        key={post.recipeId}
+                                                        onClick={() =>
+                                                            onRecipeClick?.(
+                                                                post.recipeId,
+                                                            )
+                                                        }
+                                                        className="cursor-pointer bg-white rounded-lg overflow-hidden border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
+                                                    >
+                                                        <img
+                                                            src={
+                                                                post.thumbnailImgUrl ||
+                                                                ''
+                                                            }
+                                                            alt={post.title}
+                                                            className="w-full aspect-video object-cover bg-[#ebe5db]"
+                                                        />
+                                                        <div className="p-4">
+                                                            <h4 className="text-lg text-[#3d3226] mb-2 line-clamp-2">
+                                                                {post.title}
+                                                            </h4>
+                                                            <div className="flex items-center gap-3 text-sm text-[#6b5d4f]">
+                                                                <span className="flex items-center gap-1">
+                                                                    <Star
+                                                                        size={
+                                                                            16
+                                                                        }
+                                                                    />
+                                                                    {Number.isFinite(
+                                                                        post.avgRating,
+                                                                    )
+                                                                        ? (post.avgRating?.toFixed?.(
+                                                                              1,
+                                                                          ) ??
+                                                                          post.avgRating)
+                                                                        : '0.0'}
+                                                                </span>
+                                                                <span className="flex items-center gap-1">
+                                                                    <Eye
+                                                                        size={
+                                                                            16
+                                                                        }
+                                                                    />
+                                                                    {post.viewCount ??
+                                                                        0}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* 페이징 */}
+                                            <div className="flex items-center justify-center gap-3 mt-8">
+                                                <button
+                                                    disabled={page <= 1}
+                                                    onClick={() => {
+                                                        clearRecipeError();
+                                                        setPage((p) =>
+                                                            Math.max(1, p - 1),
+                                                        );
+                                                    }}
+                                                    className="px-3 py-2 border rounded disabled:opacity-50"
+                                                >
+                                                    이전
+                                                </button>
+                                                <span className="text-[#6b5d4f]">
+                                                    {page} / {totalPages}
+                                                </span>
+                                                <button
+                                                    disabled={
+                                                        page >= totalPages
+                                                    }
+                                                    onClick={() => {
+                                                        clearRecipeError();
+                                                        setPage((p) =>
+                                                            Math.min(
+                                                                totalPages,
+                                                                p + 1,
+                                                            ),
+                                                        );
+                                                    }}
+                                                    className="px-3 py-2 border rounded disabled:opacity-50"
+                                                >
+                                                    다음
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                            </>
+                        )}
+
+                        {/* 커뮤니티 탭 (추후 API 붙일 자리) */}
+                        {postType === 'community' && (
+                            <div className="p-10 text-center border-2 border-dashed border-[#d4cbbf] rounded-lg text-[#6b5d4f]">
+                                커뮤니티 게시글 API는 추후 연결 예정입니다.
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

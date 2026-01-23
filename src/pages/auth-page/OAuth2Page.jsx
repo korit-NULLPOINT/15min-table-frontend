@@ -1,36 +1,46 @@
-import React, { useEffect, useState } from 'react';
+// src/pages/auth-page/OAuth2Page.jsx
+import { useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { AuthModal } from '../../components/layout/AuthModal';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { LoaderCircle } from 'lucide-react';
+import { OAuth2Modal } from '../../components/layout/OAuth2Modal';
 
-const OAuth2Page = () => {
+export default function OAuth2Page() {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { fetchUser } = usePrincipalState();
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [authMode, setAuthMode] = useState('signin');
-    const [socialData, setSocialData] = useState({
-        email: searchParams.get('email'),
-        provider: searchParams.get('provider'),
-        name: searchParams.get('name'),
-        providerUserId:
+
+    const accessToken = searchParams.get('accessToken');
+
+    const socialData = useMemo(() => {
+        const provider = searchParams.get('provider');
+        const providerUserId =
             searchParams.get('providerId') ||
-            searchParams.get('providerUserId'),
-    });
+            searchParams.get('providerUserId');
+
+        // provider/providerUserId 없으면 연동 UI를 띄울 이유 없음
+        if (!provider || !providerUserId) return null;
+
+        return {
+            email: searchParams.get('email'),
+            provider,
+            name: searchParams.get('name'),
+            providerUserId,
+        };
+    }, [searchParams]);
 
     useEffect(() => {
-        const accessToken = searchParams.get('accessToken');
-        if (accessToken) {
-            localStorage.setItem('AccessToken', accessToken);
+        if (!accessToken) return;
 
-            fetchUser().finally(() => {
-                navigate('/');
-            });
-        }
-    }, [searchParams, fetchUser, navigate]);
+        localStorage.setItem('AccessToken', accessToken);
+        fetchUser().finally(() => {
+            // 토큰이 URL에 남지 않게 replace 추천
+            navigate('/', { replace: true });
+        });
+    }, [accessToken, fetchUser, navigate]);
 
-    if (searchParams.get('accessToken')) {
+    // ✅ accessToken 처리 중 화면
+    if (accessToken) {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen bg-[#f5f1eb]">
                 <p className="text-[#6b5d4f] text-lg font-medium animate-pulse">
@@ -41,80 +51,16 @@ const OAuth2Page = () => {
         );
     }
 
+    // ✅ 소셜 정보 자체가 없으면 그냥 홈으로 보내는 게 UX 더 좋음
     if (!socialData) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                Loading...
-            </div>
-        );
+        navigate('/', { replace: true });
+        return null;
     }
 
-    const handleLinkAccount = () => {
-        setAuthMode('signin');
-        setIsAuthModalOpen(true);
-    };
-
-    const handleSignup = () => {
-        setAuthMode('signup');
-        setIsAuthModalOpen(true);
-    };
-
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#f5f1eb] p-4">
-            <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8 border-2 border-[#3d3226] text-center">
-                <h1 className="text-2xl font-serif text-[#3d3226] mb-6">
-                    SNS 계정 연동
-                </h1>
-                <p className="text-[#6b5d4f] mb-8">
-                    반갑습니다! <br />
-                    <span className="font-bold text-[#3d3226]">
-                        {socialData.email || '사용자'}
-                    </span>
-                    님, <br />
-                    <span className="capitalize font-bold text-[#3d3226]">
-                        {socialData.provider}
-                    </span>{' '}
-                    계정으로 인증되었습니다.
-                </p>
-
-                <div className="space-y-4">
-                    <button
-                        onClick={handleLinkAccount}
-                        className="w-full py-4 px-6 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors font-medium flex items-center justify-center gap-2"
-                    >
-                        <span>기존 계정과 연동하기</span>
-                    </button>
-
-                    <div className="relative py-2">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-[#d4cbbf]"></div>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white text-[#6b5d4f]">
-                                또는
-                            </span>
-                        </div>
-                    </div>
-
-                    <button
-                        onClick={handleSignup}
-                        className="w-full py-4 px-6 bg-white border-2 border-[#3d3226] text-[#3d3226] rounded-md hover:bg-[#f5f1eb] transition-colors font-medium"
-                    >
-                        새로운 계정으로 시작하기
-                    </button>
-                </div>
-            </div>
-
-            <AuthModal
-                isOpen={isAuthModalOpen}
-                onClose={() => setIsAuthModalOpen(false)}
-                mode={authMode}
-                onModeChange={setAuthMode}
-                onAuthSuccess={() => navigate('/')}
-                socialData={socialData}
-            />
-        </div>
+        <OAuth2Modal
+            socialData={socialData}
+            onDone={() => navigate('/', { replace: true })}
+        />
     );
-};
-
-export default OAuth2Page;
+}

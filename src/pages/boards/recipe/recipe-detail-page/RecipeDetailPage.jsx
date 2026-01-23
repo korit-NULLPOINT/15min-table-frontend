@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { usePrincipalState } from '../../../../store/usePrincipalState';
 import { AuthModal } from '../../../../components/layout/AuthModal';
 import { RecipeDetail } from '../../../../components/recipe/RecipeDetail';
@@ -10,18 +9,15 @@ export default function RecipeDetailPage() {
     const { boardId, recipeId } = useParams();
     const navigate = useNavigate();
 
+    // ✅ RootLayout에서 내려준 전역 AuthModal 오픈 함수
+    const { openAuthModal } = useOutletContext();
+
     const rId = Number(recipeId);
     const bId = Number(boardId);
 
-    // ✅ 너 프로젝트에서 쓰던 방식(안전)
     const principal = usePrincipalState((s) => s.principal);
     const isLoggedIn = !!principal;
 
-    // ✅ AuthModal 열기/모드
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [authMode, setAuthMode] = useState('signin'); // or 'signup'
-
-    // ✅ 레시피 상세
     const recipeQuery = useGetRecipeDetail(bId, rId, {
         query: {
             refetchOnWindowFocus: false,
@@ -30,13 +26,11 @@ export default function RecipeDetailPage() {
     });
     const recipeDetail = recipeQuery?.data?.data?.data;
 
-    // ✅ 댓글
     const commentQuery = useGetCommentListByRecipeId(rId, {
         query: { enabled: Number.isFinite(rId) },
     });
     const comments = commentQuery?.data?.data?.data ?? [];
 
-    // ✅ 로딩/에러/없음 방어 (RecipeDetail 내부 방어가 없어도 안전)
     if (recipeQuery.isLoading) {
         return <div className="pt-20 max-w-4xl mx-auto px-6">로딩 중...</div>;
     }
@@ -64,32 +58,19 @@ export default function RecipeDetailPage() {
     }
 
     return (
-        <>
-            <RecipeDetail
-                recipeDetail={recipeDetail}
-                comments={comments}
-                onNavigate={() => navigate(`/boards/${boardId}/recipe`)}
-                isLoggedIn={isLoggedIn}
-                onOpenAuth={() => {
-                    setAuthMode('signin');
-                    setIsAuthModalOpen(true);
-                }}
-                currentUsername={principal?.username ?? ''}
-                onAuthorClick={(authorUserId, authorName) => {
-                    if (!authorUserId) return;
-                    navigate(`/users/${authorUserId}`, {
-                        state: { username: authorName },
-                    });
-                }}
-            />
-
-            <AuthModal
-                isOpen={isAuthModalOpen}
-                onClose={() => setIsAuthModalOpen(false)}
-                mode={authMode}
-                onModeChange={setAuthMode}
-                onAuthSuccess={() => setIsAuthModalOpen(false)}
-            />
-        </>
+        <RecipeDetail
+            recipeDetail={recipeDetail}
+            comments={comments}
+            onNavigate={() => navigate(`/boards/${boardId}/recipe`)}
+            isLoggedIn={isLoggedIn}
+            onOpenAuth={() => openAuthModal('signin')} // ✅ 전역 모달 열기
+            currentUsername={principal?.username ?? ''}
+            onAuthorClick={(authorUserId, authorName) => {
+                if (!authorUserId) return;
+                navigate(`/users/${authorUserId}`, {
+                    state: { username: authorName },
+                });
+            }}
+        />
     );
 }

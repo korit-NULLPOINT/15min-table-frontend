@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Star } from 'lucide-react';
+import { Star, Bookmark, Share2 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import {
     useGetRating,
     useUpsertRating,
     useDeleteRating,
 } from '../../apis/generated/rating-controller/rating-controller';
+import {
+    useExistsByRecipeId,
+    useAddBookmark,
+    useDeleteBookmark,
+    getExistsByRecipeIdQueryKey,
+    getGetBookmarkListByUserIdQueryKey,
+} from '../../apis/generated/bookmark-controller/bookmark-controller';
 
 export default function RecipeRatingPage({
     recipeId,
     isLoggedIn,
     onOpenAuth,
     onStatsChange,
-    children,
 }) {
     const [userRating, setUserRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
@@ -20,6 +27,8 @@ export default function RecipeRatingPage({
     const { data: ratingData } = useGetRating(recipeId, {
         query: {
             enabled: !!isLoggedIn && !!recipeId,
+            retry: 0, // 404가 뜰 수 있으므로 재시도 안함
+            refetchOnWindowFocus: false, // 알트탭 시 에러 방지
         },
     });
 
@@ -27,12 +36,7 @@ export default function RecipeRatingPage({
 
     // Sync userRating with fetched data
     useEffect(() => {
-        // console.log('RecipeRatingPage Params:', { recipeId: rId, isLoggedIn });
-        // console.log('Rating Data Raw:', ratingData);
-
         const fetchedRating = ratingData?.data?.data?.rating;
-        // console.log('Fetched Rating:', fetchedRating);
-
         if (fetchedRating) {
             setUserRating(fetchedRating);
         } else {
@@ -45,13 +49,12 @@ export default function RecipeRatingPage({
 
     const handleRatingClick = (rating) => {
         if (!isLoggedIn) {
-            if (onOpenAuth) onOpenAuth();
+            onOpenAuth?.();
             return;
         }
 
         // 1. Delete Rating (Toggle off)
         if (userRating === rating) {
-            console.log('Deleting rating for recipeId:', rId);
             deleteRating(
                 { recipeId: rId },
                 {
@@ -68,13 +71,10 @@ export default function RecipeRatingPage({
         }
         // 2. Upsert Rating (New or Update)
         else {
-            console.log('Upserting rating:', { recipeId: rId, rating });
             upsertRating(
                 { data: { recipeId: rId, rating } },
                 {
                     onSuccess: () => {
-                        // If updating: deltaTotal = 0, deltaSum = new - old
-                        // If new: deltaTotal = 1, deltaSum = new
                         if (userRating > 0) {
                             onStatsChange?.(0, rating - userRating);
                         } else {
@@ -91,8 +91,78 @@ export default function RecipeRatingPage({
         }
     };
 
+    // --- Bookmark Logic ---
+    const queryClient = useQueryClient();
+
+    const { data: bookmarkData } = useExistsByRecipeId(rId, {
+        query: {
+            enabled: !!isLoggedIn && !!rId,
+        },
+    });
+
+    const isBookmarked = bookmarkData?.data?.data || false;
+
+    const { mutate: addBookmark } = useAddBookmark();
+    const { mutate: deleteBookmark } = useDeleteBookmark();
+
+    const handleBookmarkClick = () => {
+        if (!isLoggedIn) {
+            onOpenAuth?.();
+            return;
+        }
+
+        if (isBookmarked) {
+            deleteBookmark(
+                { recipeId: rId },
+                {
+                    onSuccess: () => {
+                        queryClient.invalidateQueries({
+                            queryKey: getExistsByRecipeIdQueryKey(rId),
+                        });
+                        queryClient.invalidateQueries({
+                            queryKey: getGetBookmarkListByUserIdQueryKey(),
+                        });
+                    },
+                    onError: (error) => {
+                        console.error('Failed to delete bookmark:', error);
+                        alert('북마크 취소에 실패했습니다.');
+                    },
+                },
+            );
+        } else {
+            addBookmark(
+                { recipeId: rId },
+                {
+                    onSuccess: () => {
+                        queryClient.invalidateQueries({
+                            queryKey: getExistsByRecipeIdQueryKey(rId),
+                        });
+                        queryClient.invalidateQueries({
+                            queryKey: getGetBookmarkListByUserIdQueryKey(),
+                        });
+                    },
+                    onError: (error) => {
+                        console.error('Failed to add bookmark:', error);
+                        alert('북마크 추가에 실패했습니다.');
+                    },
+                },
+            );
+        }
+    };
+
+    // --- Share Logic ---
+    const handleShareClick = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            alert('주소가 클립보드에 복사되었습니다.');
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+            alert('주소 복사에 실패했습니다.');
+        }
+    };
+
     return (
-        <div className="mb-6 p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf] flex justify-between items-end">
+        <div className="mb-6 p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf] flex justify-between items-center">
             <div>
                 <p className="text-sm text-[#3d3226] mb-2">
                     이 레시피를 평가해주세요
@@ -130,7 +200,32 @@ export default function RecipeRatingPage({
                     )}
                 </div>
             </div>
-            {children}
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+                <button
+                    onClick={handleBookmarkClick}
+                    className={`flex items-center justify-center gap-2 w-[140px] py-3 rounded-md border-2 transition-colors ${
+                        isBookmarked
+                            ? 'bg-blue-100 border-blue-500 text-blue-700'
+                            : 'border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226]'
+                    }`}
+                >
+                    <Bookmark
+                        size={20}
+                        fill={isBookmarked ? 'currentColor' : 'none'}
+                    />
+                    {isBookmarked ? '저장됨' : '저장하기'}
+                </button>
+
+                <button
+                    onClick={handleShareClick}
+                    className="flex items-center justify-center gap-2 w-[140px] py-3 rounded-md border-2 border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226] transition-colors"
+                >
+                    <Share2 size={20} />
+                    공유하기
+                </button>
+            </div>
         </div>
     );
 }

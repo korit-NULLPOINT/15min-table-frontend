@@ -1,24 +1,11 @@
-import {
-    ArrowLeft,
-    User as UserIcon,
-    Star,
-    Share2,
-    Bookmark,
-    Sparkles,
-} from 'lucide-react';
+import { ArrowLeft, User as UserIcon, Star, Sparkles } from 'lucide-react';
 import { useState, useRef, useMemo } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import RecipeCommentPage from './RecipeCommentPage';
 import RecipeRatingPage from './RecipeRatingPage';
+import { formatDate } from '../../apis/utils/formatDate';
 import KakaoMap from '../KakaoMap';
-
-import {
-    useExistsByRecipeId,
-    useAddBookmark,
-    useDeleteBookmark,
-} from '../../apis/generated/bookmark-controller/bookmark-controller';
 
 function safeJsonArray(value, fallback = []) {
     if (Array.isArray(value)) return value;
@@ -29,28 +16,6 @@ function safeJsonArray(value, fallback = []) {
     } catch {
         return fallback;
     }
-}
-
-function formatDate(dateString) {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMS = now - date;
-    const diffMins = Math.floor(diffMS / (1000 * 60));
-    const diffHours = Math.floor(diffMS / (1000 * 60 * 60));
-
-    if (diffMins >= 0 && diffMins < 60) return `${diffMins}분 전`;
-    if (diffHours >= 0 && diffHours < 12) return `${diffHours}시간 전`;
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    const formattedHour = String(hours % 12 || 12).padStart(2, '0');
-
-    return `${year}.${month}.${day} ${formattedHour}:${minutes} (${ampm})`;
 }
 
 export function RecipeDetail({
@@ -119,71 +84,7 @@ export function RecipeDetail({
         return `https://picsum.photos/seed/${Math.abs(hash)}/500`;
     }, [recipeDetail?.ingredientImgUrl, recipeDetail?.ingredients]);
 
-    // --- bookmark hooks ---
-    const queryClient = useQueryClient();
-
-    const { data: bookmarkData } = useExistsByRecipeId(recipeDetail.recipeId, {
-        query: {
-            enabled: !!isLoggedIn && !!recipeDetail.recipeId,
-        },
-    });
-
-    const isBookmarked = bookmarkData?.data?.data || false;
-
-    const { mutate: addBookmark } = useAddBookmark();
-    const { mutate: deleteBookmark } = useDeleteBookmark();
-
-    const handleBookmarkClick = () => {
-        if (!isLoggedIn) {
-            onOpenAuth?.();
-            return;
-        }
-
-        const recipeId = recipeDetail.recipeId;
-        if (!recipeId) return;
-
-        if (isBookmarked) {
-            deleteBookmark(
-                { recipeId },
-                {
-                    onSuccess: () => {
-                        queryClient.invalidateQueries({
-                            queryKey: ['/bookmark/' + recipeId],
-                        });
-                    },
-                    onError: (error) => {
-                        console.error('Failed to delete bookmark:', error);
-                        alert('북마크 취소에 실패했습니다.');
-                    },
-                },
-            );
-        } else {
-            addBookmark(
-                { recipeId },
-                {
-                    onSuccess: () => {
-                        queryClient.invalidateQueries({
-                            queryKey: ['/bookmark/' + recipeId],
-                        });
-                    },
-                    onError: (error) => {
-                        console.error('Failed to add bookmark:', error);
-                        alert('북마크 추가에 실패했습니다.');
-                    },
-                },
-            );
-        }
-    };
-
-    const handleShareClick = async () => {
-        try {
-            await navigator.clipboard.writeText(window.location.href);
-            alert('주소가 클립보드에 복사되었습니다.');
-        } catch (err) {
-            console.error('Failed to copy text: ', err);
-            alert('주소 복사에 실패했습니다.');
-        }
-    };
+    // --- bookmark hooks removed ---
 
     const mockHashtags = useMemo(() => {
         return (
@@ -314,37 +215,7 @@ export function RecipeDetail({
                                 isLoggedIn={isLoggedIn}
                                 onOpenAuth={onOpenAuth}
                                 onStatsChange={handleStatsChange}
-                            >
-                                {/* Action Buttons */}
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={handleBookmarkClick}
-                                        className={`flex items-center justify-center gap-2 w-[140px] py-3 rounded-md border-2 transition-colors ${
-                                            isBookmarked
-                                                ? 'bg-blue-100 border-blue-500 text-blue-700'
-                                                : 'border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226]'
-                                        }`}
-                                    >
-                                        <Bookmark
-                                            size={20}
-                                            fill={
-                                                isBookmarked
-                                                    ? 'currentColor'
-                                                    : 'none'
-                                            }
-                                        />
-                                        {isBookmarked ? '저장됨' : '저장하기'}
-                                    </button>
-
-                                    <button
-                                        onClick={handleShareClick}
-                                        className="flex items-center justify-center gap-2 w-[140px] py-3 rounded-md border-2 border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226] transition-colors"
-                                    >
-                                        <Share2 size={20} />
-                                        공유하기
-                                    </button>
-                                </div>
-                            </RecipeRatingPage>
+                            />
                         </div>
 
                         {/* Description */}
@@ -384,7 +255,7 @@ export function RecipeDetail({
                             </ul>
                         </div>
 
-                        <div className="flex items-start justify-end">
+                        <div className="flex flex-col items-center justify-end gap-2">
                             <img
                                 src={ingredientImgSrc}
                                 alt="Ingredients"
@@ -398,9 +269,12 @@ export function RecipeDetail({
                                         ingredientsArr.length * 40,
                                     )}px`,
                                 }}
-                                className="rounded-full object-cover border-2 border-[#d4cbbf] shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+                                className="rounded-full object-cover border-2 border-[#d4cbbf] shadow-lg cursor-pointer hover:scale-110 transition-transform duration-200"
                                 onClick={() => setIsIngredientModalOpen(true)}
                             />
+                            <p className="text-[#6b5d4f] text-xs">
+                                클릭하면 그림이 확대됩니다.
+                            </p>
                         </div>
                     </div>
                     <KakaoMap ref={mapRef} ingredients = {ingredientsArr}></KakaoMap>
