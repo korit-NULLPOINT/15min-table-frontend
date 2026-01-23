@@ -5,6 +5,7 @@ import { ImageWithFallback } from '../figma/ImageWithFallback';
 import RecipeCommentPage from './RecipeCommentPage';
 import RecipeRatingPage from './RecipeRatingPage';
 import { formatDate } from '../../apis/utils/formatDate';
+import KakaoMap from '../KakaoMap';
 
 function safeJsonArray(value, fallback = []) {
     if (Array.isArray(value)) return value;

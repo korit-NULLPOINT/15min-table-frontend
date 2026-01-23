@@ -50,7 +50,7 @@ export default function RootLayout() {
                 onNotificationClick={() => {}}
                 onLogout={handleLogout}
             />
-            <Outlet context={{ openAuthModal }} />
+            <Outlet />
 
             <AuthModal
                 isOpen={isAuthModalOpen}
