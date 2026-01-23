@@ -14,7 +14,6 @@ export default function RecipeListPage() {
             onNavigate={navigate}
             onRecipeClick={handleRecipeClick}
             isLoggedIn={false}
-            onOpenAuth={() => {}}
         />
     );
 }

@@ -19,6 +19,8 @@ import {
     getGetPrincipalQueryKey,
 } from '../../apis/generated/user-account-controller/user-account-controller';
 
+import { useGetFollowCount } from '../../apis/generated/follow-controller/follow-controller';
+
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
 import { storage } from '../../apis/utils/config/firebaseConfig';
 import { useFirebaseImageUpload } from '../../hooks/useFirebaseImageUpload';
@@ -47,6 +49,26 @@ export default function UserProfileMyProfile({
     onFollowingClick,
 }) {
     const queryClient = useQueryClient();
+
+    // ✅ 팔로우 카운트 fetch (프로필 주인 userId 기준)
+    const userId = profileData?.userId;
+
+    const { data: followCountResp, isLoading: isFollowCountLoading } =
+        useGetFollowCount(userId, {
+            query: { enabled: !!userId },
+        });
+
+    // ✅ 지침: payload(T)는 resp?.data?.data 로 꺼낸다
+    // followCountResp: { data: ApiRespDto<T>, status, headers }
+    // payload: T (= { followerCount, followingCount })
+    const followCountPayload = followCountResp?.data?.data;
+
+    // ✅ API 응답값 우선, 없으면 profileData 값 fallback
+    const followerCount =
+        followCountPayload?.followerCount ?? profileData?.followersCount ?? 0;
+
+    const followingCount =
+        followCountPayload?.followingCount ?? profileData?.followingsCount ?? 0;
 
     /* -----------------------------
      * 1) 이메일 인증 메일 발송
@@ -99,7 +121,6 @@ export default function UserProfileMyProfile({
 
     /* -----------------------------
      * 2) 프로필 이미지 업로드 (Firebase -> 백 API)
-     *    ✅ useFirebaseImageUpload 사용 + 에러메시지 훅 적용
      * ----------------------------- */
     const {
         errorMessage: imgError,
@@ -165,12 +186,10 @@ export default function UserProfileMyProfile({
         }
 
         try {
-            // ✅ 공통 훅으로 업로드
             const downloadUrl = await uploadImage(file, {
                 dir: `profile-img/${profileData.userId}`,
             });
 
-            // ✅ 백 API 반영
             await changeProfileImgMutateAsync({
                 data: {
                     userId: profileData.userId,
@@ -180,7 +199,6 @@ export default function UserProfileMyProfile({
 
             onProfileImgUpdated?.(downloadUrl);
 
-            // ✅ principal 갱신
             queryClient.invalidateQueries({
                 queryKey: getGetPrincipalQueryKey(),
             });
@@ -291,19 +309,23 @@ export default function UserProfileMyProfile({
                     <button
                         onClick={onFollowersClick}
                         className="flex flex-col items-center gap-1 px-4 py-2 hover:bg-[#ebe5db] rounded-md transition-colors"
+                        title="팔로워 목록 보기"
                     >
                         <span className="text-2xl font-bold text-[#3d3226]">
-                            {profileData?.followersCount ?? 0}
+                            {isFollowCountLoading ? '-' : followerCount}
                         </span>
                         <span className="text-sm text-[#6b5d4f]">팔로워</span>
                     </button>
+
                     <div className="w-px bg-[#d4cbbf]" />
+
                     <button
                         onClick={onFollowingClick}
                         className="flex flex-col items-center gap-1 px-4 py-2 hover:bg-[#ebe5db] rounded-md transition-colors"
+                        title="팔로잉 목록 보기"
                     >
                         <span className="text-2xl font-bold text-[#3d3226]">
-                            {profileData?.followingsCount ?? 0}
+                            {isFollowCountLoading ? '-' : followingCount}
                         </span>
                         <span className="text-sm text-[#6b5d4f]">팔로잉</span>
                     </button>

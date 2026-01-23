@@ -1,3 +1,4 @@
+// src/components/user-profile/OtherUserProfile.jsx
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Eye, Star, User as UserIcon } from 'lucide-react';
 import { usePrincipalState } from '../../store/usePrincipalState';
@@ -11,60 +12,49 @@ import {
     useUnfollow,
 } from '../../apis/generated/follow-controller/follow-controller';
 
-const RECIPE_BOARD_ID = 1;
-
-export function OtherUserProfile({
-    userId,
-    onNavigate,
-    onRecipeClick,
-    onCommunityPostClick, // 아직 커뮤니티 연결 전이면 안 써도 됨
-}) {
+export function OtherUserProfile({ userId, onNavigate, onRecipeClick }) {
     const principal = usePrincipalState((s) => s.principal);
     const isLoggedIn = !!principal;
 
-    const [postType, setPostType] = useState('recipe'); // 'recipe' | 'community'
+    const [postType, setPostType] = useState('recipe'); // recipe | community (추후)
     const [page, setPage] = useState(1);
     const size = 12;
 
-    // ✅ 에러 메시지 훅(케이스별로 분리 - UserProfileInfo 패턴)
+    /** -------------------------
+     * 1) 프로필 조회 + 에러 훅
+     * ------------------------- */
     const {
         errorMessage: profileError,
         clearError: clearProfileError,
         handleApiError: handleProfileApiError,
     } = useApiErrorMessage();
 
-    const {
-        errorMessage: recipeError,
-        clearError: clearRecipeError,
-        handleApiError: handleRecipeApiError,
-    } = useApiErrorMessage();
-
-    const {
-        errorMessage: followError,
-        clearError: clearFollowError,
-        handleApiError: handleFollowApiError,
-    } = useApiErrorMessage();
-
-    // ✅ 프로필 (username/profileImgUrl/followersCount/followingsCount/isFollowing)
     const profileQuery = useGetUserProfile(userId, {
         query: {
             enabled: Number.isFinite(userId),
             refetchOnWindowFocus: false,
         },
     });
+
     const profile = profileQuery?.data?.data?.data;
 
-    // ✅ 프로필 조회 에러 -> 훅 처리
     useEffect(() => {
         if (!profileQuery.isError) return;
-        clearProfileError();
+        // ✅ 백 message가 있으면 그대로 표시됨(예: "사용자를 찾을 수 없습니다.")
         handleProfileApiError(profileQuery.error, {
             fallbackMessage: '프로필을 불러오지 못했습니다.',
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [profileQuery.isError, profileQuery.error]);
+    }, [profileQuery.isError, profileQuery.error, handleProfileApiError]);
 
-    // ✅ 레시피 목록 (userId 기준)
+    /** -------------------------
+     * 2) 레시피 목록 + 에러 훅
+     * ------------------------- */
+    const {
+        errorMessage: recipeError,
+        clearError: clearRecipeError,
+        handleApiError: handleRecipeApiError,
+    } = useApiErrorMessage();
+
     const recipesQuery = useGetRecipeListByUserId(
         userId,
         { page, size },
@@ -76,51 +66,44 @@ export function OtherUserProfile({
             },
         },
     );
+
     const recipePage = recipesQuery?.data?.data?.data;
     const recipeItems = recipePage?.items ?? [];
     const totalCount = recipePage?.totalCount ?? 0;
+
+    useEffect(() => {
+        if (!recipesQuery.isError) return;
+        handleRecipeApiError(recipesQuery.error, {
+            fallbackMessage: '레시피 목록을 불러오지 못했습니다.',
+        });
+    }, [recipesQuery.isError, recipesQuery.error, handleRecipeApiError]);
 
     const totalPages = useMemo(() => {
         const t = Math.ceil((totalCount || 0) / size);
         return t <= 0 ? 1 : t;
     }, [totalCount, size]);
 
-    // ✅ 레시피 조회 에러 -> 훅 처리 (레시피 탭일 때만)
-    useEffect(() => {
-        if (postType !== 'recipe') return;
-        if (!recipesQuery.isError) return;
+    /** -------------------------
+     * 3) 팔로우/언팔 + 에러 훅
+     * ------------------------- */
+    const {
+        errorMessage: followError,
+        clearError: clearFollowError,
+        handleApiError: handleFollowApiError,
+    } = useApiErrorMessage();
 
-        clearRecipeError();
-        handleRecipeApiError(recipesQuery.error, {
-            fallbackMessage: '레시피 목록을 불러오지 못했습니다.',
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [postType, recipesQuery.isError, recipesQuery.error]);
-
-    // 탭 바꾸면 레시피 관련 에러는 정리
-    useEffect(() => {
-        if (postType !== 'recipe') {
-            clearRecipeError();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [postType]);
-
-    // ✅ 팔로우 토글
     const followMut = useFollow();
     const unfollowMut = useUnfollow();
     const isFollowLoading = followMut.isPending || unfollowMut.isPending;
 
     const onToggleFollow = async () => {
+        clearFollowError();
+
         if (!isLoggedIn) {
-            // 전역 AuthModal open 함수가 있으면 여기서 호출하도록 추후 개선
-            clearFollowError();
-            await handleFollowApiError(new Error('UNAUTHORIZED'), {
-                fallbackMessage: '로그인이 필요합니다.',
-            });
+            alert('로그인이 필요합니다.');
+            // 전역 AuthModal open 연결은 추후 개선점
             return;
         }
-
-        clearFollowError();
 
         try {
             if (profile?.isFollowing) {
@@ -131,26 +114,26 @@ export function OtherUserProfile({
             await profileQuery.refetch(); // ✅ count + isFollowing 갱신
         } catch (e) {
             await handleFollowApiError(e, {
-                fallbackMessage: '요청 처리 중 오류가 발생했습니다.',
+                fallbackMessage: '팔로우 처리 중 오류가 발생했습니다.',
             });
         }
     };
 
-    const displayName = profile?.username?.trim() || `사용자#${userId}`;
-
-    // ✅ 로딩/에러 처리
+    /** -------------------------
+     * 렌더링
+     * ------------------------- */
     if (profileQuery.isLoading) {
         return <div className="pt-20 max-w-4xl mx-auto px-6">로딩 중...</div>;
     }
 
-    if (profileQuery.isError || !profile) {
+    if (profileError || !profile) {
         return (
             <div className="pt-20 max-w-4xl mx-auto px-6">
-                <div className="mb-3 text-red-600 text-sm">
+                <p className="text-red-600">
                     {profileError || '프로필을 불러오지 못했습니다.'}
-                </div>
+                </p>
                 <button
-                    className="px-3 py-1 border rounded"
+                    className="mt-3 px-3 py-2 border rounded"
                     onClick={() => onNavigate?.('back')}
                 >
                     뒤로가기
@@ -158,6 +141,8 @@ export function OtherUserProfile({
             </div>
         );
     }
+
+    const displayName = profile?.username?.trim() || `사용자#${userId}`;
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
@@ -238,7 +223,6 @@ export function OtherUserProfile({
                                       : '팔로우'}
                             </button>
 
-                            {/* ✅ 팔로우 액션 에러 메시지 */}
                             {followError && (
                                 <p className="mt-3 text-sm text-red-600">
                                     {followError}
@@ -269,7 +253,6 @@ export function OtherUserProfile({
                                 </button>
                                 <button
                                     onClick={() => {
-                                        clearRecipeError();
                                         setPostType('community');
                                         setPage(1);
                                     }}
@@ -293,22 +276,22 @@ export function OtherUserProfile({
                                     </div>
                                 )}
 
-                                {/* ✅ 레시피 조회 에러 메시지 (훅 사용) */}
                                 {recipeError && (
-                                    <div className="p-6 text-center text-red-600 text-sm">
+                                    <div className="p-10 text-center text-red-600">
                                         {recipeError}
                                     </div>
                                 )}
 
                                 {!recipesQuery.isLoading &&
-                                    !recipesQuery.isError &&
+                                    !recipeError &&
                                     recipeItems.length === 0 && (
                                         <div className="p-10 text-center border-2 border-dashed border-[#d4cbbf] rounded-lg text-[#6b5d4f]">
                                             작성한 레시피가 아직 없어요.
                                         </div>
                                     )}
 
-                                {!recipesQuery.isError &&
+                                {!recipesQuery.isLoading &&
+                                    !recipeError &&
                                     recipeItems.length > 0 && (
                                         <>
                                             <div className="grid grid-cols-2 gap-4">
@@ -369,12 +352,11 @@ export function OtherUserProfile({
                                             <div className="flex items-center justify-center gap-3 mt-8">
                                                 <button
                                                     disabled={page <= 1}
-                                                    onClick={() => {
-                                                        clearRecipeError();
+                                                    onClick={() =>
                                                         setPage((p) =>
                                                             Math.max(1, p - 1),
-                                                        );
-                                                    }}
+                                                        )
+                                                    }
                                                     className="px-3 py-2 border rounded disabled:opacity-50"
                                                 >
                                                     이전
@@ -386,15 +368,14 @@ export function OtherUserProfile({
                                                     disabled={
                                                         page >= totalPages
                                                     }
-                                                    onClick={() => {
-                                                        clearRecipeError();
+                                                    onClick={() =>
                                                         setPage((p) =>
                                                             Math.min(
                                                                 totalPages,
                                                                 p + 1,
                                                             ),
-                                                        );
-                                                    }}
+                                                        )
+                                                    }
                                                     className="px-3 py-2 border rounded disabled:opacity-50"
                                                 >
                                                     다음
@@ -405,7 +386,7 @@ export function OtherUserProfile({
                             </>
                         )}
 
-                        {/* 커뮤니티 탭 (추후 API 붙일 자리) */}
+                        {/* 커뮤니티 탭(추후) */}
                         {postType === 'community' && (
                             <div className="p-10 text-center border-2 border-dashed border-[#d4cbbf] rounded-lg text-[#6b5d4f]">
                                 커뮤니티 게시글 API는 추후 연결 예정입니다.
