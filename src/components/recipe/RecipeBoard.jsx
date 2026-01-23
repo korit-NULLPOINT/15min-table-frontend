@@ -9,11 +9,18 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
     const [selectedMainCategoryId, setSelectedMainCategoryId] = useState(0);
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(0);
 
-    // boardId=1 (레시피 게시판)
-    const { data: recipeData, isLoading } = useGetRecipeList(1);
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 9;
+
+    // boardId=1 (레시피 게시판), fetch max items for client-side pagination
+    const { data: recipeData, isLoading } = useGetRecipeList(1, {
+        page: 0,
+        size: 1000,
+    });
     const recipes = recipeData?.data?.data?.items || [];
 
-    // console.log(recipes);
+    // Filter Logic
     const filteredRecipes = recipes.filter((recipe) => {
         const matchesSearch = recipe.title
             .toLowerCase()
@@ -26,6 +33,24 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
             recipe.subCategoryId === selectedSubCategoryId;
         return matchesSearch && matchesMainCategory && matchesSubCategory;
     });
+
+    // Pagination Logic
+    const totalItems = filteredRecipes.length;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const currentItems = filteredRecipes.slice(startIndex, endIndex);
+
+    // Reset page on filter change
+    const handleFilterChange = (setter, value) => {
+        setter(value);
+        setCurrentPage(1);
+    };
+
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+        setCurrentPage(1);
+    };
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
@@ -57,10 +82,7 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                             <input
                                 type="text"
                                 value={searchQuery}
-                                onChange={(e) => {
-                                    // console.log(e.target.value);
-                                    setSearchQuery(e.target.value);
-                                }}
+                                onChange={handleSearchChange}
                                 placeholder="레시피 검색..."
                                 className="w-full pl-12 pr-4 py-4 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white text-[#3d3226]"
                             />
@@ -83,19 +105,13 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                             key={id}
                                             onClick={() => {
                                                 const categoryId = Number(id);
-                                                // 같은 카테고리 클릭 시 해제
-                                                if (
+                                                handleFilterChange(
+                                                    setSelectedMainCategoryId,
                                                     selectedMainCategoryId ===
-                                                    categoryId
-                                                ) {
-                                                    setSelectedMainCategoryId(
-                                                        0,
-                                                    );
-                                                } else {
-                                                    setSelectedMainCategoryId(
-                                                        categoryId,
-                                                    );
-                                                }
+                                                        categoryId
+                                                        ? 0
+                                                        : categoryId,
+                                                );
                                             }}
                                             className={`px-4 py-2 rounded-md border-2 transition-colors ${
                                                 selectedMainCategoryId ===
@@ -125,16 +141,13 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                             key={id}
                                             onClick={() => {
                                                 const categoryId = Number(id);
-                                                if (
+                                                handleFilterChange(
+                                                    setSelectedSubCategoryId,
                                                     selectedSubCategoryId ===
-                                                    categoryId
-                                                ) {
-                                                    setSelectedSubCategoryId(0);
-                                                } else {
-                                                    setSelectedSubCategoryId(
-                                                        categoryId,
-                                                    );
-                                                }
+                                                        categoryId
+                                                        ? 0
+                                                        : categoryId,
+                                                );
                                             }}
                                             className={`px-4 py-2 rounded-md border-2 transition-colors ${
                                                 selectedSubCategoryId ===
@@ -161,67 +174,128 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                             개의 레시피
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredRecipes.map((recipe) => (
-                                <div
-                                    key={recipe.recipeId}
-                                    onClick={() =>
-                                        onRecipeClick &&
-                                        onRecipeClick(recipe.recipeId)
-                                    }
-                                    className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border-2 border-[#e5dfd5] hover:border-[#3d3226]"
-                                >
-                                    <div className="relative aspect-video overflow-hidden">
-                                        <ImageWithFallback
-                                            src={
-                                                recipe.thumbnailImgUrl ||
-                                                `https://picsum.photos/seed/${recipe.recipeId}/500`
-                                            }
-                                            alt={recipe.title}
-                                            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                                        />
-                                        {!recipe.thumbnailImgUrl && (
-                                            <div
-                                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold pointer-events-none whitespace-nowrap"
-                                                style={{
-                                                    textShadow:
-                                                        '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0px 0px 5px rgba(0,0,0,0.8)',
-                                                }}
-                                            >
-                                                랜덤이미지 입니다.
+                        {isLoading ? (
+                            <div className="text-center py-20 text-[#6b5d4f]">
+                                레시피를 불러오는 중입니다...
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {currentItems.map((recipe) => (
+                                    <div
+                                        key={recipe.recipeId}
+                                        onClick={() =>
+                                            onRecipeClick &&
+                                            onRecipeClick(recipe.recipeId)
+                                        }
+                                        className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border-2 border-[#e5dfd5] hover:border-[#3d3226]"
+                                    >
+                                        <div className="relative aspect-video overflow-hidden">
+                                            <ImageWithFallback
+                                                src={
+                                                    recipe.thumbnailImgUrl ||
+                                                    `https://picsum.photos/seed/${recipe.recipeId}/500`
+                                                }
+                                                alt={recipe.title}
+                                                className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                                            />
+                                            {!recipe.thumbnailImgUrl && (
+                                                <div
+                                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold pointer-events-none whitespace-nowrap"
+                                                    style={{
+                                                        textShadow:
+                                                            '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0px 0px 5px rgba(0,0,0,0.8)',
+                                                    }}
+                                                >
+                                                    랜덤이미지 입니다.
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="p-4">
+                                            <h3 className="text-lg text-[#3d3226] mb-2 line-clamp-1">
+                                                {recipe.title}
+                                            </h3>
+                                            <div className="flex items-center justify-between text-sm text-[#6b5d4f]">
+                                                <span>
+                                                    by {recipe.username}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Star
+                                                        size={14}
+                                                        fill="#f59e0b"
+                                                        className="text-[#f59e0b]"
+                                                    />
+                                                    {(
+                                                        recipe.avgRating || 0
+                                                    ).toFixed(1)}
+                                                </span>
                                             </div>
-                                        )}
-                                    </div>
-
-                                    <div className="p-4">
-                                        <h3 className="text-lg text-[#3d3226] mb-2">
-                                            {recipe.title}
-                                        </h3>
-                                        <div className="flex items-center justify-between text-sm text-[#6b5d4f]">
-                                            <span>by {recipe.username}</span>
-                                            <span className="flex items-center gap-1">
-                                                <Star
-                                                    size={14}
-                                                    fill="#f59e0b"
-                                                    className="text-[#f59e0b]"
-                                                />
-                                                {recipe.avgRating}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-3 mt-2 text-xs text-[#6b5d4f]">
-                                            <span>👁 {recipe.viewCount}</span>
+                                            <div className="flex items-center gap-3 mt-2 text-xs text-[#6b5d4f]">
+                                                <span>
+                                                    👁 {recipe.viewCount || 0}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
 
-                        {filteredRecipes.length === 0 && (
+                        {filteredRecipes.length === 0 && !isLoading && (
                             <div className="text-center py-12 text-[#6b5d4f]">
                                 검색 결과가 없습니다.
                             </div>
                         )}
                     </div>
+
+                    {/* Pagination Controls */}
+                    {!isLoading && totalPages > 0 && (
+                        <div className="flex justify-center items-center gap-2 p-6 border-t-2 border-[#e5dfd5] bg-[#ebe5db]">
+                            <button
+                                onClick={() =>
+                                    setCurrentPage((prev) =>
+                                        Math.max(prev - 1, 1),
+                                    )
+                                }
+                                disabled={currentPage === 1}
+                                className="px-4 py-2 rounded-md border-2 border-[#d4cbbf] bg-white text-[#3d3226] hover:border-[#3d3226] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                이전
+                            </button>
+
+                            {/* Simple Page Numbers */}
+                            <div className="flex items-center gap-1">
+                                {Array.from(
+                                    { length: totalPages },
+                                    (_, i) => i + 1,
+                                ).map((pageNum) => (
+                                    <button
+                                        key={pageNum}
+                                        onClick={() => setCurrentPage(pageNum)}
+                                        className={`w-10 h-10 rounded-md font-bold transition-colors ${
+                                            currentPage === pageNum
+                                                ? 'bg-[#3d3226] text-[#f5f1eb]'
+                                                : 'text-[#3d3226] hover:bg-[#d4cbbf]'
+                                        }`}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button
+                                onClick={() =>
+                                    setCurrentPage((prev) =>
+                                        Math.min(prev + 1, totalPages),
+                                    )
+                                }
+                                disabled={currentPage === totalPages}
+                                className="px-4 py-2 rounded-md border-2 border-[#d4cbbf] bg-white text-[#3d3226] hover:border-[#3d3226] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                다음
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
