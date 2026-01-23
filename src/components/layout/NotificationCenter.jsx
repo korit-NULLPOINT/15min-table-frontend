@@ -10,23 +10,15 @@ import {
 
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { useNotificationStore } from '../../store/useNotificationStore';
-import { mockNotifications } from '../../utils/recipeData';
 
-// mock paging
-function selectMockPage(cursor, size) {
-    const s = Math.max(1, Math.min(20, size ?? 5));
+import {
+    getNotifications,
+    getUnreadCount,
+    markAllAsRead,
+    markAsRead,
+} from '../../apis/generated/notification-controller/notification-controller';
 
-    const sorted = [...(mockNotifications ?? [])].sort(
-        (a, b) => (b.notificationId ?? 0) - (a.notificationId ?? 0),
-    );
-
-    const filtered =
-        cursor == null
-            ? sorted
-            : sorted.filter((n) => (n.notificationId ?? 0) < cursor);
-
-    return filtered.slice(0, s);
-}
+import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
 
 export function NotificationCenter({ onNotificationClick }) {
     const [open, setOpen] = useState(false);
@@ -38,9 +30,12 @@ export function NotificationCenter({ onNotificationClick }) {
     const principal = usePrincipalState((s) => s.principal);
     const isLoggedIn = !!principal;
 
+    // store
     const initializedUserId = useNotificationStore((s) => s.initializedUserId);
     const items = useNotificationStore((s) => s.items);
-    const unreadCount = useNotificationStore((s) => s.unreadCount);
+
+    const loadedUnreadCount = useNotificationStore((s) => s.unreadCount);
+    const badgeUnreadCount = useNotificationStore((s) => s.badgeUnreadCount);
 
     const hasNext = useNotificationStore((s) => s.hasNext);
     const loadingMore = useNotificationStore((s) => s.loadingMore);
@@ -48,43 +43,95 @@ export function NotificationCenter({ onNotificationClick }) {
 
     const reset = useNotificationStore((s) => s.reset);
     const ingest = useNotificationStore((s) => s.ingest);
-    const markAsReadLocal = useNotificationStore((s) => s.markAsReadLocal);
-    const markAllAsReadLocal = useNotificationStore(
-        (s) => s.markAllAsReadLocal,
-    );
-
     const setAll = useNotificationStore((s) => s.setAll);
     const appendMany = useNotificationStore((s) => s.appendMany);
     const setPaging = useNotificationStore((s) => s.setPaging);
     const setLoadingMore = useNotificationStore((s) => s.setLoadingMore);
+    const markAsReadLocal = useNotificationStore((s) => s.markAsReadLocal);
+    const markAllAsReadLocal = useNotificationStore(
+        (s) => s.markAllAsReadLocal,
+    );
+    const setBadgeUnreadCount = useNotificationStore(
+        (s) => s.setBadgeUnreadCount,
+    );
+
+    // error hook
+    const { errorMessage, clearError, handleApiError } = useApiErrorMessage();
 
     const visible = expanded ? items : items.slice(0, 5);
     const canExpand = items.length > 5 || hasNext;
 
-    // ✅ 최초 5개 세팅
-    useEffect(() => {
-        if (!isLoggedIn) {
-            setOpen(false);
-            setExpanded(false);
-            reset();
-            return;
-        }
+    const size = 5;
 
-        if (
-            principal?.userId != null &&
-            initializedUserId !== principal.userId
-        ) {
-            const first = selectMockPage(null, 5);
-            setAll({ userId: principal.userId, rawList: first }); // 여기서 cursor 갱신되게 store가 되어 있어야 함!
-            setPaging({ hasNext: first.length === 5 });
+    const refreshUnreadCount = useCallback(async () => {
+        try {
+            const resp = await getUnreadCount();
+            const count = resp?.data?.data ?? 0;
+            setBadgeUnreadCount(count);
+        } catch {
+            // 뱃지 실패는 치명적이지 않아서 메시지 생략
         }
+    }, [setBadgeUnreadCount]);
+
+    // ✅ 로그인 시 최초 목록 + 뱃지 로드 (여기서 GET /notifications 요청이 반드시 나가야 함)
+    useEffect(() => {
+        let cancelled = false;
+
+        const init = async () => {
+            if (!isLoggedIn) {
+                setOpen(false);
+                setExpanded(false);
+                reset();
+                clearError();
+                return;
+            }
+
+            const userId = principal?.userId;
+            if (userId == null) return;
+            if (initializedUserId === userId) return;
+
+            reset();
+            clearError();
+
+            try {
+                const [listResp, unreadResp] = await Promise.all([
+                    getNotifications({ size }),
+                    getUnreadCount(),
+                ]);
+
+                if (cancelled) return;
+
+                const rawList = listResp?.data?.data ?? [];
+                const unread = unreadResp?.data?.data ?? 0;
+
+                setAll({ userId, rawList });
+                setPaging({ hasNext: rawList.length === size });
+                setBadgeUnreadCount(unread);
+            } catch (e) {
+                if (cancelled) return;
+                await handleApiError(e, {
+                    fallbackMessage:
+                        '알림 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+                });
+                refreshUnreadCount();
+            }
+        };
+
+        init();
+        return () => {
+            cancelled = true;
+        };
     }, [
         isLoggedIn,
         principal?.userId,
         initializedUserId,
+        reset,
+        clearError,
         setAll,
         setPaging,
-        reset,
+        setBadgeUnreadCount,
+        handleApiError,
+        refreshUnreadCount,
     ]);
 
     // 바깥 클릭 닫기
@@ -98,30 +145,43 @@ export function NotificationCenter({ onNotificationClick }) {
         return () => document.removeEventListener('mousedown', fn);
     }, [open]);
 
-    // ✅ 핵심: “더보기(expanded)” 들어갈 때 1회 강제 로드
-    const loadMore = useCallback(() => {
+    const loadMore = useCallback(async () => {
+        if (!expanded) return;
         if (!hasNext || loadingMore) return;
+        if (!isLoggedIn) return;
 
-        const size = 5;
         setLoadingMore(true);
-
-        // mock
-        setTimeout(() => {
-            const next = selectMockPage(cursor, size);
-            appendMany(next); // 여기서 cursor 갱신되게 store가 되어 있어야 함!
+        try {
+            const resp = await getNotifications({ cursor, size });
+            const next = resp?.data?.data ?? [];
+            appendMany(next);
             setPaging({ hasNext: next.length === size });
+        } catch (e) {
+            await handleApiError(e, {
+                fallbackMessage:
+                    '추가 알림을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+            });
+        } finally {
             setLoadingMore(false);
-        }, 180);
-    }, [hasNext, loadingMore, cursor, appendMany, setPaging, setLoadingMore]);
-
-    useEffect(() => {
-        if (open && expanded) {
-            // expanded 켜자마자 한 번 채우기
-            loadMore();
         }
+    }, [
+        expanded,
+        hasNext,
+        loadingMore,
+        isLoggedIn,
+        cursor,
+        appendMany,
+        setPaging,
+        setLoadingMore,
+        handleApiError,
+    ]);
+
+    // expanded 켜질 때 1회 로드
+    useEffect(() => {
+        if (open && expanded) loadMore();
     }, [open, expanded, loadMore]);
 
-    // 무한 스크롤: 스크롤 가능한 상태에서만 동작
+    // 무한 스크롤
     const handleScroll = useCallback(() => {
         if (!expanded) return;
         if (!hasNext || loadingMore) return;
@@ -132,23 +192,72 @@ export function NotificationCenter({ onNotificationClick }) {
         const threshold = 120;
         const nearBottom =
             el.scrollTop + el.clientHeight >= el.scrollHeight - threshold;
-        if (!nearBottom) return;
 
-        loadMore();
+        if (nearBottom) loadMore();
     }, [expanded, hasNext, loadingMore, loadMore]);
 
-    const handleItemClick = (notification) => {
-        markAsReadLocal(notification.id);
+    const handleItemClick = async (notification) => {
+        if (!notification?.isRead) {
+            markAsReadLocal(notification.id);
+            try {
+                await markAsRead(notification.id);
+                refreshUnreadCount();
+            } catch (e) {
+                await handleApiError(e, {
+                    fallbackMessage:
+                        '읽음 처리에 실패했습니다. 잠시 후 다시 시도해주세요.',
+                });
+                refreshUnreadCount();
+                // 최소 롤백
+                ingest({
+                    ...notification,
+                    isRead: false,
+                    raw: notification.raw,
+                });
+            }
+        }
+
         setOpen(false);
         onNotificationClick?.(notification);
     };
 
-    const handleToggleRead = (notificationId, e) => {
+    // 체크박스는 "읽음"만 (unread로 되돌리는 API 없음)
+    const handleMarkAsRead = async (notificationId, e) => {
         e.stopPropagation();
         const target = items.find((n) => n.id === notificationId);
-        if (!target) return;
+        if (!target || target.isRead) return;
 
-        ingest({ ...target, isRead: !target.isRead, raw: target.raw });
+        markAsReadLocal(notificationId);
+
+        try {
+            await markAsRead(notificationId);
+            refreshUnreadCount();
+        } catch (e2) {
+            await handleApiError(e2, {
+                fallbackMessage:
+                    '읽음 처리에 실패했습니다. 잠시 후 다시 시도해주세요.',
+            });
+            refreshUnreadCount();
+            ingest({ ...target, isRead: false, raw: target.raw });
+        }
+    };
+
+    const handleMarkAll = async () => {
+        if (loadedUnreadCount <= 0 && badgeUnreadCount <= 0) return;
+
+        markAllAsReadLocal();
+        setBadgeUnreadCount(0);
+
+        try {
+            await markAllAsRead();
+            refreshUnreadCount();
+        } catch (e) {
+            await handleApiError(e, {
+                fallbackMessage:
+                    '모두 읽기 처리에 실패했습니다. 잠시 후 다시 시도해주세요.',
+            });
+            refreshUnreadCount();
+        }
     };
 
     if (!isLoggedIn) return null;
@@ -156,7 +265,10 @@ export function NotificationCenter({ onNotificationClick }) {
     return (
         <div className="relative" ref={rootRef}>
             <button
-                onClick={() => setOpen((v) => !v)}
+                onClick={() => {
+                    setOpen((v) => !v);
+                    clearError();
+                }}
                 className="relative"
                 aria-label="알림"
             >
@@ -164,22 +276,22 @@ export function NotificationCenter({ onNotificationClick }) {
                     size={20}
                     className="text-[#3d3226] hover:text-[#5d4a36] transition-colors"
                 />
-                {unreadCount > 0 && (
+                {badgeUnreadCount > 0 && (
                     <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                        {unreadCount}
+                        {badgeUnreadCount}
                     </div>
                 )}
             </button>
 
             {open && (
-                <div className="fixed top-16 right-6 bg-[#f5f1eb] border-2 border-[#3d3226] rounded-lg shadow-lg z-50 w-96 max-h-[80vh] flex flex-col">
+                <div className="fixed top-16 right-6 bg-[#f5f1eb] border-2 border-[#3d3226] rounded-lg shadow-lg z-[9999] w-96 max-h-[80vh] flex flex-col">
                     <div className="p-4 border-b-2 border-[#d4cbbf] flex items-center justify-between">
                         <h3 className="text-xl font-serif text-[#3d3226]">
                             알림
                         </h3>
-                        {unreadCount > 0 && (
+                        {loadedUnreadCount > 0 && (
                             <button
-                                onClick={markAllAsReadLocal}
+                                onClick={handleMarkAll}
                                 className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md text-xs font-medium shadow-sm"
                             >
                                 <CheckCheck size={14} />
@@ -187,6 +299,22 @@ export function NotificationCenter({ onNotificationClick }) {
                             </button>
                         )}
                     </div>
+
+                    {errorMessage && (
+                        <div className="px-4 pt-3">
+                            <div className="border-2 border-red-200 bg-red-50 text-red-700 rounded-md px-3 py-2 text-sm flex items-center justify-between gap-2">
+                                <span className="line-clamp-2">
+                                    {errorMessage}
+                                </span>
+                                <button
+                                    onClick={clearError}
+                                    className="text-xs px-2 py-1 rounded bg-white border border-red-200 hover:bg-red-100"
+                                >
+                                    닫기
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     <div
                         ref={listRef}
@@ -206,7 +334,7 @@ export function NotificationCenter({ onNotificationClick }) {
                                     <div className="flex items-start gap-3 py-3 px-4 relative">
                                         <button
                                             onClick={(e) =>
-                                                handleToggleRead(
+                                                handleMarkAsRead(
                                                     notification.id,
                                                     e,
                                                 )
@@ -262,12 +390,19 @@ export function NotificationCenter({ onNotificationClick }) {
 
                                             <div className="flex-1 min-w-0">
                                                 <p
-                                                    className={`text-sm font-medium line-clamp-2 ${notification.isRead ? 'text-[#6b5d4f]' : 'text-[#3d3226]'}`}
+                                                    className={`text-sm font-medium line-clamp-2 ${
+                                                        notification.isRead
+                                                            ? 'text-[#6b5d4f]'
+                                                            : 'text-[#3d3226]'
+                                                    }`}
                                                 >
                                                     {notification.type ===
                                                     'follow'
                                                         ? `${notification.userName}님이 당신을 팔로우했습니다.`
-                                                        : `${notification.userName}님이 "${notification.postTitle}"를 작성했습니다.`}
+                                                        : notification.type ===
+                                                            'comment'
+                                                          ? `${notification.userName}님이 ${notification.postTitle}에 댓글을 남겼습니다.`
+                                                          : `${notification.userName}님이 "${notification.postTitle}"를 작성했습니다.`}
                                                 </p>
                                                 <p className="text-xs text-[#6b5d4f] mt-1">
                                                     {notification.timestamp}
@@ -283,11 +418,13 @@ export function NotificationCenter({ onNotificationClick }) {
                                     불러오는 중...
                                 </div>
                             )}
+
                             {expanded && !hasNext && items.length > 0 && (
                                 <div className="text-center text-xs text-[#6b5d4f] py-3">
                                     더 이상 알림이 없습니다.
                                 </div>
                             )}
+
                             {items.length === 0 && (
                                 <div className="text-center text-sm text-[#6b5d4f] py-10">
                                     아직 알림이 없습니다.
@@ -305,7 +442,9 @@ export function NotificationCenter({ onNotificationClick }) {
                                 <span>{expanded ? '닫기' : '더보기'}</span>
                                 <ChevronDown
                                     size={16}
-                                    className={`transition-transform ${expanded ? 'rotate-180' : ''}`}
+                                    className={`transition-transform ${
+                                        expanded ? 'rotate-180' : ''
+                                    }`}
                                 />
                             </button>
                         )}

@@ -50,7 +50,7 @@ export default defineConfig({
             },
 
             // ✅ SSE 포함 알림
-            '/notifications/': {
+            '/notifications': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
