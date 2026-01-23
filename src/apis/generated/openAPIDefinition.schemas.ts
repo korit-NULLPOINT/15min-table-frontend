@@ -199,6 +199,7 @@ export interface PrincipalUser {
   enabled?: boolean;
   accountNonExpired?: boolean;
   credentialsNonExpired?: boolean;
+  accountNonExpired?: boolean;
   accountNonLocked?: boolean;
 }
 

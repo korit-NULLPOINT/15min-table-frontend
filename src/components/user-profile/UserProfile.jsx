@@ -14,6 +14,9 @@ import { usePrincipalState } from '../../store/usePrincipalState';
 import { currentUserFavorites } from '../../utils/recipeData';
 
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
+import ChangePassword from './ChangePassword';
+import DeleteAccount from './DeleteAccount';
+
 import {
     useChangeUsername,
     getGetPrincipalQueryKey,
@@ -35,19 +38,9 @@ export function UserProfile({
     onFollowersClick,
     onFollowingClick,
     onCommunityPostClick,
-    onChangePasswordClick,
 }) {
     const principal = usePrincipalState((s) => s.principal);
     const login = usePrincipalState((s) => s.login);
-    const handleProfileImgUpdated = (newUrl) => {
-        // Info 탭(로컬 state) 즉시 반영
-        setProfileData((prev) => ({ ...prev, profileImgUrl: newUrl }));
-
-        // MyProfile 탭(principal) 즉시 반영
-        if (principal) {
-            login({ ...principal, profileImgUrl: newUrl });
-        }
-    };
 
     const [profileData, setProfileData] = useState({
         userId: null,
@@ -58,13 +51,14 @@ export function UserProfile({
     });
 
     const [activeTab, setActiveTab] = useState('myProfile');
+    const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // 이미지 로딩
     const [isProfileImageLoading, setIsProfileImageLoading] = useState(true);
     const imgRef = useRef(null);
 
-    // 프로필 이미지 업로드
+    // 프로필 이미지 업로드 (UserProfileInfo에서 input을 제어)
     const fileInputRef = useRef(null);
 
     // 닉네임 편집 토글
@@ -78,7 +72,6 @@ export function UserProfile({
     const isRole3 = principal?.userRoles?.some(
         (ur) => ur?.roleId === 3 || ur?.role?.roleId === 3,
     );
-
     const canEditProfileImg = !!principal && !isRole3;
 
     const { data: myRecipeData } = useGetMyRecipeList();
@@ -106,6 +99,16 @@ export function UserProfile({
         mutateAsync: changeUsernameMutateAsync,
         isPending: isChangingUsername,
     } = useChangeUsername();
+
+    const handleProfileImgUpdated = (newUrl) => {
+        // Info 탭(로컬 state) 즉시 반영
+        setProfileData((prev) => ({ ...prev, profileImgUrl: newUrl }));
+
+        // MyProfile 탭(principal) 즉시 반영
+        if (principal) {
+            login({ ...principal, profileImgUrl: newUrl });
+        }
+    };
 
     // 바깥 클릭 시 닉네임 편집 취소
     useEffect(() => {
@@ -149,23 +152,6 @@ export function UserProfile({
     }, [principal?.profileImgUrl]);
 
     const handleImageLoad = () => setIsProfileImageLoading(false);
-
-    const handleImageUpload = (e) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const imageData = reader.result;
-            const next = { ...profileData, profileImgUrl: imageData };
-
-            setProfileData(next);
-            login(next); // mock 저장(추후 이미지 변경 API 연결 시 교체)
-            setIsSaved(true);
-            setTimeout(() => setIsSaved(false), 3000);
-        };
-        reader.readAsDataURL(file);
-    };
 
     const handleSaveUsername = async () => {
         clearError();
@@ -352,40 +338,19 @@ export function UserProfile({
                 </div>
             </div>
 
-            {/* Delete Account Confirmation Modal */}
+            {/* Delete Account Modal */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full border-2 border-[#e5dfd5]">
-                        <div className="bg-[#3d3226] text-[#f5f1eb] px-6 py-4 rounded-t-lg">
-                            <h3 className="text-xl">회원 탈퇴</h3>
-                        </div>
-                        <div className="p-6">
-                            <div className="mb-6">
-                                <p className="text-[#3d3226] mb-4">
-                                    정말로 회원 탈퇴를 진행하시겠습니까?
-                                </p>
-                                <p className="text-sm text-red-600">
-                                    ⚠️ 모든 프로필 정보와 데이터가 삭제되며, 이
-                                    작업은 되돌릴 수 없습니다.
-                                </p>
-                            </div>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setShowDeleteConfirm(false)}
-                                    className="flex-1 py-3 border-2 border-[#3d3226] text-[#3d3226] rounded-md hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors"
-                                >
-                                    취소
-                                </button>
-                                <button
-                                    onClick={handleDeleteAccount}
-                                    className="flex-1 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                                >
-                                    탈퇴하기
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <DeleteAccount
+                    onClose={() => setShowDeleteConfirm(false)}
+                    onConfirm={handleDeleteAccount}
+                />
+            )}
+
+            {/* Change Password Modal */}
+            {isChangePasswordOpen && (
+                <ChangePassword
+                    onClose={() => setIsChangePasswordOpen(false)}
+                />
             )}
         </div>
     );

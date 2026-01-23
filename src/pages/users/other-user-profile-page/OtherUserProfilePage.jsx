@@ -1,7 +1,7 @@
-// src/pages/users/other-user-profile-page/OtherUserProfilePage.jsx
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { OtherUserProfile } from '../../../components/user-profile/OtherUserProfile';
+import { usePrincipalState } from '../../../store/usePrincipalState';
 
 const RECIPE_BOARD_ID = 1;
 const COMMUNITY_BOARD_ID = 2;
@@ -10,10 +10,24 @@ export default function OtherUserProfilePage() {
     const { userId } = useParams();
     const navigate = useNavigate();
 
+    const principal = usePrincipalState((s) => s.principal);
+    const isLoggedIn = !!principal;
+
     const parsedUserId = useMemo(() => {
         const n = Number(userId);
         return Number.isNaN(n) ? null : n;
     }, [userId]);
+
+    // ✅ 자기 자신이면 /me로 리다이렉트
+    useEffect(() => {
+        if (!isLoggedIn) return;
+        if (!principal?.userId) return;
+        if (parsedUserId === null) return;
+
+        if (parsedUserId === principal.userId) {
+            navigate('/me', { replace: true });
+        }
+    }, [isLoggedIn, principal?.userId, parsedUserId, navigate]);
 
     const onNavigate = (key) => {
         if (key === 'home') navigate('/');
@@ -49,14 +63,17 @@ export default function OtherUserProfilePage() {
         navigate(`/boards/${COMMUNITY_BOARD_ID}/free/${postId}`);
     };
 
+    // ✅ 리다이렉트 조건에 걸리면 화면 렌더링하지 않게(깜빡임 방지)
+    if (isLoggedIn && principal?.userId && parsedUserId === principal.userId) {
+        return null;
+    }
+
     return (
         <OtherUserProfile
             userId={parsedUserId}
             onNavigate={onNavigate}
             onRecipeClick={onRecipeClick}
             onCommunityPostClick={onCommunityPostClick}
-            // ✅ 추후: 여기서 userId로 fetch해서 username 넣을 예정
-            // username={fetchedUsername}
         />
     );
 }

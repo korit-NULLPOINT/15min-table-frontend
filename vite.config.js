@@ -55,6 +55,11 @@ export default defineConfig({
                 changeOrigin: true,
             },
 
+            '/users/profile/': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+            },
+
             '/recipes/': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,

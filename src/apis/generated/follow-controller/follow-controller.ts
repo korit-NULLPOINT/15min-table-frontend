@@ -23,6 +23,13 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import type {
+  ApiRespDtoFollowCountRespDto,
+  ApiRespDtoFollowStatusRespDto,
+  ApiRespDtoListFollowRespDto,
+  ApiRespDtoVoid
+} from '../openAPIDefinition.schemas';
+
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -497,7 +504,7 @@ export function useGetFollowers<TData = Awaited<ReturnType<typeof getFollowers>>
 
 
 export type getFollowCountResponse200 = {
-  data: Blob
+  data: ApiRespDtoFollowCountRespDto
   status: 200
 }
     
@@ -542,6 +549,7 @@ export const getGetFollowCountQueryOptions = <TData = Awaited<ReturnType<typeof 
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
+
 
   const queryKey =  queryOptions?.queryKey ?? getGetFollowCountQueryKey(userId);
 

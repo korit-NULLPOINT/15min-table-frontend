@@ -1,4 +1,3 @@
-// KakaoMap.jsx
 import {
     forwardRef,
     useEffect,

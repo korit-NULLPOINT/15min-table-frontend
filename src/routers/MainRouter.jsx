@@ -4,8 +4,8 @@ import BoardsRouter from './BoardsRouter';
 import RootLayout from '../layout/RootLayout';
 import HomePage from '../pages/home/home-page/HomePage';
 import MyPageRouter from './MypageRouter';
-import OtherUserProfilePage from '../pages/users/other-user-profile-page/OtherUserProfilePage';
 import OAuth2Page from '../pages/auth-page/OAuth2Page';
+import UserProfileRouter from './UserProfileRouter';
 
 export default function MainRouter() {
     return (
@@ -14,10 +14,7 @@ export default function MainRouter() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/boards/*" element={<BoardsRouter />} />
                 <Route path="/me/*" element={<MyPageRouter />} />
-                <Route
-                    path="/users/:userId"
-                    element={<OtherUserProfilePage />}
-                />
+                <Route path="/users/*" element={<UserProfileRouter />} />
                 <Route path="/auth/oauth2/*" element={<OAuth2Page />} />
             </Route>
         </Routes>
