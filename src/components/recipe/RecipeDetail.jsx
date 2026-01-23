@@ -62,10 +62,7 @@ export function RecipeDetail({
     onAuthorClick,
     comments,
 }) {
-    // ✅ recipeDetail 없으면 렌더 방지 (Page에서 이미 방어해도 안전하게)
     if (!recipeDetail) return null;
-
-    // --- rating state (RecipeRatingPage에서 변화량만 반영) ---
     const [totalRatings, setTotalRatings] = useState(
         recipeDetail.ratingCount || 0,
     );
@@ -81,7 +78,6 @@ export function RecipeDetail({
         setRatingSum((prev) => prev + deltaSum);
     };
 
-    // --- map ref (카카오맵 기능은 AiStoreMapPage에서 유지) ---
     const mapRef = useRef(null);
 
     const handleAIStoreMap = () => {
@@ -102,12 +98,10 @@ export function RecipeDetail({
     const [isIngredientModalOpen, setIsIngredientModalOpen] = useState(false);
 
     const ingredientsArr = useMemo(() => {
-        // 서버가 JSON 문자열로 주는 케이스 대응
         return safeJsonArray(recipeDetail.ingredients, []);
     }, [recipeDetail.ingredients]);
 
     const ingredientImgSrc = useMemo(() => {
-        // 서버 필드 우선, 없으면 seed로 대체
         if (recipeDetail?.ingredientImgUrl)
             return recipeDetail.ingredientImgUrl;
 
@@ -409,8 +403,6 @@ export function RecipeDetail({
                             />
                         </div>
                     </div>
-
-                    {/* ✅ 카카오맵 기능은 이 컴포넌트에서 유지 */}
                     <KakaoMap ref={mapRef} ingredients = {ingredientsArr}></KakaoMap>
                 </div>
 
