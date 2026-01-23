@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft,
     Upload,
@@ -9,15 +10,45 @@ import {
     Filter,
 } from 'lucide-react';
 import { usePrincipalState } from '../../store/usePrincipalState';
-import { useAddRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
+import {
+    useModifyRecipe,
+    useGetRecipeDetail,
+} from '../../apis/generated/recipe-controller/recipe-controller';
+import { useAddRecipeHashtags } from '../../apis/generated/recipe-hashtag-controller/recipe-hashtag-controller';
 import { mainCategory, subCategory } from '../../utils/categoryData';
 
-export function RecipeWrite({ onNavigate }) {
+export function RecipeEdit({ recipeId, boardId = 1 }) {
+    const navigate = useNavigate();
     const [showEmailWarning, setShowEmailWarning] = useState(false);
     const principal = usePrincipalState((s) => s.principal);
-    const logout = usePrincipalState((s) => s.logout);
 
-    const { mutateAsync: addRecipeMutate } = useAddRecipe();
+    const { mutateAsync: modifyRecipeMutate } = useModifyRecipe();
+    const { mutateAsync: addHashtagsMutate } = useAddRecipeHashtags();
+    const { data: recipeQueryData, isLoading } = useGetRecipeDetail(
+        boardId,
+        recipeId,
+        {
+            query: {
+                enabled: !!recipeId,
+            },
+        },
+    );
+
+    useEffect(() => {
+        if (isLoading) return;
+
+        if (!principal) {
+            alert('잘못된 접근입니다.');
+            navigate('/', { replace: true });
+            return;
+        }
+
+        const recipeOwnerId = recipeQueryData?.data?.data?.userId;
+        if (recipeOwnerId && principal.userId !== recipeOwnerId) {
+            alert('권한이 없습니다.');
+            navigate('/', { replace: true });
+        }
+    }, [principal, navigate, recipeQueryData, isLoading]);
 
     const [title, setTitle] = useState('');
     const [selectedMainCategoryId, setSelectedMainCategoryId] = useState('');
@@ -28,11 +59,42 @@ export function RecipeWrite({ onNavigate }) {
     const ingredientImgUrlRef = useRef('');
     const inputRefs = useRef([]);
     const [ingredients, setIngredients] = useState(['']);
-    const [steps, setSteps] = useState(['']);
+    const [steps, setSteps] = useState('');
     const [intro, setIntro] = useState('');
 
     const [hashtags, setHashtags] = useState([]);
     const [newHashtag, setNewHashtag] = useState('');
+
+    useEffect(() => {
+        const recipeDetail = recipeQueryData?.data?.data;
+        if (recipeDetail) {
+            setTitle(recipeDetail.title || '');
+            // 카테고리 ID가 문자열인지 숫자인지 확인 필요하나 state는 초기값에 맞춰 들어갈 것
+            // API 응답에 카테고리 ID가 포함되어 있다고 가정
+            setSelectedMainCategoryId(
+                recipeDetail.mainCategoryId?.toString() || '',
+            );
+            setSelectedSubCategoryId(
+                recipeDetail.subCategoryId?.toString() || '',
+            );
+            setThumbnailImgUrl(recipeDetail.thumbnailImgUrl || '');
+            setIngredientImgUrl(recipeDetail.ingredientImgUrl || '');
+
+            try {
+                const parsed =
+                    typeof recipeDetail.ingredients === 'string'
+                        ? JSON.parse(recipeDetail.ingredients)
+                        : recipeDetail.ingredients;
+                setIngredients(Array.isArray(parsed) ? parsed : ['']);
+            } catch {
+                setIngredients(['']);
+            }
+
+            setSteps(recipeDetail.steps || '');
+            setIntro(recipeDetail.intro || '');
+            setHashtags(recipeDetail.hashtags || []);
+        }
+    }, [recipeQueryData]);
 
     const handleImageUpload = (e, type) => {
         const file = e.target.files?.[0];
@@ -62,7 +124,6 @@ export function RecipeWrite({ onNavigate }) {
             if (ingredients[index].trim()) {
                 if (index === ingredients.length - 1) {
                     setIngredients([...ingredients, '']);
-                    // Focus logic handled in useEffect or separate handler
                 } else {
                     inputRefs.current[index + 1]?.focus();
                 }
@@ -86,7 +147,7 @@ export function RecipeWrite({ onNavigate }) {
     };
 
     const generateAIHashtags = () => {
-        // Mock AI hashtag generation
+        // Todo : 현재 mockdata, AI 호출 API 구현 해야 함
         const aiHashtags = ['15분요리', '간단레시피', '자취생필수', '초간단'];
         setHashtags([
             ...hashtags,
@@ -106,8 +167,6 @@ export function RecipeWrite({ onNavigate }) {
     };
 
     const handleSubmit = async () => {
-        // Check email verification
-
         if (!principal) {
             alert('잘못된 접근 입니다.');
             return;
@@ -119,13 +178,13 @@ export function RecipeWrite({ onNavigate }) {
                 minId = r.roleId;
             }
         }
-        console.log(minId);
+
         if (minId >= 3) {
             setShowEmailWarning(true);
             return;
         }
 
-        const addRecipeData = {
+        const modifyData = {
             mainCategoryId: selectedMainCategoryId,
             subCategoryId: selectedSubCategoryId,
             title,
@@ -134,41 +193,50 @@ export function RecipeWrite({ onNavigate }) {
             ingredients: JSON.stringify(ingredients),
             ingredientImgUrl,
             steps,
+            hashtags, // API DTO에 해시태그가 포함되어 있다면 추가
         };
-        // TODO: Implement recipe submission
-        console.log(addRecipeData);
+
         try {
-            await addRecipeMutate({ boardId: 1, data: addRecipeData });
-            alert('레시피가 등록되었습니다!');
-            onNavigate?.('board');
+            await modifyRecipeMutate({
+                boardId,
+                recipeId,
+                data: modifyData,
+            });
+            if (hashtags.length > 0) {
+                await addHashtagsMutate({
+                    data: { recipeId, hashtagNames: hashtags },
+                });
+            }
+            alert('레시피가 수정되었습니다!');
+            navigate(`/boards/${boardId}/recipe/${recipeId}`); // 수정 후 상세 페이지로 이동
         } catch (error) {
-            console.error('레시피 등록 실패:', error);
-            alert('레시피 등록 중 오류가 발생했습니다.');
+            console.error('레시피 수정 실패:', error);
+            alert('레시피 수정 중 오류가 발생했습니다.');
         }
     };
 
     const handleGoToProfile = () => {
         setShowEmailWarning(false);
-        onNavigate('profile');
+        navigate('/users/me');
     };
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
-                    onClick={() => onNavigate('home')}
+                    onClick={() => navigate(-1)} // 이전 페이지로 돌아가기
                     className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                 >
                     <ArrowLeft size={20} />
-                    돌아가기
+                    취소하고 돌아가기
                 </button>
 
                 <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden">
                     {/* Header */}
                     <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
-                        <h1 className="text-3xl mb-2">레시피 작성하기</h1>
+                        <h1 className="text-3xl mb-2">레시피 수정하기</h1>
                         <p className="text-[#e5dfd5]">
-                            나만의 특별한 레시피를 공유해보세요
+                            레시피 내용을 수정하고 저장하세요
                         </p>
                     </div>
 
@@ -206,7 +274,6 @@ export function RecipeWrite({ onNavigate }) {
                                             <button
                                                 key={id}
                                                 onClick={() => {
-                                                    // 같은 카테고리를 다시 클릭하면 선택 취소
                                                     if (
                                                         selectedMainCategoryId ===
                                                         id
@@ -250,7 +317,6 @@ export function RecipeWrite({ onNavigate }) {
                                             <button
                                                 key={label}
                                                 onClick={() => {
-                                                    // 같은 카테고리를 다시 클릭하면 선택 취소
                                                     if (
                                                         selectedSubCategoryId ===
                                                         id
@@ -479,7 +545,7 @@ export function RecipeWrite({ onNavigate }) {
                             onClick={handleSubmit}
                             className="w-full py-4 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors font-medium text-lg"
                         >
-                            레시피 등록하기
+                            레시피 수정완료
                         </button>
                     </div>
                 </div>
