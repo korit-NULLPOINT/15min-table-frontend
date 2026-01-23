@@ -2,7 +2,12 @@ import { Eye, Clock, Star, TrendingUp } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { topRecipes } from '../../utils/recipeData';
 
-export function TopRecipes({ onRecipeClick }) {
+export function TopRecipes({ recipes = [], onRecipeClick }) {
+    // 조회수 순 정렬 (Top 6)
+    const sortedRecipes = [...recipes]
+        .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+        .slice(0, 6);
+
     return (
         <section className="px-6 py-8 max-w-7xl mx-auto bg-[#ebe5db] rounded-lg my-8">
             <h3 className="text-3xl mb-6 text-[#3d3226] flex items-center gap-3">
@@ -16,17 +21,20 @@ export function TopRecipes({ onRecipeClick }) {
                 인기 레시피
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4">
-                {topRecipes.map((recipe) => (
+                {sortedRecipes.map((recipe) => (
                     <div
-                        key={recipe.id}
+                        key={recipe.recipeId}
                         onClick={() =>
-                            onRecipeClick && onRecipeClick(recipe.id)
+                            onRecipeClick && onRecipeClick(recipe.recipeId)
                         }
                         className="group cursor-pointer bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border-2 border-[#e5dfd5] hover:border-[#3d3226]"
                     >
                         <div className="relative aspect-video overflow-hidden">
                             <ImageWithFallback
-                                src={recipe.image}
+                                src={
+                                    recipe.thumbnailImgUrl ||
+                                    `https://picsum.photos/seed/${recipe.recipeId}/800`
+                                }
                                 alt={recipe.title}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             />
@@ -34,11 +42,11 @@ export function TopRecipes({ onRecipeClick }) {
                                 <div className="flex items-center gap-3 text-white text-sm">
                                     <span className="flex items-center gap-1">
                                         <Eye size={16} />
-                                        {recipe.views}
+                                        {recipe.viewCount || 0}
                                     </span>
                                     <span className="flex items-center gap-1">
                                         <Star size={16} fill="currentColor" />
-                                        {recipe.rating}
+                                        {(recipe.avgRating || 0).toFixed(1)}
                                     </span>
                                 </div>
                             </div>
@@ -48,7 +56,7 @@ export function TopRecipes({ onRecipeClick }) {
                                 {recipe.title}
                             </h4>
                             <p className="text-sm text-[#6b5d4f]">
-                                by {recipe.author}
+                                by {recipe.username || 'Unknown'}
                             </p>
                         </div>
                     </div>

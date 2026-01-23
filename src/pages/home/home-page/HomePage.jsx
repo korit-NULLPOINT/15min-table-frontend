@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useGetRecipeList } from '../../../apis/generated/recipe-controller/recipe-controller';
 import { TopRecipes } from '../../../components/home/TopRecipes';
 import { HighRatedSlider } from '../../../components/home/HighRatedSlider';
 
@@ -6,9 +7,25 @@ export default function HomePage() {
     const navigate = useNavigate();
     const boardId = 1;
 
+    // TODO: 페이지네이션 처리가 필요하다면 params 추가 (현재는 전체/기본 조회)
+    // boardId는 필수 파라미터입니다.
+    const { data: recipeListResponse, isLoading } = useGetRecipeList(boardId);
+
+    // API 응답 구조: data.data.data.items 배열로 가정
+    // (Actual response might be nested differently, e.g. .data.data.items if generated code returns AxiosResponse)
+    // Based on user provided info: generated code uses customInstance which usually returns promise of data.
+    // If we look at other usages: const recipeDetail = recipeQuery?.data?.data?.data;
+    // So likely: recipeListResponse.data.data.items
+
+    const recipes = recipeListResponse?.data?.data?.items || [];
+
     const handleRecipeClick = (recipeId) => {
         navigate(`/boards/${boardId}/recipe/${recipeId}`);
     };
+
+    if (isLoading) {
+        return <div className="pt-20 text-center">로딩 중...</div>;
+    }
 
     return (
         <main className="pt-20">
@@ -31,8 +48,11 @@ export default function HomePage() {
                 </div>
             </section>
 
-            <TopRecipes onRecipeClick={handleRecipeClick} />
-            <HighRatedSlider onRecipeClick={handleRecipeClick} />
+            <TopRecipes recipes={recipes} onRecipeClick={handleRecipeClick} />
+            <HighRatedSlider
+                recipes={recipes}
+                onRecipeClick={handleRecipeClick}
+            />
 
             {/* Home only Footer */}
             <footer className="bg-[#3d3226] text-[#f5f1eb] py-8 mt-20">
