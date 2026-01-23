@@ -1,14 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-    ArrowLeft,
-    Upload,
-    Plus,
-    X,
-    Sparkles,
-    Mail,
-    Filter,
-    LoaderCircle,
-} from 'lucide-react';
+import { ArrowLeft, Upload, Mail, Filter, LoaderCircle, X } from 'lucide-react';
 
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { useAddRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
@@ -17,6 +8,8 @@ import { mainCategory, subCategory } from '../../utils/categoryData';
 import { storage } from '../../apis/utils/config/firebaseConfig';
 import { useFirebaseImageUpload } from '../../hooks/useFirebaseImageUpload';
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
+import { RecipeHashtag } from './RecipeHashtag';
+import { useAddRecipeHashtags } from '../../apis/generated/recipe-hashtag-controller/recipe-hashtag-controller';
 
 export function RecipeWrite({ onNavigate }) {
     const [showEmailWarning, setShowEmailWarning] = useState(false);
@@ -25,6 +18,7 @@ export function RecipeWrite({ onNavigate }) {
 
     const { mutateAsync: addRecipeMutate, isPending: isAdding } =
         useAddRecipe();
+    const { mutateAsync: addHashtagsMutate } = useAddRecipeHashtags();
 
     const [title, setTitle] = useState('');
     const [selectedMainCategoryId, setSelectedMainCategoryId] = useState('');
@@ -41,7 +35,6 @@ export function RecipeWrite({ onNavigate }) {
     const [steps, setSteps] = useState('');
 
     const [hashtags, setHashtags] = useState([]);
-    const [newHashtag, setNewHashtag] = useState('');
 
     /* -----------------------------
      * 1) 에러 메시지 훅(레시피 등록)
@@ -105,26 +98,6 @@ export function RecipeWrite({ onNavigate }) {
         if (ingredients.length > 1) {
             setIngredients(ingredients.filter((_, i) => i !== index));
         }
-    };
-
-    const generateAIHashtags = () => {
-        // Mock AI hashtag generation
-        const aiHashtags = ['15분요리', '간단레시피', '자취생필수', '초간단'];
-        setHashtags([
-            ...hashtags,
-            ...aiHashtags.filter((tag) => !hashtags.includes(tag)),
-        ]);
-    };
-
-    const addHashtag = () => {
-        if (newHashtag.trim() && !hashtags.includes(newHashtag.trim())) {
-            setHashtags([...hashtags, newHashtag.trim()]);
-            setNewHashtag('');
-        }
-    };
-
-    const removeHashtag = (tag) => {
-        setHashtags(hashtags.filter((t) => t !== tag));
     };
 
     const checkEmailVerifiedOrWarn = () => {
@@ -244,7 +217,25 @@ export function RecipeWrite({ onNavigate }) {
         };
 
         try {
-            await addRecipeMutate({ boardId: 1, data: addRecipeData });
+            const result = await addRecipeMutate({
+                boardId: 1,
+                data: addRecipeData,
+            });
+
+            // result가 숫자형 ID라고 가정하거나 객체 안에 ID가 있는지 확인
+            // useAddRecipe의 응답 타입에 따라 다르지만, 보통 data.data가 ID인 경우가 많음
+            // 혹은 result 자체가 ID일 수 있음. 안전하게 처리.
+            const newRecipeId = result?.data?.data || result?.data || result;
+
+            if (hashtags.length > 0 && newRecipeId) {
+                await addHashtagsMutate({
+                    data: {
+                        recipeId: Number(newRecipeId),
+                        hashtagNames: hashtags,
+                    },
+                });
+            }
+
             alert('레시피가 등록되었습니다!');
             onNavigate?.('board');
         } catch (e) {
@@ -558,59 +549,10 @@ export function RecipeWrite({ onNavigate }) {
                         </div>
 
                         {/* Hashtags */}
-                        <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm text-[#3d3226]">
-                                    해시태그
-                                </label>
-                                <button
-                                    onClick={generateAIHashtags}
-                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md"
-                                >
-                                    <Sparkles size={16} />
-                                    AI 해시태그 생성
-                                </button>
-                            </div>
-
-                            <div className="flex gap-2 mb-3">
-                                <input
-                                    type="text"
-                                    value={newHashtag}
-                                    onChange={(e) =>
-                                        setNewHashtag(e.target.value)
-                                    }
-                                    onKeyDown={(e) =>
-                                        e.key === 'Enter' &&
-                                        (e.preventDefault(), addHashtag())
-                                    }
-                                    className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none"
-                                    placeholder="해시태그 입력 (# 없이)"
-                                />
-                                <button
-                                    onClick={addHashtag}
-                                    className="px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors"
-                                >
-                                    <Plus size={20} />
-                                </button>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                                {hashtags.map((tag) => (
-                                    <span
-                                        key={tag}
-                                        className="flex items-center gap-2 px-3 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border border-[#d4cbbf]"
-                                    >
-                                        #{tag}
-                                        <button
-                                            onClick={() => removeHashtag(tag)}
-                                            className="hover:text-red-600 transition-colors"
-                                        >
-                                            <X size={16} />
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
+                        <RecipeHashtag
+                            hashtags={hashtags}
+                            setHashtags={setHashtags}
+                        />
 
                         {/* Submit Button */}
                         <button

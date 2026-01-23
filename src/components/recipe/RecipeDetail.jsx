@@ -2,10 +2,11 @@ import { ArrowLeft, User as UserIcon, Star, Sparkles } from 'lucide-react';
 import { useState, useRef, useMemo } from 'react';
 
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import RecipeCommentPage from './RecipeCommentPage';
-import RecipeRatingPage from './RecipeRatingPage';
+import RecipeComment from './RecipeComment';
+import RecipeRatingBookmark from './RecipeRatingBookmark';
 import { formatDate } from '../../apis/utils/formatDate';
 import KakaoMap from '../KakaoMap';
+// import { useGetHashtagsByRecipeId } from '../../apis/generated/recipe-hashtag-controller/recipe-hashtag-controller';
 
 function safeJsonArray(value, fallback = []) {
     if (Array.isArray(value)) return value;
@@ -92,15 +93,26 @@ export function RecipeDetail({
 
     // --- bookmark hooks removed ---
 
-    const mockHashtags = useMemo(() => {
-        return (
-            recipeDetail.hashtags || [
-                '15분요리',
-                '간단레시피',
-                '자취생필수',
-                '초간단',
-            ]
-        );
+    // const hashtags = useGetHashtagsByRecipeId(recipeDetail.recipeId)?.data?.data
+    //     ?.data;
+    // console.log(hashtags);
+
+    const hashtags = useMemo(() => {
+        const tags = recipeDetail.hashtags || [
+            '15분요리',
+            '간단레시피',
+            '자취생필수',
+            '초간단',
+        ];
+        return tags
+            .map((tag) => {
+                if (typeof tag === 'string') return tag;
+                if (tag.name) return tag.name;
+                if (typeof tag.hashtag === 'string') return tag.hashtag;
+                if (tag.hashtag?.name) return tag.hashtag.name;
+                return '';
+            })
+            .filter(Boolean); // Handle mock/fallback strings
     }, [recipeDetail.hashtags]);
 
     // onNavigate가 (type) 형태로 쓰이기도 하고, 단순 함수로 쓰이기도 해서 안전하게
@@ -216,7 +228,7 @@ export function RecipeDetail({
 
                         {/* Rating Section (컴포넌트 유지) */}
                         <div className="mb-6">
-                            <RecipeRatingPage
+                            <RecipeRatingBookmark
                                 recipeId={recipeDetail.recipeId}
                                 isLoggedIn={isLoggedIn}
                                 onOpenAuth={onOpenAuth}
@@ -314,7 +326,7 @@ export function RecipeDetail({
                 <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8 mt-8">
                     <h2 className="text-2xl mb-4 text-[#3d3226]">해시태그</h2>
                     <div className="flex flex-wrap gap-3">
-                        {mockHashtags.map((tag) => (
+                        {hashtags.map((tag) => (
                             <button
                                 key={tag}
                                 className="px-4 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors"
@@ -326,7 +338,7 @@ export function RecipeDetail({
                 </div>
 
                 {/* Comments Component (API 댓글 유지) */}
-                <RecipeCommentPage
+                <RecipeComment
                     comments={comments ?? []}
                     isLoggedIn={isLoggedIn}
                     onOpenAuth={onOpenAuth}

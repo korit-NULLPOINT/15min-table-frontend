@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { ArrowLeft, Search, Filter, Star } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import { useGetRecipeList } from '../../apis/generated/recipe-controller/recipe-controller';
 import { mainCategory, subCategory } from '../../utils/categoryData';
+import { useGetRecipeList } from '../../apis/generated/recipe-controller/recipe-controller';
 
 export function RecipeBoard({ onNavigate, onRecipeClick }) {
     const [searchQuery, setSearchQuery] = useState('');

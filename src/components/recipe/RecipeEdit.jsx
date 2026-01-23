@@ -1,14 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-    ArrowLeft,
-    Upload,
-    Plus,
-    X,
-    Sparkles,
-    Mail,
-    Filter,
-} from 'lucide-react';
+import { ArrowLeft, Upload, Mail, Filter } from 'lucide-react';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import {
     useModifyRecipe,
@@ -16,6 +8,7 @@ import {
 } from '../../apis/generated/recipe-controller/recipe-controller';
 import { useAddRecipeHashtags } from '../../apis/generated/recipe-hashtag-controller/recipe-hashtag-controller';
 import { mainCategory, subCategory } from '../../utils/categoryData';
+import { RecipeHashtag } from '../../components/Recipe/RecipeHashtag';
 
 export function RecipeEdit({ recipeId, boardId = 1 }) {
     const navigate = useNavigate();
@@ -92,7 +85,17 @@ export function RecipeEdit({ recipeId, boardId = 1 }) {
 
             setSteps(recipeDetail.steps || '');
             setIntro(recipeDetail.intro || '');
-            setHashtags(recipeDetail.hashtags || []);
+            setHashtags(
+                (recipeDetail.hashtags || [])
+                    .map((tag) => {
+                        if (typeof tag === 'string') return tag;
+                        if (tag.name) return tag.name;
+                        if (typeof tag.hashtag === 'string') return tag.hashtag;
+                        if (tag.hashtag?.name) return tag.hashtag.name;
+                        return '';
+                    })
+                    .filter(Boolean),
+            );
         }
     }, [recipeQueryData]);
 
@@ -486,59 +489,10 @@ export function RecipeEdit({ recipeId, boardId = 1 }) {
                         </div>
 
                         {/* Hashtags */}
-                        <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm text-[#3d3226]">
-                                    해시태그
-                                </label>
-                                <button
-                                    onClick={generateAIHashtags}
-                                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md"
-                                >
-                                    <Sparkles size={16} />
-                                    AI 해시태그 생성
-                                </button>
-                            </div>
-
-                            <div className="flex gap-2 mb-3">
-                                <input
-                                    type="text"
-                                    value={newHashtag}
-                                    onChange={(e) =>
-                                        setNewHashtag(e.target.value)
-                                    }
-                                    onKeyDown={(e) =>
-                                        e.key === 'Enter' &&
-                                        (e.preventDefault(), addHashtag())
-                                    }
-                                    className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none"
-                                    placeholder="해시태그 입력 (# 없이)"
-                                />
-                                <button
-                                    onClick={addHashtag}
-                                    className="px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors"
-                                >
-                                    <Plus size={20} />
-                                </button>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                                {hashtags.map((tag) => (
-                                    <span
-                                        key={tag}
-                                        className="flex items-center gap-2 px-3 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border border-[#d4cbbf]"
-                                    >
-                                        #{tag}
-                                        <button
-                                            onClick={() => removeHashtag(tag)}
-                                            className="hover:text-red-600 transition-colors"
-                                        >
-                                            <X size={16} />
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
+                        <RecipeHashtag
+                            hashtags={hashtags}
+                            setHashtags={setHashtags}
+                        />
 
                         {/* Submit Button */}
                         <button

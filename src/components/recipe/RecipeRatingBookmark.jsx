@@ -14,7 +14,7 @@ import {
     getGetBookmarkListByUserIdQueryKey,
 } from '../../apis/generated/bookmark-controller/bookmark-controller';
 
-export default function RecipeRatingPage({
+export default function RecipeRatingBookmark({
     recipeId,
     isLoggedIn,
     onOpenAuth,

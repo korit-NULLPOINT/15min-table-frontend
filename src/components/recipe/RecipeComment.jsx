@@ -10,7 +10,7 @@ import {
 } from '../../apis/generated/comment-controller/comment-controller';
 import { formatDate } from '../../apis/utils/formatDate';
 
-export default function RecipeCommentPage({
+export default function RecipeComment({
     comments,
     onOpenAuth,
     onNavigate,
@@ -67,7 +67,15 @@ export default function RecipeCommentPage({
         onNavigate('profile');
     };
 
+    const [shakingCommentId, setShakingCommentId] = useState(null);
+
     const handleCommentDelete = async (commentId) => {
+        setShakingCommentId(commentId);
+
+        // Wait for animation (400ms)
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        setShakingCommentId(null);
+
         if (!window.confirm('정말 삭제하시겠습니까?')) return;
         try {
             await deleteComment(commentId);
@@ -126,9 +134,15 @@ export default function RecipeCommentPage({
                                                                 comment.id,
                                                         )
                                                     }
-                                                    className="text-red-500 hover:text-red-700 transition-colors"
+                                                    className={`hover:text-red-700 transition-colors ${
+                                                        shakingCommentId ===
+                                                        (comment.commentId ||
+                                                            comment.id)
+                                                            ? 'text-red-700 animate-shake'
+                                                            : 'text-red-500'
+                                                    }`}
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 size={20} />
                                                 </button>
                                             )}
                                         </div>
