@@ -96,8 +96,6 @@ export function RecipeDetail({
             ]
         );
     }, [recipeDetail.hashtags]);
-
-    // onNavigate가 (type) 형태로 쓰이기도 하고, 단순 함수로 쓰이기도 해서 안전하게
     const handleBack = () => {
         if (typeof onNavigate === 'function') {
             // page에서 onNavigate={() => navigate(...)} 형태면 인자 무시됨

@@ -36,42 +36,29 @@ function getDistanceMeta(distance) {
         return { label: '멀어요', tone: 'orange', move: '차량 추천' };
     return { label: '많이 멀어요', tone: 'red', move: '차량 필수' };
 }
-
 function loadDaumPostcodeAndOpen(onComplete) {
     if (window.daum && window.daum.Postcode) {
         new window.daum.Postcode({ oncomplete: onComplete }).open();
         return;
     }
-
     const script = document.createElement('script');
     script.src =
         'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
     script.async = true;
-
     script.onload = () =>
         new window.daum.Postcode({ oncomplete: onComplete }).open();
     script.onerror = () => alert('주소 검색 스크립트를 불러오지 못했습니다.');
-
     document.body.appendChild(script);
 }
-
 const KakaoMap = forwardRef(function KakaoMap({ ingredients = [] }, ref) {
     const [showStoreMap, setShowStoreMap] = useState(false);
     const [showZipcodeModal, setShowZipcodeModal] = useState(false);
-
     const [userAddress, setUserAddress] = useState('');
-
     const [nearbyPlaces, setNearbyPlaces] = useState([]);
     const [selectedPlaceId, setSelectedPlaceId] = useState(null);
-    const [originLocation, setOriginLocation] = useState(null); // { name, lat, lng }
-
+    const [originLocation, setOriginLocation] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [autoSelected, setAutoSelected] = useState(false);
-
-    const ingredientsText = useMemo(
-        () => (ingredients || []).join(' '),
-        [ingredients],
-    );
 
     useImperativeHandle(ref, () => ({
         handleAIStoreMap() {
