@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 
 import { usePrincipalState } from '../../store/usePrincipalState';
-import { currentUserFavorites } from '../../utils/recipeData';
 
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
 import ChangePassword from './ChangePassword';
