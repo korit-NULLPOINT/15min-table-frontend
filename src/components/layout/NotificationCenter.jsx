@@ -35,8 +35,8 @@ export function NotificationCenter({ onNotificationClick }) {
     const rootRef = useRef(null);
     const listRef = useRef(null);
 
-    const isLoggedIn = usePrincipalState((s) => s.isLoggedIn);
     const principal = usePrincipalState((s) => s.principal);
+    const isLoggedIn = !!principal;
 
     const initializedUserId = useNotificationStore((s) => s.initializedUserId);
     const items = useNotificationStore((s) => s.items);

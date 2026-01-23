@@ -16,8 +16,8 @@ export function Header({
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
 
-    const isLoggedIn = usePrincipalState((s) => s.isLoggedIn);
     const principal = usePrincipalState((s) => s.principal);
+    const isLoggedIn = !!principal;
     const logout = usePrincipalState((s) => s.logout);
 
     const handleLogout = () => {

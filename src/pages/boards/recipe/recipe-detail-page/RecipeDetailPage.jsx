@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePrincipalState } from '../../../../store/usePrincipalState';
-import { AuthModal } from '../../../../components/AuthModal';
+import { AuthModal } from '../../../../components/layout/AuthModal';
 import { RecipeDetail } from '../../../../components/recipe/RecipeDetail';
 import { useGetRecipeDetail } from '../../../../apis/generated/recipe-controller/recipe-controller';
 import { useGetCommentListByRecipeId } from '../../../../apis/generated/comment-controller/comment-controller';
