@@ -23,15 +23,19 @@ import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
 export function NotificationCenter({ onNotificationClick }) {
     const [open, setOpen] = useState(false);
     const [expanded, setExpanded] = useState(false);
+    const [tab, setTab] = useState('UNREAD'); // ✅ 'UNREAD' | 'READ'
 
     const rootRef = useRef(null);
     const listRef = useRef(null);
+
+    // ✅ init 충돌 방지용 (store reset과 무관하게 1회만 초기 로드)
+    const initUserIdRef = useRef(null);
 
     const principal = usePrincipalState((s) => s.principal);
     const isLoggedIn = !!principal;
 
     // store
-    const initializedUserId = useNotificationStore((s) => s.initializedUserId);
+    // const initializedUserId = useNotificationStore((s) => s.initializedUserId); // ✅ 더 이상 init 트리거로 사용 X
     const items = useNotificationStore((s) => s.items);
 
     const loadedUnreadCount = useNotificationStore((s) => s.unreadCount);
@@ -73,7 +77,7 @@ export function NotificationCenter({ onNotificationClick }) {
         }
     }, [setBadgeUnreadCount]);
 
-    // ✅ 로그인 시 최초 목록 + 뱃지 로드 (여기서 GET /notifications 요청이 반드시 나가야 함)
+    // ✅ 로그인 시 최초 목록 + 뱃지 로드 (기본: UNREAD)
     useEffect(() => {
         let cancelled = false;
 
@@ -81,6 +85,8 @@ export function NotificationCenter({ onNotificationClick }) {
             if (!isLoggedIn) {
                 setOpen(false);
                 setExpanded(false);
+                setTab('UNREAD');
+                initUserIdRef.current = null; // ✅ 로그아웃 시 초기화
                 reset();
                 clearError();
                 return;
@@ -88,14 +94,18 @@ export function NotificationCenter({ onNotificationClick }) {
 
             const userId = principal?.userId;
             if (userId == null) return;
-            if (initializedUserId === userId) return;
 
+            // ✅ store reset과 무관하게 1회만
+            if (initUserIdRef.current === userId) return;
+            initUserIdRef.current = userId;
+
+            setTab('UNREAD'); // 기본 탭
             reset();
             clearError();
 
             try {
                 const [listResp, unreadResp] = await Promise.all([
-                    getNotifications({ size }),
+                    getNotifications({ size, mode: 'UNREAD' }),
                     getUnreadCount(),
                 ]);
 
@@ -124,7 +134,6 @@ export function NotificationCenter({ onNotificationClick }) {
     }, [
         isLoggedIn,
         principal?.userId,
-        initializedUserId,
         reset,
         clearError,
         setAll,
@@ -132,6 +141,57 @@ export function NotificationCenter({ onNotificationClick }) {
         setBadgeUnreadCount,
         handleApiError,
         refreshUnreadCount,
+    ]);
+
+    // ✅ 탭 전환 시: reset + 해당 탭으로 1페이지 재조회 (알림창 열려 있을 때만)
+    useEffect(() => {
+        let cancelled = false;
+
+        const refetchByTab = async () => {
+            if (!open) return;
+            if (!isLoggedIn) return;
+
+            const userId = principal?.userId;
+            if (userId == null) return;
+
+            setExpanded(false);
+            reset();
+            clearError();
+
+            try {
+                const resp = await getNotifications({ size, mode: tab });
+                if (cancelled) return;
+
+                const rawList = resp?.data?.data ?? [];
+                setAll({ userId, rawList });
+                setPaging({ hasNext: rawList.length === size });
+
+                refreshUnreadCount();
+            } catch (e) {
+                if (cancelled) return;
+                await handleApiError(e, {
+                    fallbackMessage:
+                        '알림 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
+                });
+                refreshUnreadCount();
+            }
+        };
+
+        refetchByTab();
+        return () => {
+            cancelled = true;
+        };
+    }, [
+        tab,
+        open,
+        isLoggedIn,
+        principal?.userId,
+        reset,
+        clearError,
+        setAll,
+        setPaging,
+        refreshUnreadCount,
+        handleApiError,
     ]);
 
     // 바깥 클릭 닫기
@@ -152,7 +212,7 @@ export function NotificationCenter({ onNotificationClick }) {
 
         setLoadingMore(true);
         try {
-            const resp = await getNotifications({ cursor, size });
+            const resp = await getNotifications({ cursor, size, mode: tab });
             const next = resp?.data?.data ?? [];
             appendMany(next);
             setPaging({ hasNext: next.length === size });
@@ -170,6 +230,7 @@ export function NotificationCenter({ onNotificationClick }) {
         loadingMore,
         isLoggedIn,
         cursor,
+        tab,
         appendMany,
         setPaging,
         setLoadingMore,
@@ -197,7 +258,8 @@ export function NotificationCenter({ onNotificationClick }) {
     }, [expanded, hasNext, loadingMore, loadMore]);
 
     const handleItemClick = async (notification) => {
-        if (!notification?.isRead) {
+        // ✅ 미읽음 탭에서만 읽음 처리 UI/동작이 의미 있음
+        if (tab === 'UNREAD' && !notification?.isRead) {
             markAsReadLocal(notification.id);
             try {
                 await markAsRead(notification.id);
@@ -224,6 +286,8 @@ export function NotificationCenter({ onNotificationClick }) {
     // 체크박스는 "읽음"만 (unread로 되돌리는 API 없음)
     const handleMarkAsRead = async (notificationId, e) => {
         e.stopPropagation();
+        if (tab !== 'UNREAD') return;
+
         const target = items.find((n) => n.id === notificationId);
         if (!target || target.isRead) return;
 
@@ -243,6 +307,7 @@ export function NotificationCenter({ onNotificationClick }) {
     };
 
     const handleMarkAll = async () => {
+        if (tab !== 'UNREAD') return;
         if (loadedUnreadCount <= 0 && badgeUnreadCount <= 0) return;
 
         markAllAsReadLocal();
@@ -285,11 +350,51 @@ export function NotificationCenter({ onNotificationClick }) {
 
             {open && (
                 <div className="fixed top-16 right-6 bg-[#f5f1eb] border-2 border-[#3d3226] rounded-lg shadow-lg z-[9999] w-96 max-h-[80vh] flex flex-col">
-                    <div className="p-4 border-b-2 border-[#d4cbbf] flex items-center justify-between">
-                        <h3 className="text-xl font-serif text-[#3d3226]">
-                            알림
-                        </h3>
-                        {loadedUnreadCount > 0 && (
+                    {/* Header + Tabs */}
+                    <div className="p-4 border-b-2 border-[#d4cbbf] flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                            <h3 className="text-xl font-serif text-[#3d3226] shrink-0">
+                                알림
+                            </h3>
+
+                            {/* 탭 */}
+                            <div className="flex items-center bg-white border-2 border-[#d4cbbf] rounded-md overflow-hidden shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() => setTab('UNREAD')}
+                                    className={[
+                                        'px-3 py-1.5 text-xs font-medium transition-colors',
+                                        tab === 'UNREAD'
+                                            ? 'bg-[#3d3226] text-[#f5f1eb]'
+                                            : 'bg-white text-[#3d3226] hover:bg-[#ebe5db]',
+                                    ].join(' ')}
+                                >
+                                    미읽음
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setTab('READ')}
+                                    className={[
+                                        'px-3 py-1.5 text-xs font-medium transition-colors border-l-2 border-[#d4cbbf]',
+                                        tab === 'READ'
+                                            ? 'bg-[#3d3226] text-[#f5f1eb]'
+                                            : 'bg-white text-[#3d3226] hover:bg-[#ebe5db]',
+                                    ].join(' ')}
+                                >
+                                    읽음
+                                </button>
+                            </div>
+
+                            {tab === 'READ' && (
+                                <span className="text-[11px] text-[#6b5d4f] shrink-0">
+                                    최근 14일
+                                </span>
+                            )}
+                        </div>
+
+                        {/* 모두 읽기 (미읽음 탭에서만) */}
+                        {tab === 'UNREAD' && loadedUnreadCount > 0 && (
                             <button
                                 onClick={handleMarkAll}
                                 className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md text-xs font-medium shadow-sm"
@@ -343,7 +448,17 @@ export function NotificationCenter({ onNotificationClick }) {
                                                 notification.isRead
                                                     ? 'bg-gradient-to-r from-emerald-500 to-teal-600 border-emerald-600'
                                                     : 'bg-white border-[#d4cbbf]'
+                                            } ${
+                                                tab === 'READ'
+                                                    ? 'opacity-60 cursor-default'
+                                                    : ''
                                             }`}
+                                            disabled={tab === 'READ'}
+                                            title={
+                                                tab === 'READ'
+                                                    ? '이미 읽은 알림입니다.'
+                                                    : '읽음 처리'
+                                            }
                                         >
                                             {notification.isRead && (
                                                 <CheckCircle2
@@ -427,7 +542,9 @@ export function NotificationCenter({ onNotificationClick }) {
 
                             {items.length === 0 && (
                                 <div className="text-center text-sm text-[#6b5d4f] py-10">
-                                    아직 알림이 없습니다.
+                                    {tab === 'UNREAD'
+                                        ? '미읽음 알림이 없습니다.'
+                                        : '읽은 알림이 없습니다.'}
                                 </div>
                             )}
                         </div>
