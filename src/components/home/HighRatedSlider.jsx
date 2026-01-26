@@ -7,13 +7,24 @@ import { Navigation, Autoplay } from 'swiper/modules';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
+import { usePrincipalState } from '../../store/usePrincipalState';
+import { HighRatedCard } from './HighRatedCard';
 
-export function HighRatedSlider({ recipes = [], onRecipeClick }) {
+export function HighRatedSlider({
+    recipes = [],
+    onRecipeClick,
+    onOpenAuth,
+    bookmarkedRecipeIds,
+    onToggleBookmark,
+}) {
     const sortedRecipes = useMemo(() => {
         return [...recipes]
             .sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0))
             .slice(0, 10);
     }, [recipes]);
+
+    const principal = usePrincipalState((s) => s.principal);
+    const isLoggedIn = !!principal;
 
     if (sortedRecipes.length === 0) return null;
 
@@ -64,49 +75,16 @@ export function HighRatedSlider({ recipes = [], onRecipeClick }) {
                 >
                     {sortedRecipes.map((recipe) => (
                         <SwiperSlide key={recipe.recipeId}>
-                            <div
-                                onClick={() => onRecipeClick?.(recipe.recipeId)}
-                                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow cursor-pointer border-2 border-[#e5dfd5] hover:border-[#3d3226] h-full"
-                            >
-                                <div className="relative aspect-square overflow-hidden">
-                                    <ImageWithFallback
-                                        src={
-                                            recipe.thumbnailImgUrl ||
-                                            `https://picsum.photos/seed/${recipe.recipeId}/800`
-                                        }
-                                        alt={recipe.title}
-                                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                                    />
-                                </div>
-
-                                <div className="p-4">
-                                    <h4 className="text-lg mb-2 text-[#3d3226]">
-                                        {recipe.title}
-                                    </h4>
-                                    <p className="text-sm text-[#6b5d4f] mb-3 line-clamp-2">
-                                        {recipe.intro ||
-                                            '간단하고 맛있는 레시피를 확인해보세요.'}
-                                    </p>
-
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs text-[#6b5d4f]">
-                                            by {recipe.username || 'Unknown'}
-                                        </span>
-                                        <div className="flex items-center gap-1">
-                                            <Star
-                                                size={16}
-                                                fill="#f59e0b"
-                                                className="text-[#f59e0b]"
-                                            />
-                                            <span className="text-sm font-bold text-[#3d3226]">
-                                                {(
-                                                    recipe.avgRating || 0
-                                                ).toFixed(1)}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <HighRatedCard
+                                recipe={recipe}
+                                onRecipeClick={onRecipeClick}
+                                onOpenAuth={onOpenAuth}
+                                isLoggedIn={isLoggedIn}
+                                isBookmarked={bookmarkedRecipeIds?.has(
+                                    recipe.recipeId,
+                                )}
+                                onToggleBookmark={onToggleBookmark}
+                            />
                         </SwiperSlide>
                     ))}
                 </Swiper>
