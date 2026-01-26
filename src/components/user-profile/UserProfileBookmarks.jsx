@@ -1,3 +1,4 @@
+import { Bookmark } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 
 export default function UserProfileBookmarks({
@@ -6,8 +7,13 @@ export default function UserProfileBookmarks({
     recipeList,
 }) {
     return (
-        <div className="p-8">
-            <h3 className="text-xl mb-6 text-[#3d3226]">저장한 게시물</h3>
+        <div className="px-8 py-6">
+            <div className="h-13 flex items-center mb-6 gap-2 border-2 border-[#ebe5db]/0">
+                <div className="w-8 h-8 flex items-center justify-center">
+                    <Bookmark size={20} />
+                </div>
+                <h3 className="text-xl text-[#3d3226]">저장한 게시물</h3>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
                 {myBookmarkList.length > 0 ? (
