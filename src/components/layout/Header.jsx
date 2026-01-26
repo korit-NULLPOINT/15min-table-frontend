@@ -7,12 +7,7 @@ import { Sidebar } from './Sidebar';
 import { LogoButton } from './LogoButton';
 import { NotificationCenter } from './NotificationCenter';
 
-export function Header({
-    onOpenAuth,
-    onNavigate,
-    onRandomRecipe,
-    onNotificationClick,
-}) {
+export function Header({ onOpenAuth, onNavigate, onNotificationClick }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -93,7 +88,6 @@ export function Header({
                 isLoggedIn={isLoggedIn}
                 username={principal?.username}
                 onNavigate={(key) => onNavigate?.(key)}
-                onRandomRecipe={onRandomRecipe}
                 onOpenAuth={onOpenAuth}
                 onLogout={handleLogout}
             />

@@ -190,10 +190,10 @@ export function UserProfile({
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
-            <div className="max-w-4xl mx-auto px-6 py-12">
+            <div className="max-w-4xl mx-auto px-6 py-6">
                 <button
                     onClick={() => onNavigate('home')}
-                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
+                    className="flex items-center gap-2 mb-4 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
                 >
                     <ArrowLeft size={20} />
                     메인으로 돌아가기
@@ -241,18 +241,6 @@ export function UserProfile({
                     {/* Tabs */}
                     <div className="border-b-2 border-[#e5dfd5] bg-[#ebe5db]">
                         <div className="flex">
-                            {/* <button
-                                onClick={() => setActiveTab('myProfile')}
-                                className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${
-                                    activeTab === 'myProfile'
-                                        ? 'bg-white text-[#3d3226] border-b-4 border-[#3d3226]'
-                                        : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
-                                }`}
-                            >
-                                <Users size={20} />
-                                My 프로필
-                            </button> */}
-
                             <button
                                 onClick={() => setActiveTab('myProfile')}
                                 className={`flex-1 px-6 py-4 flex items-center justify-center gap-2 transition-colors ${
@@ -291,7 +279,7 @@ export function UserProfile({
                     </div>
 
                     {/* Tab Content */}
-                    <div className="h-[550px] scrollbar-hide scrollbar-thin scrollbar-track-gray-200 scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full overflow-y-auto">
+                    <div className="h-[583px] scrollbar-hide scrollbar-thin scrollbar-track-gray-200 scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full overflow-y-auto">
                         {activeTab === 'myProfile' && (
                             <UserProfileMyProfile
                                 profileData={profileData}
