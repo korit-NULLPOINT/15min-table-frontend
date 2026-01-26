@@ -2,13 +2,11 @@ import { useCallback, useState } from 'react';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { v4 as uuid } from 'uuid';
 
+const DEFAULT_ALLOW_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
 export function useFirebaseImageUpload(storage, options = {}) {
     const maxMB = options.maxMB ?? 2;
-    const allowTypes = options.allowTypes ?? [
-        'image/jpeg',
-        'image/png',
-        'image/webp',
-    ];
+    const allowTypes = options.allowTypes ?? DEFAULT_ALLOW_TYPES;
 
     const [isUploading, setIsUploading] = useState(false);
     const [progress, setProgress] = useState(0);

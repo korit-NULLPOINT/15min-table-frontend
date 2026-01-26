@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { getPrincipal } from '../apis/generated/user-account-controller/user-account-controller';
+import { disconnectNotificationSse } from '../apis/notificationSse';
 
 export const usePrincipalState = create((set, get) => ({
     isLoggedIn: false,
@@ -9,6 +10,7 @@ export const usePrincipalState = create((set, get) => ({
     login: (userData) => set({ isLoggedIn: true, principal: userData }),
 
     logout: () => {
+        disconnectNotificationSse();
         localStorage.removeItem('AccessToken');
         set({ isLoggedIn: false, principal: null, loading: false });
     },

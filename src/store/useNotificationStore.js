@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { mockNotifications } from '../utils/recipeData';
 
 // --- utils ---
 function formatDateTime(isoString) {
@@ -18,12 +17,24 @@ function formatDateTime(isoString) {
 function toUINotification(n) {
     const typeUpper = (n.notificationType ?? '').toUpperCase();
 
+    const uiType =
+        typeUpper === 'FOLLOW'
+            ? 'follow'
+            : typeUpper.includes('COMMENT')
+              ? 'comment'
+              : 'post';
+
     return {
         id: n.notificationId,
-        type: typeUpper === 'FOLLOW' ? 'follow' : 'post',
+        type: uiType,
         userName: n.actorUsername ?? '알 수 없음',
         userImage: '',
-        postTitle: n.recipeId != null ? `레시피 #${n.recipeId}` : typeUpper,
+        postTitle:
+            n.recipeId != null
+                ? `레시피 #${n.recipeId}`
+                : n.commentId != null
+                  ? `댓글 #${n.commentId}`
+                  : typeUpper,
         isRead: Number(n.isRead) === 1,
         timestamp: formatDateTime(n.createDt),
         raw: n,
@@ -50,7 +61,11 @@ export const useNotificationStore = create((set, get) => ({
     // --- state ---
     initializedUserId: null,
     items: [],
+    // 로드된(items) 기준 미읽음 개수(리스트 하이라이트/"모두 읽기" 버튼에 사용)
     unreadCount: 0,
+
+    // 서버가 가진 "전체 미읽음"(아직 로드하지 않은 알림 포함) → 헤더 뱃지에 사용
+    badgeUnreadCount: 0,
 
     // paging
     cursor: null, // 다음 페이지 기준(notification_id < cursor)
@@ -63,10 +78,14 @@ export const useNotificationStore = create((set, get) => ({
             initializedUserId: null,
             items: [],
             unreadCount: 0,
+            badgeUnreadCount: 0,
             cursor: null,
             hasNext: true,
             loadingMore: false,
         }),
+
+    setBadgeUnreadCount: (count) =>
+        set({ badgeUnreadCount: Math.max(0, Number(count) || 0) }),
 
     setLoadingMore: (v) => set({ loadingMore: !!v }),
 
@@ -134,39 +153,27 @@ export const useNotificationStore = create((set, get) => ({
 
     markAsReadLocal: (id) => {
         set((s) => {
-            const next = s.items.map((n) =>
-                n.id === id ? { ...n, isRead: true } : n,
-            );
-            return { items: next, unreadCount: calcUnread(next) };
+            let wasUnread = false;
+            const next = s.items.map((n) => {
+                if (n.id !== id) return n;
+                if (!n.isRead) wasUnread = true;
+                return { ...n, isRead: true };
+            });
+
+            return {
+                items: next,
+                unreadCount: calcUnread(next),
+                badgeUnreadCount: wasUnread
+                    ? Math.max(0, (s.badgeUnreadCount ?? 0) - 1)
+                    : s.badgeUnreadCount,
+            };
         });
     },
 
     markAllAsReadLocal: () => {
         set((s) => {
             const next = s.items.map((n) => ({ ...n, isRead: true }));
-            return { items: next, unreadCount: 0 };
-        });
-    },
-
-    // --- dev/mock ---
-    initMockForUser: (userId = 0, size = 5) => {
-        const { initializedUserId } = get();
-        if (initializedUserId === userId) return;
-
-        const sortedRaw = [...(mockNotifications ?? [])].sort(
-            (a, b) => (b.notificationId ?? 0) - (a.notificationId ?? 0),
-        );
-        const first = sortedRaw.slice(0, size);
-
-        const ui = sortByIdDesc(first.map(toUINotification));
-
-        set({
-            initializedUserId: userId,
-            items: ui,
-            unreadCount: calcUnread(ui),
-            cursor: computeCursorFromItems(ui),
-            hasNext: first.length === size, // 단순 판단
-            loadingMore: false,
+            return { items: next, unreadCount: 0, badgeUnreadCount: 0 };
         });
     },
 }));
