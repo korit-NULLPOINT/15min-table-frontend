@@ -287,7 +287,10 @@ export function RecipeDetail({
                             </p>
                         </div>
                     </div>
-                    <KakaoMap ref={mapRef} ingredients = {ingredientsArr}></KakaoMap>
+                    <KakaoMap
+                        ref={mapRef}
+                        ingredients={ingredientsArr}
+                    ></KakaoMap>
                 </div>
 
                 {/* Steps */}

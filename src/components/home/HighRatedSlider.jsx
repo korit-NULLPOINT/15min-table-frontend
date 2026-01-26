@@ -19,6 +19,8 @@ export function HighRatedSlider({ recipes = [], onRecipeClick }) {
         ...sortedRecipes,
     ];
 
+    // console.log(displayRecipes);
+
     const ITEM_WIDTH = 288; // w-72 (18rem * 16px)
     const GAP = 16; // gap-4 (1rem * 16px)
     const UNIT_WIDTH = ITEM_WIDTH + GAP;
@@ -119,10 +121,10 @@ export function HighRatedSlider({ recipes = [], onRecipeClick }) {
                                     <h4 className="text-lg mb-2 text-[#3d3226]">
                                         {recipe.title}
                                     </h4>
-                                    <p className="text-sm text-[#6b5d4f] mb-3 line-clamp-2">
+                                    {/* <p className="text-sm text-[#6b5d4f] mb-3 line-clamp-2">
                                         {recipe.intro ||
                                             '간단하고 맛있는 레시피를 확인해보세요.'}
-                                    </p>
+                                    </p> */}
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs text-[#6b5d4f]">
                                             by {recipe.username || 'Unknown'}
