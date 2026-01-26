@@ -1,12 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-    Bell,
-    User,
-    PenSquare,
-    CheckCircle2,
-    ChevronDown,
-    CheckCheck,
-} from 'lucide-react';
+import { Bell, CheckCheck } from 'lucide-react';
 
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { useNotificationStore } from '../../store/useNotificationStore';
@@ -19,6 +12,8 @@ import {
 } from '../../apis/generated/notification-controller/notification-controller';
 
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
+import { NotificationList } from './NotificationList';
+import { useNotificationRealtime } from '../../hooks/useNotificationRealtime';
 
 export function NotificationCenter({ onNotificationClick }) {
     const [open, setOpen] = useState(false);
@@ -28,14 +23,11 @@ export function NotificationCenter({ onNotificationClick }) {
     const rootRef = useRef(null);
     const listRef = useRef(null);
 
-    // ✅ init 충돌 방지용 (store reset과 무관하게 1회만 초기 로드)
     const initUserIdRef = useRef(null);
 
     const principal = usePrincipalState((s) => s.principal);
     const isLoggedIn = !!principal;
 
-    // store
-    // const initializedUserId = useNotificationStore((s) => s.initializedUserId); // ✅ 더 이상 init 트리거로 사용 X
     const items = useNotificationStore((s) => s.items);
 
     const loadedUnreadCount = useNotificationStore((s) => s.unreadCount);
@@ -59,7 +51,6 @@ export function NotificationCenter({ onNotificationClick }) {
         (s) => s.setBadgeUnreadCount,
     );
 
-    // error hook
     const { errorMessage, clearError, handleApiError } = useApiErrorMessage();
 
     const visible = expanded ? items : items.slice(0, 5);
@@ -73,11 +64,18 @@ export function NotificationCenter({ onNotificationClick }) {
             const count = resp?.data?.data ?? 0;
             setBadgeUnreadCount(count);
         } catch {
-            // 뱃지 실패는 치명적이지 않아서 메시지 생략
+            // ignore
         }
     }, [setBadgeUnreadCount]);
 
-    // ✅ 로그인 시 최초 목록 + 뱃지 로드 (기본: UNREAD)
+    useNotificationRealtime({
+        enabled: isLoggedIn, // ✅ 로그인 상태에서만 연결
+        activeTab: tab, // ✅ 'UNREAD' | 'READ'
+        ingest, // ✅ UNREAD 탭일 때만 리스트 반영(훅 내부 정책)
+        refreshUnreadCount, // ✅ 뱃지 보정 + 폴링
+        pollMs: 15000,
+    });
+
     useEffect(() => {
         let cancelled = false;
 
@@ -86,7 +84,7 @@ export function NotificationCenter({ onNotificationClick }) {
                 setOpen(false);
                 setExpanded(false);
                 setTab('UNREAD');
-                initUserIdRef.current = null; // ✅ 로그아웃 시 초기화
+                initUserIdRef.current = null;
                 reset();
                 clearError();
                 return;
@@ -95,11 +93,10 @@ export function NotificationCenter({ onNotificationClick }) {
             const userId = principal?.userId;
             if (userId == null) return;
 
-            // ✅ store reset과 무관하게 1회만
             if (initUserIdRef.current === userId) return;
             initUserIdRef.current = userId;
 
-            setTab('UNREAD'); // 기본 탭
+            setTab('UNREAD');
             reset();
             clearError();
 
@@ -143,7 +140,6 @@ export function NotificationCenter({ onNotificationClick }) {
         refreshUnreadCount,
     ]);
 
-    // ✅ 탭 전환 시: reset + 해당 탭으로 1페이지 재조회 (알림창 열려 있을 때만)
     useEffect(() => {
         let cancelled = false;
 
@@ -194,7 +190,6 @@ export function NotificationCenter({ onNotificationClick }) {
         handleApiError,
     ]);
 
-    // 바깥 클릭 닫기
     useEffect(() => {
         if (!open) return;
         const fn = (e) => {
@@ -237,12 +232,10 @@ export function NotificationCenter({ onNotificationClick }) {
         handleApiError,
     ]);
 
-    // expanded 켜질 때 1회 로드
     useEffect(() => {
         if (open && expanded) loadMore();
     }, [open, expanded, loadMore]);
 
-    // 무한 스크롤
     const handleScroll = useCallback(() => {
         if (!expanded) return;
         if (!hasNext || loadingMore) return;
@@ -258,7 +251,6 @@ export function NotificationCenter({ onNotificationClick }) {
     }, [expanded, hasNext, loadingMore, loadMore]);
 
     const handleItemClick = async (notification) => {
-        // ✅ 미읽음 탭에서만 읽음 처리 UI/동작이 의미 있음
         if (tab === 'UNREAD' && !notification?.isRead) {
             markAsReadLocal(notification.id);
             try {
@@ -270,7 +262,6 @@ export function NotificationCenter({ onNotificationClick }) {
                         '읽음 처리에 실패했습니다. 잠시 후 다시 시도해주세요.',
                 });
                 refreshUnreadCount();
-                // 최소 롤백
                 ingest({
                     ...notification,
                     isRead: false,
@@ -283,7 +274,6 @@ export function NotificationCenter({ onNotificationClick }) {
         onNotificationClick?.(notification);
     };
 
-    // 체크박스는 "읽음"만 (unread로 되돌리는 API 없음)
     const handleMarkAsRead = async (notificationId, e) => {
         e.stopPropagation();
         if (tab !== 'UNREAD') return;
@@ -334,15 +324,21 @@ export function NotificationCenter({ onNotificationClick }) {
                     setOpen((v) => !v);
                     clearError();
                 }}
-                className="relative"
+                className={[
+                    'relative',
+                    'cursor-pointer',
+                    'p-2 -m-2',
+                    'rounded-full',
+                    'transition-all duration-150',
+                    'hover:bg-[#ebe5db]',
+                    'active:scale-95',
+                    'focus:outline-none focus:ring-2 focus:ring-[#3d3226]/30',
+                ].join(' ')}
                 aria-label="알림"
             >
-                <Bell
-                    size={20}
-                    className="text-[#3d3226] hover:text-[#5d4a36] transition-colors"
-                />
+                <Bell size={25} className="text-[#3d3226]" />
                 {badgeUnreadCount > 0 && (
-                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    <div className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                         {badgeUnreadCount}
                     </div>
                 )}
@@ -357,7 +353,7 @@ export function NotificationCenter({ onNotificationClick }) {
                                 알림
                             </h3>
 
-                            {/* 탭 */}
+                            {/* Tabs */}
                             <div className="flex items-center bg-white border-2 border-[#d4cbbf] rounded-md overflow-hidden shrink-0">
                                 <button
                                     type="button"
@@ -371,7 +367,6 @@ export function NotificationCenter({ onNotificationClick }) {
                                 >
                                     미읽음
                                 </button>
-
                                 <button
                                     type="button"
                                     onClick={() => setTab('READ')}
@@ -393,7 +388,7 @@ export function NotificationCenter({ onNotificationClick }) {
                             )}
                         </div>
 
-                        {/* 모두 읽기 (미읽음 탭에서만) */}
+                        {/* Mark all (UNREAD only) */}
                         {tab === 'UNREAD' && loadedUnreadCount > 0 && (
                             <button
                                 onClick={handleMarkAll}
@@ -405,167 +400,22 @@ export function NotificationCenter({ onNotificationClick }) {
                         )}
                     </div>
 
-                    {errorMessage && (
-                        <div className="px-4 pt-3">
-                            <div className="border-2 border-red-200 bg-red-50 text-red-700 rounded-md px-3 py-2 text-sm flex items-center justify-between gap-2">
-                                <span className="line-clamp-2">
-                                    {errorMessage}
-                                </span>
-                                <button
-                                    onClick={clearError}
-                                    className="text-xs px-2 py-1 rounded bg-white border border-red-200 hover:bg-red-100"
-                                >
-                                    닫기
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    <div
-                        ref={listRef}
+                    <NotificationList
+                        tab={tab}
+                        visible={visible}
+                        itemsLength={items.length}
+                        expanded={expanded}
+                        canExpand={canExpand}
+                        hasNext={hasNext}
+                        loadingMore={loadingMore}
+                        errorMessage={errorMessage}
+                        onClearError={clearError}
+                        listRef={listRef}
                         onScroll={handleScroll}
-                        className="flex-1 overflow-y-auto p-4"
-                    >
-                        <div className="space-y-2">
-                            {visible.map((notification) => (
-                                <div
-                                    key={notification.id}
-                                    className={`rounded-md transition-all border-2 ${
-                                        notification.isRead
-                                            ? 'bg-white border-[#e5dfd5]'
-                                            : 'bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200'
-                                    }`}
-                                >
-                                    <div className="flex items-start gap-3 py-3 px-4 relative">
-                                        <button
-                                            onClick={(e) =>
-                                                handleMarkAsRead(
-                                                    notification.id,
-                                                    e,
-                                                )
-                                            }
-                                            className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center ${
-                                                notification.isRead
-                                                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 border-emerald-600'
-                                                    : 'bg-white border-[#d4cbbf]'
-                                            } ${
-                                                tab === 'READ'
-                                                    ? 'opacity-60 cursor-default'
-                                                    : ''
-                                            }`}
-                                            disabled={tab === 'READ'}
-                                            title={
-                                                tab === 'READ'
-                                                    ? '이미 읽은 알림입니다.'
-                                                    : '읽음 처리'
-                                            }
-                                        >
-                                            {notification.isRead && (
-                                                <CheckCircle2
-                                                    size={14}
-                                                    className="text-white"
-                                                />
-                                            )}
-                                        </button>
-
-                                        <div
-                                            onClick={() =>
-                                                handleItemClick(notification)
-                                            }
-                                            className="flex items-start gap-3 flex-1 cursor-pointer"
-                                        >
-                                            <div
-                                                className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                                    notification.isRead
-                                                        ? 'bg-[#d4cbbf]'
-                                                        : 'bg-gradient-to-r from-emerald-400 to-teal-500'
-                                                }`}
-                                            >
-                                                {notification.type ===
-                                                'follow' ? (
-                                                    <User
-                                                        size={20}
-                                                        className={
-                                                            notification.isRead
-                                                                ? 'text-[#3d3226]'
-                                                                : 'text-white'
-                                                        }
-                                                    />
-                                                ) : (
-                                                    <PenSquare
-                                                        size={20}
-                                                        className={
-                                                            notification.isRead
-                                                                ? 'text-[#3d3226]'
-                                                                : 'text-white'
-                                                        }
-                                                    />
-                                                )}
-                                            </div>
-
-                                            <div className="flex-1 min-w-0">
-                                                <p
-                                                    className={`text-sm font-medium line-clamp-2 ${
-                                                        notification.isRead
-                                                            ? 'text-[#6b5d4f]'
-                                                            : 'text-[#3d3226]'
-                                                    }`}
-                                                >
-                                                    {notification.type ===
-                                                    'follow'
-                                                        ? `${notification.userName}님이 당신을 팔로우했습니다.`
-                                                        : notification.type ===
-                                                            'comment'
-                                                          ? `${notification.userName}님이 ${notification.postTitle}에 댓글을 남겼습니다.`
-                                                          : `${notification.userName}님이 "${notification.postTitle}"를 작성했습니다.`}
-                                                </p>
-                                                <p className="text-xs text-[#6b5d4f] mt-1">
-                                                    {notification.timestamp}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-
-                            {expanded && loadingMore && (
-                                <div className="text-center text-xs text-[#6b5d4f] py-3">
-                                    불러오는 중...
-                                </div>
-                            )}
-
-                            {expanded && !hasNext && items.length > 0 && (
-                                <div className="text-center text-xs text-[#6b5d4f] py-3">
-                                    더 이상 알림이 없습니다.
-                                </div>
-                            )}
-
-                            {items.length === 0 && (
-                                <div className="text-center text-sm text-[#6b5d4f] py-10">
-                                    {tab === 'UNREAD'
-                                        ? '미읽음 알림이 없습니다.'
-                                        : '읽은 알림이 없습니다.'}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="p-4 border-t-2 border-[#d4cbbf] bg-[#f5f1eb]">
-                        {canExpand && (
-                            <button
-                                onClick={() => setExpanded((v) => !v)}
-                                className="w-full px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md text-sm font-medium flex items-center justify-center gap-2 shadow-md"
-                            >
-                                <span>{expanded ? '닫기' : '더보기'}</span>
-                                <ChevronDown
-                                    size={16}
-                                    className={`transition-transform ${
-                                        expanded ? 'rotate-180' : ''
-                                    }`}
-                                />
-                            </button>
-                        )}
-                    </div>
+                        onItemClick={handleItemClick}
+                        onMarkAsRead={handleMarkAsRead}
+                        onToggleExpanded={() => setExpanded((v) => !v)}
+                    />
                 </div>
             )}
         </div>

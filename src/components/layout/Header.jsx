@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { Sidebar } from './Sidebar';
 import { LogoButton } from './LogoButton';
-import { NotificationCenter } from './NotificationCenter';
+import { NotificationCenter } from '../notification/NotificationCenter';
 
 export function Header({ onOpenAuth, onNavigate, onNotificationClick }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
