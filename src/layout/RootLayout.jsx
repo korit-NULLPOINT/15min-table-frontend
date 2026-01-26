@@ -3,9 +3,12 @@ import { useEffect, useState } from 'react';
 import { Header } from '../components/layout/Header';
 import { AuthModal } from '../components/layout/AuthModal';
 import { usePrincipalState } from '../store/usePrincipalState';
+import { useQueryClient } from '@tanstack/react-query';
+import { getGetBookmarkListByUserIdQueryKey } from '../apis/generated/bookmark-controller/bookmark-controller';
 
 export default function RootLayout() {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { isLoggedIn, principal, fetchUser, logout } = usePrincipalState();
 
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -23,9 +26,15 @@ export default function RootLayout() {
 
     const handleAuthSuccess = async () => {
         await fetchUser();
+        queryClient.invalidateQueries({
+            queryKey: getGetBookmarkListByUserIdQueryKey(),
+        });
     };
     const handleLogout = () => {
         logout();
+        queryClient.invalidateQueries({
+            queryKey: getGetBookmarkListByUserIdQueryKey(),
+        });
         navigate('/');
     };
 

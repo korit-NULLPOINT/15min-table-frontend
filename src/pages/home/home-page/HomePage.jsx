@@ -26,7 +26,8 @@ export default function HomePage() {
         query: { enabled: isLoggedIn },
     });
     // Assuming the API returns: data.data.data (in result) -> data.data (in value)
-    const myBookmarkList = bookmarkListData?.data?.data || [];
+    // Assuming the API returns: data.data.data (in result) -> data.data (in value)
+    const myBookmarkList = isLoggedIn ? bookmarkListData?.data?.data || [] : [];
 
     // Create a Set for O(1) lookup
     const bookmarkedRecipeIds = useMemo(() => {
