@@ -46,7 +46,6 @@ export default function RootLayout() {
                 onNavigate={handleNavigate}
                 isLoggedIn={isLoggedIn}
                 username={username}
-                onRandomRecipe={() => {}}
                 onNotificationClick={() => {}}
                 onLogout={handleLogout}
             />

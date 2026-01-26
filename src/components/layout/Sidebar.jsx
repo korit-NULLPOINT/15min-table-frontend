@@ -1,4 +1,7 @@
-import { X } from 'lucide-react';
+import { useState } from 'react';
+import { X, Shuffle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useGetRecipeList } from '../../apis/generated/recipe-controller/recipe-controller';
 
 export function Sidebar({
     isOpen,
@@ -8,10 +11,68 @@ export function Sidebar({
     username,
 
     onNavigate, // (key) => void  ex) 'board' | 'community' | 'profile'
-    onRandomRecipe, // () => void
+    // onRandomRecipe, // () => void
     onOpenAuth, // (mode) => void ex) 'signin' | 'signup'
     onLogout, // () => void
 }) {
+    const navigate = useNavigate();
+
+    const [randomStatus, setRandomStatus] = useState('idle'); // 'idle' | 'picking' | 'result'
+
+    // 1. 훅을 선언하되, 'enabled: false'로 자동 실행을 막습니다. (중요 ⭐)
+    // 버튼을 누르기 전에는 서버 요청을 절대 보내지 않습니다.
+    const { refetch, isFetching } = useGetRecipeList(
+        1, // boardId (레시피 게시판)
+        { page: 0, size: 1000 }, // 전체를 다 훑어야 랜덤이 의미가 있으므로 넉넉하게
+        {
+            query: {
+                enabled: false, // 컴포넌트 마운트 시 자동 실행 방지
+                staleTime: 1000 * 60 * 5, // 5분 정도는 캐시된 데이터 써도 됨 (반복 클릭 시 빠름)
+            },
+        },
+    );
+
+    const handleRecipeClick = (recipeId) => {
+        navigate(`/boards/1/recipe/${recipeId}`);
+    };
+
+    const handleRandomClick = async () => {
+        try {
+            // 상태 시작: picking ('고르는 중...')
+            setRandomStatus('picking');
+
+            // 1단계: 데이터 가져오기 + 최소 1초 대기
+            const pickingDelay = new Promise((resolve) =>
+                setTimeout(resolve, 1000),
+            );
+            const fetchPromise = refetch();
+
+            const [_, result] = await Promise.all([pickingDelay, fetchPromise]);
+            const recipes = result?.data?.data?.data?.items || [];
+
+            if (recipes.length > 0) {
+                // 2단계: 결과 확인 멘트 + 1초 대기 ('오늘 뭐 먹지?')
+                setRandomStatus('result');
+                await new Promise((resolve) => setTimeout(resolve, 500));
+
+                const randomIndex = Math.floor(Math.random() * recipes.length);
+                const randomRecipeId = recipes[randomIndex].recipeId;
+
+                // console.log(`당첨된 레시피 ID: ${randomRecipeId}`);  // 테스트 코드
+
+                handleRecipeClick(randomRecipeId);
+                onClose?.();
+            } else {
+                alert('등록된 레시피가 없습니다 ㅠㅠ');
+            }
+        } catch (error) {
+            console.error('랜덤 레시피 실패:', error);
+            alert('레시피를 불러오는데 실패했습니다.');
+        } finally {
+            setRandomStatus('idle');
+        }
+    };
+
     return (
         <>
             {/* Overlay */}
@@ -72,9 +133,9 @@ export function Sidebar({
                     {/* Logo Section in Middle */}
                     <button
                         onClick={() => {
-                            onRandomRecipe?.();
-                            onClose?.();
+                            handleRandomClick();
                         }}
+                        disabled={randomStatus !== 'idle'}
                         className="mt-12 mb-12 flex flex-col items-center py-8 bg-white/50 rounded-lg border-2 border-[#d4cbbf] w-full hover:bg-white/80 hover:border-[#3d3226] transition-all hover:shadow-lg group"
                     >
                         <div className="relative w-32 h-32 mb-4">
@@ -108,9 +169,43 @@ export function Sidebar({
                             <br />
                             식탁 위의 행복
                         </p>
-                        <p className="text-xs text-[#3d3226] font-medium bg-[#f5f1eb] px-3 py-1 rounded-full border border-[#d4cbbf] group-hover:bg-[#3d3226] group-hover:text-[#f5f1eb] transition-colors">
-                            🎲 클릭하면 랜덤 레시피!
-                        </p>
+                        <div className="relative w-full h-8 flex items-center justify-center">
+                            {/* Active State (Picking / Result) */}
+                            <div
+                                className={`absolute transition-opacity duration-500 ease-in-out ${
+                                    randomStatus !== 'idle'
+                                        ? 'opacity-100'
+                                        : 'opacity-0'
+                                }`}
+                            >
+                                <p className="flex items-center gap-2 text-xs text-[#3d3226] font-medium bg-[#f5f1eb] px-3 py-1 rounded-full border border-[#d4cbbf]">
+                                    <Shuffle
+                                        size={14}
+                                        className={
+                                            randomStatus === 'picking'
+                                                ? 'animate-spin'
+                                                : ''
+                                        }
+                                    />
+                                    {randomStatus === 'picking'
+                                        ? '고르는 중...'
+                                        : '오늘 뭐 먹지?'}
+                                </p>
+                            </div>
+
+                            {/* Idle State */}
+                            <div
+                                className={`absolute transition-opacity duration-500 ease-in-out ${
+                                    randomStatus === 'idle'
+                                        ? 'opacity-100'
+                                        : 'opacity-0'
+                                }`}
+                            >
+                                <p className="text-xs text-[#3d3226] font-medium bg-[#f5f1eb] px-3 py-1 rounded-full border border-[#d4cbbf] group-hover:bg-[#3d3226] group-hover:text-[#f5f1eb] transition-colors">
+                                    🎲 클릭하면 랜덤 레시피!
+                                </p>
+                            </div>
+                        </div>
                     </button>
 
                     {/* Bottom Auth Buttons */}
