@@ -110,13 +110,13 @@ export interface OAuth2MergeReqDto {
 }
 
 export interface AddCommentReqDto {
-  recipeId?: number;
   content?: string;
 }
 
 export interface Comment {
   commentId?: number;
-  recipeId?: number;
+  targetType?: string;
+  targetId?: number;
   userId?: number;
   content?: string;
   createDt?: string;
@@ -151,6 +151,25 @@ export interface ApiRespDtoInteger {
   message?: string;
   /** 응답 데이터(없으면 null) */
   data?: number;
+}
+
+export interface AiHashtagReqDto {
+  title?: string;
+  intro?: string;
+  ingredients?: string;
+  steps?: string;
+  limit?: number;
+}
+
+export interface AiHashtagRespDto {
+  hashtags?: string[];
+}
+
+export interface ApiRespDtoAiHashtagRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: AiHashtagRespDto;
 }
 
 export interface UserProfileRespDto {
@@ -197,8 +216,8 @@ export interface PrincipalUser {
   userRoles?: UserRole[];
   authorities?: GrantedAuthority[];
   enabled?: boolean;
-  accountNonExpired?: boolean;
   credentialsNonExpired?: boolean;
+  accountNonExpired?: boolean;
   accountNonLocked?: boolean;
 }
 
@@ -256,7 +275,8 @@ export interface NotificationRespDto {
   actorUserId?: number;
   actorUsername?: string;
   notificationType?: string;
-  recipeId?: number;
+  targetType?: string;
+  targetId?: number;
   commentId?: number;
   isRead?: number;
   createDt?: string;
@@ -309,10 +329,11 @@ export interface ApiRespDtoFollowCountRespDto {
 
 export interface CommentRespDto {
   commentId?: number;
-  recipeId?: number;
+  targetType?: string;
+  targetId?: number;
   userId?: number;
   username?: string;
-  profileImgUrl?: string;
+  title?: string;
   content?: string;
   createDt?: string;
   updateDt?: string;

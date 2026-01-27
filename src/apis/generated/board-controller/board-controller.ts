@@ -24,6 +24,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiRespDtoListBoard,
+  ApiRespDtoVoid,
   BoardCreateReqDto
 } from '../openAPIDefinition.schemas';
 
@@ -39,7 +41,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type getBoardListResponse200 = {
-  data: Blob
+  data: ApiRespDtoListBoard
   status: 200
 }
     
@@ -143,7 +145,7 @@ export function useGetBoardList<TData = Awaited<ReturnType<typeof getBoardList>>
 
 
 export type addBoardResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -219,7 +221,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getAddBoardMutationOptions(options), queryClient);
     }
     export type removeBoardResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     

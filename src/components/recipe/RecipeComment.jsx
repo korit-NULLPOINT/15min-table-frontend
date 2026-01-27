@@ -3,11 +3,11 @@ import { Trash2, Mail } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrincipalState } from '../../store/usePrincipalState';
-import {
-    addComment,
-    getGetCommentListByRecipeIdQueryKey,
-    deleteComment,
-} from '../../apis/generated/comment-controller/comment-controller';
+// import {
+//     addComment,
+//     getGetCommentListByRecipeIdQueryKey,
+//     deleteComment,
+// } from '../../apis/generated/comment-controller/comment-controller';
 import { formatDate } from '../../apis/utils/formatDate';
 
 export default function RecipeComment({
@@ -162,7 +162,7 @@ export default function RecipeComment({
                         className="w-full p-4 border-2 border-[#d4cbbf] rounded-lg focus:outline-none focus:border-[#3d3226]"
                     />
                     <button
-                        onClick={handleCommentSubmit}
+                        // onClick={handleCommentSubmit}
                         className="mt-4 px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5c4c40] transition-colors"
                     >
                         댓글 작성
