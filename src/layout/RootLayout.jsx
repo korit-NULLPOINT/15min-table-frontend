@@ -48,6 +48,41 @@ export default function RootLayout() {
 
     const username = principal?.username || principal?.nickname || '';
 
+    const handleNotificationClick = (notification) => {
+        const raw = notification?.raw ?? {};
+        const notificationType = (
+            raw.notificationType ??
+            raw.type ??
+            ''
+        ).toUpperCase();
+        const targetType = (raw.targetType ?? '').toUpperCase();
+        const targetId = raw.targetId;
+        const actorUserId = raw.actorUserId;
+        const commentId = raw.commentId;
+
+        // FOLLOW → 해당 유저 프로필로
+        if (notificationType === 'FOLLOW') {
+            if (actorUserId != null) navigate(`/users/${actorUserId}`);
+            return;
+        }
+
+        // COMMENT / RECIPE_POST → targetType에 따라 이동
+        if (targetType === 'RECIPE' && targetId != null) {
+            // commentId를 쿼리/해시로 넘기고 싶으면 여기서 붙여
+            // navigate(`/boards/1/recipe/${targetId}?commentId=${commentId ?? ''}`);
+            navigate(`/boards/1/recipe/${targetId}`);
+            return;
+        }
+
+        if (targetType === 'POST' && targetId != null) {
+            navigate(`/boards/2/free/${targetId}`);
+            return;
+        }
+
+        // 예외 fallback
+        console.warn('Unknown notification target:', raw);
+    };
+
     return (
         <div className="min-h-screen bg-[#f5f1eb]">
             <Header
@@ -55,7 +90,7 @@ export default function RootLayout() {
                 onNavigate={handleNavigate}
                 isLoggedIn={isLoggedIn}
                 username={username}
-                onNotificationClick={() => {}}
+                onNotificationClick={handleNotificationClick}
                 onLogout={handleLogout}
             />
             <Outlet context={{ openAuthModal }} />
