@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { CommunityEdit } from '../../../../components/CommunityEdit';
+import { CommunityEdit } from '../../../../components/community/CommunityEdit';
 
 export default function FreeEditPage() {
     const { boardId, freeId } = useParams();

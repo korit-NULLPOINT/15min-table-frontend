@@ -4,14 +4,12 @@ import { TopRecipes } from '../../../components/home/TopRecipes';
 import { HighRatedSlider } from '../../../components/home/HighRatedSlider';
 
 import {
-    getGetBookmarkListByUserIdQueryKey,
     useAddBookmark,
     useDeleteBookmark,
-    useGetBookmarkListByUserId,
 } from '../../../apis/generated/bookmark-controller/bookmark-controller';
+import { getGetRecipeListQueryKey } from '../../../apis/generated/recipe-controller/recipe-controller';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrincipalState } from '../../../store/usePrincipalState';
-import { useMemo } from 'react';
 
 export default function HomePage() {
     const navigate = useNavigate();
@@ -21,43 +19,39 @@ export default function HomePage() {
     const principal = usePrincipalState((s) => s.principal);
     const isLoggedIn = !!principal;
 
-    // --- Bookmark Logic (Lifted Up) ---
-    const { data: bookmarkListData } = useGetBookmarkListByUserId({
-        query: { enabled: isLoggedIn },
-    });
-    // Assuming the API returns: data.data.data (in result) -> data.data (in value)
-    // Assuming the API returns: data.data.data (in result) -> data.data (in value)
-    const myBookmarkList = isLoggedIn ? bookmarkListData?.data?.data || [] : [];
-
-    // Create a Set for O(1) lookup
-    const bookmarkedRecipeIds = useMemo(() => {
-        return new Set(myBookmarkList.map((b) => b.recipeId));
-    }, [myBookmarkList]);
-
     const { mutate: addBookmark } = useAddBookmark();
     const { mutate: deleteBookmark } = useDeleteBookmark();
 
-    const handleToggleBookmark = (recipeId) => {
+    const handleToggleBookmark = (recipeId, currentBookmarked) => {
         if (!isLoggedIn) {
             openAuthModal?.();
             return;
         }
 
-        const isBookmarked = bookmarkedRecipeIds.has(recipeId);
         const options = {
             onSuccess: () => {
                 // Invalidate the list so it updates
                 queryClient.invalidateQueries({
-                    queryKey: getGetBookmarkListByUserIdQueryKey(),
+                    queryKey: getGetRecipeListQueryKey(boardId),
                 });
             },
             onError: (error) => {
+                const status = error.response?.status;
+                if (status === 400) {
+                    // 400 에러(이미 북마크됨 등) 발생 시에도 목록 갱신하여 상태 동기화
+                    console.warn('Bookmark state mismatch (400), syncing...');
+                    queryClient.invalidateQueries({
+                        queryKey: getGetRecipeListQueryKey(boardId),
+                    });
+                    return;
+                }
+
                 console.error('Failed to toggle bookmark:', error);
                 alert('북마크 변경에 실패했습니다.');
             },
         };
 
-        if (isBookmarked) {
+        if (currentBookmarked) {
             deleteBookmark({ recipeId }, options);
         } else {
             addBookmark({ recipeId }, options);
@@ -109,14 +103,12 @@ export default function HomePage() {
                 recipes={recipes}
                 onRecipeClick={handleRecipeClick}
                 onOpenAuth={openAuthModal}
-                bookmarkedRecipeIds={bookmarkedRecipeIds}
                 onToggleBookmark={handleToggleBookmark}
             />
             <HighRatedSlider
                 recipes={recipes}
                 onRecipeClick={handleRecipeClick}
                 onOpenAuth={openAuthModal}
-                bookmarkedRecipeIds={bookmarkedRecipeIds}
                 onToggleBookmark={handleToggleBookmark}
             />
 

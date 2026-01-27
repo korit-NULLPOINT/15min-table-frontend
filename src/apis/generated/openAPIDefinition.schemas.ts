@@ -197,9 +197,9 @@ export interface PrincipalUser {
   userRoles?: UserRole[];
   authorities?: GrantedAuthority[];
   enabled?: boolean;
-  accountNonLocked?: boolean;
   accountNonExpired?: boolean;
   credentialsNonExpired?: boolean;
+  accountNonLocked?: boolean;
 }
 
 export interface ApiRespDtoPrincipalUser {

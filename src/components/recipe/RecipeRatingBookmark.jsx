@@ -20,21 +20,19 @@ export default function RecipeRatingBookmark({
     onOpenAuth,
     onStatsChange,
 }) {
+    const rId = Number(recipeId);
     const [userRating, setUserRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
 
     // Fetch existing rating for the user
-    const { data: ratingData } = useGetRating(recipeId, {
+    const { data: ratingData } = useGetRating(rId, {
         query: {
-            enabled: !!isLoggedIn && !!recipeId,
+            enabled: !!isLoggedIn && !!rId,
             retry: 0, // 404가 뜰 수 있으므로 재시도 안함
             refetchOnWindowFocus: false, // 알트탭 시 에러 방지
         },
     });
 
-    const rId = Number(recipeId);
-
-    // Sync userRating with fetched data
     useEffect(() => {
         const fetchedRating = ratingData?.data?.data?.rating;
         if (fetchedRating) {
