@@ -103,8 +103,6 @@ export function RecipeDetail({
                 if (typeof tag === 'string') return tag;
                 if (tag.name) return tag.name;
                 if (typeof tag.hashtag === 'string') return tag.hashtag;
-
-                
                 if (tag.hashtag?.name) return tag.hashtag.name;
                 return '';
             })
@@ -117,9 +115,6 @@ export function RecipeDetail({
             return;
         }
     };
-
-    const authorName = recipeDetail.username || recipeDetail.author || '';
-    const authorUserId = recipeDetail.userId;
 
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
@@ -159,7 +154,7 @@ export function RecipeDetail({
                                         {recipeDetail.profileImgUrl ? (
                                             <img
                                                 src={recipeDetail.profileImgUrl}
-                                                alt={authorName}
+                                                alt={recipeDetail.username}
                                                 className="w-10 h-10 rounded-full object-cover border border-[#d4cbbf]"
                                             />
                                         ) : (
@@ -174,14 +169,15 @@ export function RecipeDetail({
                                         <span
                                             className="cursor-pointer hover:underline"
                                             onClick={() => {
-                                                if (!authorUserId) return;
+                                                if (!recipeDetail.userId)
+                                                    return;
                                                 onAuthorClick?.(
-                                                    authorUserId,
-                                                    authorName,
+                                                    recipeDetail.userId,
+                                                    recipeDetail.username,
                                                 );
                                             }}
                                         >
-                                            {authorName}
+                                            {recipeDetail.username || 'Unknown'}
                                         </span>
                                     </div>
 

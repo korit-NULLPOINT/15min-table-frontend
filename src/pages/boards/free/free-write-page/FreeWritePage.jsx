@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { CommunityWrite } from '../../../../components/CommunityWrite';
+import { CommunityWrite } from '../../../../components/community/CommunityWrite';
 
 export default function FreeWritePage() {
     const { boardId } = useParams();

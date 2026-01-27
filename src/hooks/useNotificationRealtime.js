@@ -56,8 +56,10 @@ export function useNotificationRealtime({
         // 원하면 onOpen에서 stopPolling()해도 됨.
         startPolling();
 
+        const token = localStorage.getItem('AccessToken');
         connectNotificationSse({
             url: '/notifications/subscribe',
+            token,
             onMessage: (e) => {
                 // e.type: 'notification' | 'message' 등 (addEventListener로 받으면 type이 들어옴)
                 if (e?.type !== 'notification') return;

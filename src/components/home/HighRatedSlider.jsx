@@ -14,7 +14,6 @@ export function HighRatedSlider({
     recipes = [],
     onRecipeClick,
     onOpenAuth,
-    bookmarkedRecipeIds,
     onToggleBookmark,
 }) {
     const sortedRecipes = useMemo(() => {
@@ -80,10 +79,13 @@ export function HighRatedSlider({
                                 onRecipeClick={onRecipeClick}
                                 onOpenAuth={onOpenAuth}
                                 isLoggedIn={isLoggedIn}
-                                isBookmarked={bookmarkedRecipeIds?.has(
-                                    recipe.recipeId,
-                                )}
-                                onToggleBookmark={onToggleBookmark}
+                                isBookmarked={recipe.bookmarkedByMe}
+                                onToggleBookmark={() =>
+                                    onToggleBookmark(
+                                        recipe.recipeId,
+                                        recipe.bookmarkedByMe,
+                                    )
+                                }
                             />
                         </SwiperSlide>
                     ))}

@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Community } from '../../../../components/Community';
+import { Community } from '../../../../components/community/Community';
 
 export default function FreeListPage() {
     const { boardId } = useParams();

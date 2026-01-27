@@ -6,7 +6,6 @@ export function TopRecipes({
     recipes = [],
     onRecipeClick,
     onOpenAuth,
-    bookmarkedRecipeIds,
     onToggleBookmark,
 }) {
     // 조회수 순 정렬 (Top 6)
@@ -36,8 +35,13 @@ export function TopRecipes({
                         onRecipeClick={onRecipeClick}
                         onOpenAuth={onOpenAuth}
                         isLoggedIn={isLoggedIn}
-                        isBookmarked={bookmarkedRecipeIds?.has(recipe.recipeId)}
-                        onToggleBookmark={onToggleBookmark}
+                        isBookmarked={recipe.bookmarkedByMe}
+                        onToggleBookmark={() =>
+                            onToggleBookmark(
+                                recipe.recipeId,
+                                recipe.bookmarkedByMe,
+                            )
+                        }
                     />
                 ))}
             </div>

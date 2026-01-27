@@ -1,8 +1,11 @@
+import { EventSourcePolyfill } from 'event-source-polyfill';
+
 let es = null;
 let reconnectTimer = null;
 
 export function connectNotificationSse({
     url = '/notifications/subscribe',
+    token, // ✅ AccessToken 받음
     onOpen,
     onMessage,
     onError,
@@ -11,7 +14,13 @@ export function connectNotificationSse({
 } = {}) {
     if (es && es.readyState !== EventSource.CLOSED) return es;
 
-    es = new EventSource(url);
+    // ✅ Polyfill 사용 + Header에 토큰 담기
+    es = new EventSourcePolyfill(url, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        heartbeatTimeout: 3600000, // 1시간 (기본값보다 길게 설정하여 타임아웃 방지)
+    });
 
     es.onopen = (e) => onOpen?.(e);
 
@@ -40,6 +49,7 @@ export function connectNotificationSse({
                 reconnectTimer = null;
                 connectNotificationSse({
                     url,
+                    token,
                     onOpen,
                     onMessage,
                     onError,
