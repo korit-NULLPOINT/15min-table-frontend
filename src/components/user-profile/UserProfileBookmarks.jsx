@@ -8,7 +8,7 @@ export default function UserProfileBookmarks({
 }) {
     return (
         <div className="px-8 py-6">
-            <div className="h-13 flex items-center mb-6 gap-2 border-2 border-[#ebe5db]/0">
+            <div className="h-12 flex items-center mb-6 gap-2 border-2 border-[#ebe5db]/0">
                 <div className="w-8 h-8 flex items-center justify-center">
                     <Bookmark size={20} />
                 </div>

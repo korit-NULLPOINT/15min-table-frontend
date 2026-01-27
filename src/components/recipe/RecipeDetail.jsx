@@ -1,5 +1,5 @@
 import { ArrowLeft, User as UserIcon, Star, Sparkles } from 'lucide-react';
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import RecipeComment from './RecipeComment';
@@ -29,12 +29,17 @@ export function RecipeDetail({
     comments,
 }) {
     if (!recipeDetail) return null;
-    const [totalRatings, setTotalRatings] = useState(
-        recipeDetail.ratingCount || 0,
-    );
-    const [ratingSum, setRatingSum] = useState(
-        (recipeDetail.ratingCount || 0) * (recipeDetail.avgRating || 0),
-    );
+    const [totalRatings, setTotalRatings] = useState(0);
+    const [ratingSum, setRatingSum] = useState(0);
+
+    useEffect(() => {
+        if (recipeDetail) {
+            const count = Number(recipeDetail.ratingCount) || 0;
+            const avg = Number(recipeDetail.avgRating) || 0;
+            setTotalRatings(count);
+            setRatingSum(count * avg);
+        }
+    }, [recipeDetail]);
 
     const averageRating =
         totalRatings > 0 ? (ratingSum / totalRatings).toFixed(1) : '0.0';

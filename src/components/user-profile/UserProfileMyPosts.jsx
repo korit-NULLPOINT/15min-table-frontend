@@ -6,26 +6,20 @@ import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { formatDate } from '../../apis/utils/formatDate';
 import { Pen, PenIcon, Trash2Icon, Trash2, FileText } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { removeRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
 import {
-    removeRecipe,
-    useGetRecipeList,
-} from '../../apis/generated/recipe-controller/recipe-controller';
-import {
-    useGetMyCommentList,
     deleteComment,
     getGetMyCommentListQueryKey,
 } from '../../apis/generated/comment-controller/comment-controller';
-import {
-    useGetMyRecipeList,
-    getGetMyRecipeListQueryKey,
-} from '../../apis/generated/user-recipe-controller/user-recipe-controller';
+import { getGetMyRecipeListQueryKey } from '../../apis/generated/user-recipe-controller/user-recipe-controller';
+import { targetData } from '../../utils/targetData';
 
 export default function UserProfileMyPosts({
     onRecipeClick,
     onCommunityPostClick,
     myCommentList,
     myPostList,
-    recipeList,
+    // recipeList,
 }) {
     const principal = usePrincipalState((s) => s.principal);
     const [myProfilePostType, setMyProfilePostType] = useState('recipe');
@@ -253,15 +247,18 @@ export default function UserProfileMyPosts({
                                     <div
                                         onClick={() => {
                                             if (
-                                                comment.boardId === 1 ||
-                                                !comment.boardId
+                                                comment.targetType ===
+                                                targetData[1]
                                             )
                                                 onRecipeClick?.(
-                                                    comment.recipeId,
+                                                    comment.targetId,
                                                 );
-                                            if (comment.boardId === 2)
+                                            if (
+                                                comment.targetType ===
+                                                targetData[2]
+                                            )
                                                 onCommunityPostClick?.(
-                                                    comment?.postId,
+                                                    comment.targetId,
                                                 );
                                         }}
                                         className="cursor-pointer pr-10"
@@ -269,28 +266,19 @@ export default function UserProfileMyPosts({
                                         <div className="flex items-center gap-2 mb-2">
                                             <span
                                                 className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                                    comment?.boardId === 1 ||
-                                                    !comment?.boardId
+                                                    comment.targetType ===
+                                                    targetData[1]
                                                         ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
                                                         : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white'
                                                 }`}
                                             >
-                                                {comment?.boardId === 1 ||
-                                                !comment?.boardId
+                                                {comment.targetType ===
+                                                targetData[1]
                                                     ? '📋 레시피'
                                                     : '💬 커뮤니티'}
                                             </span>
                                             <span className="text-sm text-[#6b5d4f]">
-                                                게시글 :
-                                                {
-                                                    recipeList?.find(
-                                                        (recipe) =>
-                                                            recipe.recipeId ===
-                                                            Number(
-                                                                comment?.recipeId,
-                                                            ),
-                                                    )?.title
-                                                }
+                                                제목 : {comment?.title}
                                             </span>
                                         </div>
                                         <p className="text-[#3d3226] mb-2">

@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Trash2, Mail } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrincipalState } from '../../store/usePrincipalState';
-// import {
-//     addComment,
-//     getGetCommentListByRecipeIdQueryKey,
-//     deleteComment,
-// } from '../../apis/generated/comment-controller/comment-controller';
+import {
+    addRecipeComment,
+    deleteComment,
+    getGetRecipeCommentListByTargetQueryKey,
+} from '../../apis/generated/comment-controller/comment-controller';
 import { formatDate } from '../../apis/utils/formatDate';
 
 export default function RecipeComment({
@@ -18,12 +18,25 @@ export default function RecipeComment({
 }) {
     const [newComment, setNewComment] = useState('');
     const [showEmailWarning, setShowEmailWarning] = useState(false);
+    const [showEmptyWarning, setShowEmptyWarning] = useState(false);
+    const textareaRef = useRef(null);
+
+    useEffect(() => {
+        let timer;
+        if (showEmptyWarning) {
+            timer = setTimeout(() => {
+                setShowEmptyWarning(false);
+            }, 2000);
+        }
+        return () => clearTimeout(timer);
+    }, [showEmptyWarning]);
 
     const { principal } = usePrincipalState();
+    const isLoggedIn = !!principal;
     const queryClient = useQueryClient();
 
     const handleCommentSubmit = async () => {
-        if (!principal) {
+        if (!isLoggedIn || !principal) {
             alert('잘못된 접근 입니다.');
             if (onOpenAuth) onOpenAuth();
             return;
@@ -41,18 +54,21 @@ export default function RecipeComment({
             return;
         }
 
-        if (newComment.trim() === '') return;
+        if (newComment.trim() === '') {
+            setShowEmptyWarning(true);
+            textareaRef.current?.focus();
+            return;
+        }
 
         try {
-            const response = await addComment({
-                recipeId: recipeDetail.recipeId,
+            const response = await addRecipeComment(recipeDetail.recipeId, {
                 content: newComment,
             });
             // console.log('Submit comment:', response?.data?.data);
             setNewComment('');
             // alert('댓글이 등록되었습니다.');
             await queryClient.invalidateQueries({
-                queryKey: getGetCommentListByRecipeIdQueryKey(
+                queryKey: getGetRecipeCommentListByTargetQueryKey(
                     recipeDetail.recipeId,
                 ),
             });
@@ -80,7 +96,7 @@ export default function RecipeComment({
         try {
             await deleteComment(commentId);
             await queryClient.invalidateQueries({
-                queryKey: getGetCommentListByRecipeIdQueryKey(
+                queryKey: getGetRecipeCommentListByTargetQueryKey(
                     recipeDetail.recipeId,
                 ),
             });
@@ -154,13 +170,33 @@ export default function RecipeComment({
                             );
                         })}
                 </div>
-                <div className="mt-6">
+                <div className="mt-6 relative">
                     <textarea
+                        ref={textareaRef}
                         value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
+                        onChange={(e) => {
+                            setNewComment(e.target.value);
+                            if (showEmptyWarning) setShowEmptyWarning(false);
+                        }}
                         placeholder="댓글을 입력하세요..."
                         className="w-full p-4 border-2 border-[#d4cbbf] rounded-lg focus:outline-none focus:border-[#3d3226]"
                     />
+                    {/* Empty Content Warning Tooltip */}
+                    <div
+                        className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500 ease-in-out pointer-events-none ${
+                            showEmptyWarning
+                                ? 'opacity-100 translate-y-[-50%]'
+                                : 'opacity-0 translate-y-[-40%]'
+                        }`}
+                    >
+                        <div className="bg-[#3d3226]/90 text-[#f5f1eb] px-6 py-3 rounded-full shadow-xl flex items-center gap-3 backdrop-blur-sm whitespace-nowrap">
+                            <span className="text-xl">✍️</span>
+                            <span className="font-medium">
+                                댓글 내용을 입력해주세요.
+                            </span>
+                        </div>
+                    </div>
+
                     <button
                         // onClick={handleCommentSubmit}
                         className="mt-4 px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5c4c40] transition-colors"
@@ -216,6 +252,17 @@ export default function RecipeComment({
                     </div>
                 </div>
             )}
+
+            <style>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes scaleIn {
+                    from { transform: scale(0.9); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+            `}</style>
         </>
     );
 }

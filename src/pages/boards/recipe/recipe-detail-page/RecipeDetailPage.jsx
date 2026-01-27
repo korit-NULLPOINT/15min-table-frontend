@@ -2,7 +2,7 @@ import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
 import { usePrincipalState } from '../../../../store/usePrincipalState';
 import { RecipeDetail } from '../../../../components/recipe/RecipeDetail';
 import { useGetRecipeDetail } from '../../../../apis/generated/recipe-controller/recipe-controller';
-// import { useGetCommentListByRecipeId } from '../../../../apis/generated/comment-controller/comment-controller';
+import { useGetRecipeCommentListByTarget } from '../../../../apis/generated/comment-controller/comment-controller';
 
 export default function RecipeDetailPage() {
     const { boardId, recipeId } = useParams();
@@ -24,7 +24,7 @@ export default function RecipeDetailPage() {
     });
     const recipeDetail = recipeQuery?.data?.data?.data;
 
-    const commentQuery = useGetCommentListByRecipeId(rId, {
+    const commentQuery = useGetRecipeCommentListByTarget(rId, {
         query: { enabled: Number.isFinite(rId) },
     });
     
