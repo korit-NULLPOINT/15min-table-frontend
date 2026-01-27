@@ -1,7 +1,15 @@
 import { useEffect, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useOutletContext } from 'react-router-dom';
 import { OtherUserProfile } from '../../../components/user-profile/OtherUserProfile';
 import { usePrincipalState } from '../../../store/usePrincipalState';
+
+import {
+    useAddBookmark,
+    useDeleteBookmark,
+} from '../../../apis/generated/bookmark-controller/bookmark-controller';
+import { useQueryClient } from '@tanstack/react-query';
+
+import { getGetRecipeListByUserIdQueryKey } from '../../../apis/generated/user-recipe-controller/user-recipe-controller';
 
 const RECIPE_BOARD_ID = 1;
 const COMMUNITY_BOARD_ID = 2;
@@ -10,8 +18,15 @@ export default function OtherUserProfilePage() {
     const { userId } = useParams();
     const navigate = useNavigate();
 
+    // ✅ HomePage처럼 outlet에서 모달 열기
+    const { openAuthModal } = useOutletContext();
+
     const principal = usePrincipalState((s) => s.principal);
     const isLoggedIn = !!principal;
+
+    const queryClient = useQueryClient();
+    const { mutate: addBookmark } = useAddBookmark();
+    const { mutate: deleteBookmark } = useDeleteBookmark();
 
     const parsedUserId = useMemo(() => {
         const n = Number(userId);
@@ -63,7 +78,41 @@ export default function OtherUserProfilePage() {
         navigate(`/boards/${COMMUNITY_BOARD_ID}/free/${postId}`);
     };
 
-    // ✅ 리다이렉트 조건에 걸리면 화면 렌더링하지 않게(깜빡임 방지)
+    // ✅ 북마크 토글 (HomePage 로직 그대로)
+    const handleToggleBookmark = (recipeId, currentBookmarked) => {
+        if (!isLoggedIn) {
+            openAuthModal?.();
+            return;
+        }
+
+        const options = {
+            onSuccess: () => {
+                queryClient.invalidateQueries({
+                    queryKey: getGetRecipeListByUserIdQueryKey(parsedUserId),
+                });
+            },
+            onError: (error) => {
+                const status = error.response?.status;
+                if (status === 400) {
+                    console.warn('Bookmark state mismatch (400), syncing...');
+                    queryClient.invalidateQueries({
+                        queryKey:
+                            getGetRecipeListByUserIdQueryKey(parsedUserId),
+                    });
+                    return;
+                }
+                console.error('Failed to toggle bookmark:', error);
+                alert('북마크 변경에 실패했습니다.');
+            },
+        };
+
+        if (currentBookmarked) {
+            deleteBookmark({ recipeId }, options);
+        } else {
+            addBookmark({ recipeId }, options);
+        }
+    };
+
     if (isLoggedIn && principal?.userId && parsedUserId === principal.userId) {
         return null;
     }
@@ -74,6 +123,9 @@ export default function OtherUserProfilePage() {
             onNavigate={onNavigate}
             onRecipeClick={onRecipeClick}
             onCommunityPostClick={onCommunityPostClick}
+            isLoggedIn={isLoggedIn}
+            onOpenAuth={openAuthModal}
+            onToggleBookmark={handleToggleBookmark}
         />
     );
 }

@@ -23,6 +23,12 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import type {
+  ApiRespDtoBoolean,
+  ApiRespDtoListBookmarkRespDto,
+  ApiRespDtoVoid
+} from '../openAPIDefinition.schemas';
+
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -35,7 +41,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type existsByRecipeIdResponse200 = {
-  data: Blob
+  data: ApiRespDtoBoolean
   status: 200
 }
     
@@ -139,7 +145,7 @@ export function useExistsByRecipeId<TData = Awaited<ReturnType<typeof existsByRe
 
 
 export type addBookmarkResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -214,7 +220,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getAddBookmarkMutationOptions(options), queryClient);
     }
     export type deleteBookmarkResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -289,7 +295,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getDeleteBookmarkMutationOptions(options), queryClient);
     }
     export type getBookmarkListByUserIdResponse200 = {
-  data: Blob
+  data: ApiRespDtoListBookmarkRespDto
   status: 200
 }
     
