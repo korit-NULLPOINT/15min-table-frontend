@@ -38,104 +38,30 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type deleteCommentResponse200 = {
+export type addRecipeCommentResponse200 = {
   data: Blob
   status: 200
 }
     
-export type deleteCommentResponseSuccess = (deleteCommentResponse200) & {
+export type addRecipeCommentResponseSuccess = (addRecipeCommentResponse200) & {
   headers: Headers;
 };
 ;
 
-export type deleteCommentResponse = (deleteCommentResponseSuccess)
+export type addRecipeCommentResponse = (addRecipeCommentResponseSuccess)
 
-export const getDeleteCommentUrl = (commentId: number,) => {
+export const getAddRecipeCommentUrl = (recipeId: number,) => {
 
 
   
 
-  return `/comment/delete/${commentId}`
+  return `/comment/add/recipe/${recipeId}`
 }
 
-export const deleteComment = async (commentId: number, options?: RequestInit): Promise<deleteCommentResponse> => {
+export const addRecipeComment = async (recipeId: number,
+    addCommentReqDto: AddCommentReqDto, options?: RequestInit): Promise<addRecipeCommentResponse> => {
   
-  return customInstance<deleteCommentResponse>(getDeleteCommentUrl(commentId),
-  {      
-    ...options,
-    method: 'POST'
-    
-    
-  }
-);}
-
-
-
-
-export const getDeleteCommentMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{commentId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{commentId: number}, TContext> => {
-
-const mutationKey = ['deleteComment'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteComment>>, {commentId: number}> = (props) => {
-          const {commentId} = props ?? {};
-
-          return  deleteComment(commentId,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteCommentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteComment>>>
-    
-    export type DeleteCommentMutationError = unknown
-
-    export const useDeleteComment = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{commentId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteComment>>,
-        TError,
-        {commentId: number},
-        TContext
-      > => {
-      return useMutation(getDeleteCommentMutationOptions(options), queryClient);
-    }
-    export type addCommentResponse200 = {
-  data: Blob
-  status: 200
-}
-    
-export type addCommentResponseSuccess = (addCommentResponse200) & {
-  headers: Headers;
-};
-;
-
-export type addCommentResponse = (addCommentResponseSuccess)
-
-export const getAddCommentUrl = () => {
-
-
-  
-
-  return `/comment/add`
-}
-
-export const addComment = async (addCommentReqDto: AddCommentReqDto, options?: RequestInit): Promise<addCommentResponse> => {
-  
-  return customInstance<addCommentResponse>(getAddCommentUrl(),
+  return customInstance<addRecipeCommentResponse>(getAddRecipeCommentUrl(recipeId),
   {      
     ...options,
     method: 'POST',
@@ -148,11 +74,11 @@ export const addComment = async (addCommentReqDto: AddCommentReqDto, options?: R
 
 
 
-export const getAddCommentMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addComment>>, TError,{data: AddCommentReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof addComment>>, TError,{data: AddCommentReqDto}, TContext> => {
+export const getAddRecipeCommentMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addRecipeComment>>, TError,{recipeId: number;data: AddCommentReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof addRecipeComment>>, TError,{recipeId: number;data: AddCommentReqDto}, TContext> => {
 
-const mutationKey = ['addComment'];
+const mutationKey = ['addRecipeComment'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -162,10 +88,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addComment>>, {data: AddCommentReqDto}> = (props) => {
-          const {data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addRecipeComment>>, {recipeId: number;data: AddCommentReqDto}> = (props) => {
+          const {recipeId,data} = props ?? {};
 
-          return  addComment(data,requestOptions)
+          return  addRecipeComment(recipeId,data,requestOptions)
         }
 
 
@@ -175,19 +101,96 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type AddCommentMutationResult = NonNullable<Awaited<ReturnType<typeof addComment>>>
-    export type AddCommentMutationBody = AddCommentReqDto
-    export type AddCommentMutationError = unknown
+    export type AddRecipeCommentMutationResult = NonNullable<Awaited<ReturnType<typeof addRecipeComment>>>
+    export type AddRecipeCommentMutationBody = AddCommentReqDto
+    export type AddRecipeCommentMutationError = unknown
 
-    export const useAddComment = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addComment>>, TError,{data: AddCommentReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useAddRecipeComment = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addRecipeComment>>, TError,{recipeId: number;data: AddCommentReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof addComment>>,
+        Awaited<ReturnType<typeof addRecipeComment>>,
         TError,
-        {data: AddCommentReqDto},
+        {recipeId: number;data: AddCommentReqDto},
         TContext
       > => {
-      return useMutation(getAddCommentMutationOptions(options), queryClient);
+      return useMutation(getAddRecipeCommentMutationOptions(options), queryClient);
+    }
+    export type addPostCommentResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type addPostCommentResponseSuccess = (addPostCommentResponse200) & {
+  headers: Headers;
+};
+;
+
+export type addPostCommentResponse = (addPostCommentResponseSuccess)
+
+export const getAddPostCommentUrl = (postId: number,) => {
+
+
+  
+
+  return `/comment/add/post/${postId}`
+}
+
+export const addPostComment = async (postId: number,
+    addCommentReqDto: AddCommentReqDto, options?: RequestInit): Promise<addPostCommentResponse> => {
+  
+  return customInstance<addPostCommentResponse>(getAddPostCommentUrl(postId),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      addCommentReqDto,)
+  }
+);}
+
+
+
+
+export const getAddPostCommentMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPostComment>>, TError,{postId: number;data: AddCommentReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof addPostComment>>, TError,{postId: number;data: AddCommentReqDto}, TContext> => {
+
+const mutationKey = ['addPostComment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addPostComment>>, {postId: number;data: AddCommentReqDto}> = (props) => {
+          const {postId,data} = props ?? {};
+
+          return  addPostComment(postId,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddPostCommentMutationResult = NonNullable<Awaited<ReturnType<typeof addPostComment>>>
+    export type AddPostCommentMutationBody = AddCommentReqDto
+    export type AddPostCommentMutationError = unknown
+
+    export const useAddPostComment = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addPostComment>>, TError,{postId: number;data: AddCommentReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addPostComment>>,
+        TError,
+        {postId: number;data: AddCommentReqDto},
+        TContext
+      > => {
+      return useMutation(getAddPostCommentMutationOptions(options), queryClient);
     }
     export type getMyCommentListResponse200 = {
   data: Blob
@@ -293,29 +296,29 @@ export function useGetMyCommentList<TData = Awaited<ReturnType<typeof getMyComme
 
 
 
-export type getCommentListByRecipeIdResponse200 = {
+export type getRecipeCommentListByTargetResponse200 = {
   data: Blob
   status: 200
 }
     
-export type getCommentListByRecipeIdResponseSuccess = (getCommentListByRecipeIdResponse200) & {
+export type getRecipeCommentListByTargetResponseSuccess = (getRecipeCommentListByTargetResponse200) & {
   headers: Headers;
 };
 ;
 
-export type getCommentListByRecipeIdResponse = (getCommentListByRecipeIdResponseSuccess)
+export type getRecipeCommentListByTargetResponse = (getRecipeCommentListByTargetResponseSuccess)
 
-export const getGetCommentListByRecipeIdUrl = (recipeId: number,) => {
+export const getGetRecipeCommentListByTargetUrl = (recipeId: number,) => {
 
 
   
 
-  return `/comment/list/${recipeId}`
+  return `/comment/list/recipe/${recipeId}`
 }
 
-export const getCommentListByRecipeId = async (recipeId: number, options?: RequestInit): Promise<getCommentListByRecipeIdResponse> => {
+export const getRecipeCommentListByTarget = async (recipeId: number, options?: RequestInit): Promise<getRecipeCommentListByTargetResponse> => {
   
-  return customInstance<getCommentListByRecipeIdResponse>(getGetCommentListByRecipeIdUrl(recipeId),
+  return customInstance<getRecipeCommentListByTargetResponse>(getGetRecipeCommentListByTargetUrl(recipeId),
   {      
     ...options,
     method: 'GET'
@@ -328,66 +331,66 @@ export const getCommentListByRecipeId = async (recipeId: number, options?: Reque
 
 
 
-export const getGetCommentListByRecipeIdQueryKey = (recipeId: number,) => {
+export const getGetRecipeCommentListByTargetQueryKey = (recipeId: number,) => {
     return [
-    `/comment/list/${recipeId}`
+    `/comment/list/recipe/${recipeId}`
     ] as const;
     }
 
     
-export const getGetCommentListByRecipeIdQueryOptions = <TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError = unknown>(recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetRecipeCommentListByTargetQueryOptions = <TData = Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError = unknown>(recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetCommentListByRecipeIdQueryKey(recipeId);
+  const queryKey =  queryOptions?.queryKey ?? getGetRecipeCommentListByTargetQueryKey(recipeId);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCommentListByRecipeId>>> = ({ signal }) => getCommentListByRecipeId(recipeId, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecipeCommentListByTarget>>> = ({ signal }) => getRecipeCommentListByTarget(recipeId, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(recipeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(recipeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetCommentListByRecipeIdQueryResult = NonNullable<Awaited<ReturnType<typeof getCommentListByRecipeId>>>
-export type GetCommentListByRecipeIdQueryError = unknown
+export type GetRecipeCommentListByTargetQueryResult = NonNullable<Awaited<ReturnType<typeof getRecipeCommentListByTarget>>>
+export type GetRecipeCommentListByTargetQueryError = unknown
 
 
-export function useGetCommentListByRecipeId<TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError = unknown>(
- recipeId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData>> & Pick<
+export function useGetRecipeCommentListByTarget<TData = Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError = unknown>(
+ recipeId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+          Awaited<ReturnType<typeof getRecipeCommentListByTarget>>,
           TError,
-          Awaited<ReturnType<typeof getCommentListByRecipeId>>
+          Awaited<ReturnType<typeof getRecipeCommentListByTarget>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommentListByRecipeId<TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData>> & Pick<
+export function useGetRecipeCommentListByTarget<TData = Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError = unknown>(
+ recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getCommentListByRecipeId>>,
+          Awaited<ReturnType<typeof getRecipeCommentListByTarget>>,
           TError,
-          Awaited<ReturnType<typeof getCommentListByRecipeId>>
+          Awaited<ReturnType<typeof getRecipeCommentListByTarget>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetCommentListByRecipeId<TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetRecipeCommentListByTarget<TData = Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError = unknown>(
+ recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetCommentListByRecipeId<TData = Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError = unknown>(
- recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCommentListByRecipeId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetRecipeCommentListByTarget<TData = Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError = unknown>(
+ recipeId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecipeCommentListByTarget>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetCommentListByRecipeIdQueryOptions(recipeId,options)
+  const queryOptions = getGetRecipeCommentListByTargetQueryOptions(recipeId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -397,3 +400,183 @@ export function useGetCommentListByRecipeId<TData = Awaited<ReturnType<typeof ge
 
 
 
+export type getPostCommentListByTargetResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type getPostCommentListByTargetResponseSuccess = (getPostCommentListByTargetResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getPostCommentListByTargetResponse = (getPostCommentListByTargetResponseSuccess)
+
+export const getGetPostCommentListByTargetUrl = (postId: number,) => {
+
+
+  
+
+  return `/comment/list/post/${postId}`
+}
+
+export const getPostCommentListByTarget = async (postId: number, options?: RequestInit): Promise<getPostCommentListByTargetResponse> => {
+  
+  return customInstance<getPostCommentListByTargetResponse>(getGetPostCommentListByTargetUrl(postId),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getGetPostCommentListByTargetQueryKey = (postId: number,) => {
+    return [
+    `/comment/list/post/${postId}`
+    ] as const;
+    }
+
+    
+export const getGetPostCommentListByTargetQueryOptions = <TData = Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError = unknown>(postId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPostCommentListByTargetQueryKey(postId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostCommentListByTarget>>> = ({ signal }) => getPostCommentListByTarget(postId, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(postId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPostCommentListByTargetQueryResult = NonNullable<Awaited<ReturnType<typeof getPostCommentListByTarget>>>
+export type GetPostCommentListByTargetQueryError = unknown
+
+
+export function useGetPostCommentListByTarget<TData = Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError = unknown>(
+ postId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPostCommentListByTarget>>,
+          TError,
+          Awaited<ReturnType<typeof getPostCommentListByTarget>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPostCommentListByTarget<TData = Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError = unknown>(
+ postId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPostCommentListByTarget>>,
+          TError,
+          Awaited<ReturnType<typeof getPostCommentListByTarget>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPostCommentListByTarget<TData = Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError = unknown>(
+ postId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPostCommentListByTarget<TData = Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError = unknown>(
+ postId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostCommentListByTarget>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPostCommentListByTargetQueryOptions(postId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type deleteCommentResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type deleteCommentResponseSuccess = (deleteCommentResponse200) & {
+  headers: Headers;
+};
+;
+
+export type deleteCommentResponse = (deleteCommentResponseSuccess)
+
+export const getDeleteCommentUrl = (commentId: number,) => {
+
+
+  
+
+  return `/comment/delete/${commentId}`
+}
+
+export const deleteComment = async (commentId: number, options?: RequestInit): Promise<deleteCommentResponse> => {
+  
+  return customInstance<deleteCommentResponse>(getDeleteCommentUrl(commentId),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+
+
+
+
+export const getDeleteCommentMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{commentId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{commentId: number}, TContext> => {
+
+const mutationKey = ['deleteComment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteComment>>, {commentId: number}> = (props) => {
+          const {commentId} = props ?? {};
+
+          return  deleteComment(commentId,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteCommentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteComment>>>
+    
+    export type DeleteCommentMutationError = unknown
+
+    export const useDeleteComment = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteComment>>, TError,{commentId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteComment>>,
+        TError,
+        {commentId: number},
+        TContext
+      > => {
+      return useMutation(getDeleteCommentMutationOptions(options), queryClient);
+    }
+    

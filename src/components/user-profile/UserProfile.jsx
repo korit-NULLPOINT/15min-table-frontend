@@ -309,7 +309,7 @@ export function UserProfile({
                                 onRecipeClick={onRecipeClick}
                                 onCommunityPostClick={onCommunityPostClick}
                                 myPostList={myPostList}
-                                recipeList={recipeList}
+                                // recipeList={recipeList}
                                 myCommentList={myCommentList}
                             />
                         )}

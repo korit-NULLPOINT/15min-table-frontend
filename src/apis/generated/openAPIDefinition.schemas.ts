@@ -110,13 +110,13 @@ export interface OAuth2MergeReqDto {
 }
 
 export interface AddCommentReqDto {
-  recipeId?: number;
   content?: string;
 }
 
 export interface Comment {
   commentId?: number;
-  recipeId?: number;
+  targetType?: string;
+  targetId?: number;
   userId?: number;
   content?: string;
   createDt?: string;
@@ -256,7 +256,8 @@ export interface NotificationRespDto {
   actorUserId?: number;
   actorUsername?: string;
   notificationType?: string;
-  recipeId?: number;
+  targetType?: string;
+  targetId?: number;
   commentId?: number;
   isRead?: number;
   createDt?: string;
@@ -309,10 +310,11 @@ export interface ApiRespDtoFollowCountRespDto {
 
 export interface CommentRespDto {
   commentId?: number;
-  recipeId?: number;
+  targetType?: string;
+  targetId?: number;
   userId?: number;
   username?: string;
-  profileImgUrl?: string;
+  title?: string;
   content?: string;
   createDt?: string;
   updateDt?: string;
