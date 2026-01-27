@@ -103,6 +103,8 @@ export function RecipeDetail({
                 if (typeof tag === 'string') return tag;
                 if (tag.name) return tag.name;
                 if (typeof tag.hashtag === 'string') return tag.hashtag;
+
+                
                 if (tag.hashtag?.name) return tag.hashtag.name;
                 return '';
             })

@@ -73,6 +73,7 @@ export default function IngredientMap({
     const activeMarkerRef = useRef(null);
     const originRef = useRef(null);
     const infoOverlayRef = useRef(null);
+    const originOverlayRef = useRef(null);
 
     const isPharmacy = (place) =>
         place.category_name?.includes('약국') ||
@@ -85,115 +86,128 @@ export default function IngredientMap({
         markersRef.current = [];
         markerMapRef.current.clear();
         placesMapRef.current.clear();
+
+        originMarkerRef.current?.setMap(null);
+        originMarkerRef.current = null;
+
+        infoOverlayRef.current?.setMap(null);
+        infoOverlayRef.current = null;
+
         activeMarkerRef.current = null;
+
+        originRef.current = null;
 
         onPlacesChange?.([]);
     };
-    //출발지 마커
 
     const setOriginMarker = (lat, lng) => {
+        // ✅ 기존 출발지(마커 + 말풍선) 제거
         originMarkerRef.current?.setMap(null);
+        originMarkerRef.current = null;
 
+        originOverlayRef.current?.setMap(null);
+        originOverlayRef.current = null;
+
+        const position = new window.kakao.maps.LatLng(lat, lng);
+
+        // ✅ 출발지 마커
         originMarkerRef.current = new window.kakao.maps.Marker({
             map: mapInstanceRef.current,
-            position: new window.kakao.maps.LatLng(lat, lng),
+            position,
         });
-        const overlay = new window.kakao.maps.CustomOverlay({
-            position: new window.kakao.maps.LatLng(lat, lng),
+        originOverlayRef.current = new window.kakao.maps.CustomOverlay({
+            position,
             yAnchor: 1.3,
-            zIndex: 100, // 마커보다 항상 위
+            zIndex: 100,
             content: `
-            <div style="
-                background:#3d3226;
-                color:#fff;
-                padding:6px 10px;
-                border-radius:8px;
-                font-size:12px;
-                white-space:nowrap;
-                box-shadow:0 2px 6px rgba(0,0,0,0.25);
-            ">
-                📍 출발지
-            </div>
+                <div style="
+                    background:#3d3226;
+                    color:#fff;
+                    padding:6px 10px;
+                    border-radius:8px;
+                    font-size:12px;
+                    white-space:nowrap;
+                    box-shadow:0 2px 6px rgba(0,0,0,0.25);
+                ">
+                    📍 출발지
+                </div>
             `,
         });
 
-        overlay.setMap(mapInstanceRef.current);
+        originOverlayRef.current.setMap(mapInstanceRef.current);
     };
 
     /* =====================
-            인포윈도우 열기 (공용)
-        ====================== */
+                인포윈도우 열기 (공용)
+            ====================== */
 
     const openInfoFor = (record) => {
         const { marker, place, label } = record;
 
-        // 같은 마커 다시 클릭 → 닫기
+        // ⭐ 같은 마커 다시 클릭 → 길찾기 실행
         if (activeMarkerRef.current === marker) {
+            const o = originRef.current;
+            if (!o) return;
+
+            // 말풍선 닫기
             infoOverlayRef.current?.setMap(null);
             activeMarkerRef.current = null;
             return;
         }
 
+        // 기존 말풍선 닫기
         infoOverlayRef.current?.setMap(null);
 
-        //  1. 지도 중심을 해당 마커로 이동 (원래 체감 복구)
-        mapInstanceRef.current.panTo(marker.getPosition());
-
-        //  2. 마커 "바로 위"에 뜨도록 yAnchor 조정
         const overlay = new window.kakao.maps.CustomOverlay({
             position: marker.getPosition(),
             yAnchor: 1.15,
             zIndex: 9999,
             content: `
-                <div style="
-                    background:#fff;
-                    border-radius:10px;
-                    padding:10px;
-                    min-width:220px;
-                    box-shadow:0 4px 12px rgba(0,0,0,0.25);
-                    font-size:13px;
-                ">
-                    <strong>${place.place_name}</strong><br/>
-                    <span>${label}</span><br/>
-                    <div style="font-size:12px;color:#666;margin-top:4px;">
-                    ${place.road_address_name || place.address_name || ''}
-                    </div>
-                    <button
-                    id="route-btn"
-                    style="
-                        margin-top:8px;
-                        width:100%;
-                        padding:8px;
-                        background:#3d3226;
-                        color:#fff;
-                        border:none;
-                        border-radius:6px;
-                        cursor:pointer;
-                        font-size:12px;
-                    ">
-                    카카오맵 길찾기
-                    </button>
-                </div>
-                `,
+    <div style="
+        background:#fff;
+        border-radius:10px;
+        padding:10px;
+        min-width:220px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.25);
+        font-size:13px;
+    ">
+        <strong>${place.place_name}</strong><br/>
+        <span>${label}</span><br/>
+        <div style="font-size:12px;color:#666;margin-top:4px;">
+        ${place.road_address_name || place.address_name || ''}
+        </div>
+
+       <button
+  data-route="1"
+  data-to-name="${place.place_name}"
+  data-to-x="${place.x}"
+  data-to-y="${place.y}"
+  style="
+    margin-top:8px;
+    width:100%;
+    padding:7px 0;
+    background:#3d3226;
+    border:none;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+    color:#FFFFFF;
+    cursor:pointer;
+  "
+  onmouseover="this.style.background='#2f261d'"
+  onmouseout="this.style.background='#3d3226'"
+>
+  카카오맵 길찾기
+</button>
+    </div>
+    `,
         });
 
         overlay.setMap(mapInstanceRef.current);
         infoOverlayRef.current = overlay;
         activeMarkerRef.current = marker;
-
-        setTimeout(() => {
-            const btn = document.getElementById('route-btn');
-            if (!btn || !originRef.current) return;
-
-            btn.onclick = () => {
-                const o = originRef.current;
-                window.open(
-                    `https://map.kakao.com/link/from/${encodeURIComponent(o.name)},${o.lat},${o.lng}/to/${encodeURIComponent(place.place_name)},${place.y},${place.x}`,
-                    '_blank',
-                );
-            };
-        }, 0);
     };
+
     const calcRecipeFitScore = (place) => {
         let score = 1;
 
@@ -206,8 +220,8 @@ export default function IngredientMap({
     };
 
     /* =====================
-            마커 추가
-        ====================== */
+                마커 추가
+            ====================== */
     const addMarker = (place) => {
         const placeKey = getPlaceKey(place);
 
@@ -268,8 +282,8 @@ export default function IngredientMap({
     };
 
     /* =====================
-            주변 검색
-        ====================== */
+                주변 검색
+            ====================== */
 
     const includesAny = (text = '', keywords = []) =>
         keywords.some((k) => text.includes(k));
@@ -313,8 +327,8 @@ export default function IngredientMap({
     };
 
     /* =====================
-            지도 초기화
-        ====================== */
+                지도 초기화
+            ====================== */
 
     const initMap = () => {
         const geocoder = new window.kakao.maps.services.Geocoder();
@@ -324,7 +338,7 @@ export default function IngredientMap({
 
             const lat = Number(result[0].y);
             const lng = Number(result[0].x);
-
+            clearMarkers();
             originRef.current = { name: address, lat, lng };
             onOriginChange?.({
                 name: address,
@@ -346,28 +360,64 @@ export default function IngredientMap({
             }
 
             setOriginMarker(lat, lng);
-            clearMarkers();
             searchNearbyStores(center);
         });
     };
-
     /* =====================
             Effects
-        ====================== */
+    ====================== */
+    useEffect(() => {
+        const handleClick = (e) => {
+            const btn = e.target.closest('button[data-route="1"]');
+            if (!btn) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const toName = btn.getAttribute('data-to-name');
+            const toX = btn.getAttribute('data-to-x');
+            const toY = btn.getAttribute('data-to-y');
+
+            const o = originRef.current;
+            if (!o || !toName || !toX || !toY) return;
+
+            window.open(
+                `https://map.kakao.com/link/from/${encodeURIComponent(
+                    o.name,
+                )},${o.lat},${o.lng}/to/${encodeURIComponent(
+                    toName,
+                )},${toY},${toX}?by=FOOT`,
+                '_blank',
+            );
+        };
+
+        // 🔥 핵심: document + capture
+        document.addEventListener('click', handleClick, true);
+
+        return () => {
+            document.removeEventListener('click', handleClick, true);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!selectedPlaceId) return;
+
+        const record = markerMapRef.current.get(selectedPlaceId);
+        if (!record) return;
+
+        const map = mapInstanceRef.current;
+        if (map) {
+            map.panTo(record.marker.getPosition()); // ✅ 이동 추가
+        }
+
+        openInfoFor(record);
+    }, [selectedPlaceId]);
 
     useEffect(() => {
         if (!window.kakao || !window.kakao.maps) return;
         if (!address) return;
         initMap();
     }, [address]);
-
-    useEffect(() => {
-        if (!selectedPlaceId) return;
-        const record = markerMapRef.current.get(selectedPlaceId);
-        if (!record) return;
-        openInfoFor(record);
-    }, [selectedPlaceId]);
-
     return (
         <div
             ref={mapRef}
