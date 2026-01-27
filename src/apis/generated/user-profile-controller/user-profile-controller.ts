@@ -19,6 +19,10 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import type {
+  ApiRespDtoUserProfileRespDto
+} from '../openAPIDefinition.schemas';
+
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -31,7 +35,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type getUserProfileResponse200 = {
-  data: Blob
+  data: ApiRespDtoUserProfileRespDto
   status: 200
 }
     

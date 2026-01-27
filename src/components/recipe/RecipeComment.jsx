@@ -198,7 +198,7 @@ export default function RecipeComment({
                     </div>
 
                     <button
-                        onClick={handleCommentSubmit}
+                        // onClick={handleCommentSubmit}
                         className="mt-4 px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5c4c40] transition-colors"
                     >
                         댓글 작성

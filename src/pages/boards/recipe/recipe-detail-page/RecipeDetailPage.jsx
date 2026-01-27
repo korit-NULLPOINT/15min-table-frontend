@@ -27,6 +27,7 @@ export default function RecipeDetailPage() {
     const commentQuery = useGetRecipeCommentListByTarget(rId, {
         query: { enabled: Number.isFinite(rId) },
     });
+    
     const comments = commentQuery?.data?.data?.data ?? [];
 
     if (recipeQuery.isLoading) {

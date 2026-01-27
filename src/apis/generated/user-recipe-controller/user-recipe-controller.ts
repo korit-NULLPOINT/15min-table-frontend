@@ -20,6 +20,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiRespDtoRecipeListPageRespDto,
   GetMyRecipeListParams,
   GetRecipeListByUserIdParams
 } from '../openAPIDefinition.schemas';
@@ -36,7 +37,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type getRecipeListByUserIdResponse200 = {
-  data: Blob
+  data: ApiRespDtoRecipeListPageRespDto
   status: 200
 }
     
@@ -155,7 +156,7 @@ export function useGetRecipeListByUserId<TData = Awaited<ReturnType<typeof getRe
 
 
 export type getMyRecipeListResponse200 = {
-  data: Blob
+  data: ApiRespDtoRecipeListPageRespDto
   status: 200
 }
     
