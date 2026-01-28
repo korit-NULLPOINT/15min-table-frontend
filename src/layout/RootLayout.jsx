@@ -45,7 +45,7 @@ export default function RootLayout() {
 
     const handleNavigate = (pageKey) => {
         if (pageKey === 'home') navigate('/');
-        if (pageKey === 'board') navigate('/boards/1/recipe');
+        if (pageKey === 'board') navigate('/boards/1/recipe/filtered');
         if (pageKey === 'community') navigate('/boards/2/free');
         if (pageKey === 'profile') {
             if (isAdmin(principal)) {
@@ -57,7 +57,7 @@ export default function RootLayout() {
         if (pageKey === 'write') navigate('/boards/1/recipe/write');
     };
 
-    const username = principal?.username || principal?.nickname || '';
+    const username = principal?.username || '';
 
     const handleNotificationClick = (notification) => {
         const raw = notification?.raw ?? {};

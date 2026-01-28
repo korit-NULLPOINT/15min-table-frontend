@@ -19,11 +19,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import type {
-  ApiRespDtoListUser,
-  ApiRespDtoUser
-} from '../openAPIDefinition.schemas';
-
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -36,7 +31,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type getUserByUsernameResponse200 = {
-  data: ApiRespDtoUser
+  data: Blob
   status: 200
 }
     
@@ -140,7 +135,7 @@ export function useGetUserByUsername<TData = Awaited<ReturnType<typeof getUserBy
 
 
 export type getUserListResponse200 = {
-  data: ApiRespDtoListUser
+  data: Blob
   status: 200
 }
     

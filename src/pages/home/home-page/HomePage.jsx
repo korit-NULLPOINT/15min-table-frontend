@@ -58,8 +58,7 @@ export default function HomePage() {
         }
     };
 
-    // TODO: 페이지네이션 처리가 필요하다면 params 추가 (현재는 전체/기본 조회)
-    // boardId는 필수 파라미터입니다.
+    // Use original getRecipeList but with default pagination to avoid 500 or NPE in backend
     const { data: recipeListResponse, isLoading } = useGetRecipeList(boardId);
 
     // API 응답 구조: data.data.data.items 배열로 가정

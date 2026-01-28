@@ -153,25 +153,6 @@ export interface ApiRespDtoInteger {
   data?: number;
 }
 
-export interface AiHashtagReqDto {
-  title?: string;
-  intro?: string;
-  ingredients?: string;
-  steps?: string;
-  limit?: number;
-}
-
-export interface AiHashtagRespDto {
-  hashtags?: string[];
-}
-
-export interface ApiRespDtoAiHashtagRespDto {
-  status?: string;
-  message?: string;
-  /** 응답 데이터(없으면 null) */
-  data?: AiHashtagRespDto;
-}
-
 export interface UserProfileRespDto {
   userId?: number;
   username?: string;
@@ -216,8 +197,8 @@ export interface PrincipalUser {
   userRoles?: UserRole[];
   authorities?: GrantedAuthority[];
   enabled?: boolean;
-  credentialsNonExpired?: boolean;
   accountNonExpired?: boolean;
+  credentialsNonExpired?: boolean;
   accountNonLocked?: boolean;
 }
 
@@ -387,6 +368,12 @@ export interface ApiRespDtoListBoard {
   data?: Board[];
 }
 
+export interface RecipeFilterReqDto {
+  mainCategoryId?: number;
+  subCategoryId?: number;
+  keyword?: string;
+}
+
 export interface RecipeDetailRespDto {
   recipeId?: number;
   boardId?: number;
@@ -468,5 +455,11 @@ mode?: string;
 export type GetRecipeListParams = {
 page?: number;
 size?: number;
+};
+
+export type GetFilteredRecipeListParams = {
+page?: number;
+size?: number;
+recipeFilterReqDto: RecipeFilterReqDto;
 };
 

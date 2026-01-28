@@ -24,10 +24,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AddCommentReqDto,
-  ApiRespDtoComment,
-  ApiRespDtoListCommentRespDto,
-  ApiRespDtoVoid
+  AddCommentReqDto
 } from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
@@ -42,7 +39,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type addRecipeCommentResponse200 = {
-  data: ApiRespDtoComment
+  data: Blob
   status: 200
 }
     
@@ -119,7 +116,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getAddRecipeCommentMutationOptions(options), queryClient);
     }
     export type addPostCommentResponse200 = {
-  data: ApiRespDtoComment
+  data: Blob
   status: 200
 }
     
@@ -196,7 +193,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getAddPostCommentMutationOptions(options), queryClient);
     }
     export type getMyCommentListResponse200 = {
-  data: ApiRespDtoListCommentRespDto
+  data: Blob
   status: 200
 }
     
@@ -300,7 +297,7 @@ export function useGetMyCommentList<TData = Awaited<ReturnType<typeof getMyComme
 
 
 export type getRecipeCommentListByTargetResponse200 = {
-  data: ApiRespDtoListCommentRespDto
+  data: Blob
   status: 200
 }
     
@@ -404,7 +401,7 @@ export function useGetRecipeCommentListByTarget<TData = Awaited<ReturnType<typeo
 
 
 export type getPostCommentListByTargetResponse200 = {
-  data: ApiRespDtoListCommentRespDto
+  data: Blob
   status: 200
 }
     
@@ -508,7 +505,7 @@ export function useGetPostCommentListByTarget<TData = Awaited<ReturnType<typeof 
 
 
 export type deleteCommentResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
