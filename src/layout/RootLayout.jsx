@@ -38,11 +38,22 @@ export default function RootLayout() {
         navigate('/');
     };
 
+    function isAdmin(principal) {
+        const roles = principal?.userRoles ?? [];
+        return roles.some((ur) => Number(ur?.roleId) === 1);
+    }
+
     const handleNavigate = (pageKey) => {
         if (pageKey === 'home') navigate('/');
         if (pageKey === 'board') navigate('/boards/1/recipe');
         if (pageKey === 'community') navigate('/boards/2/free');
-        if (pageKey === 'profile') navigate('/me');
+        if (pageKey === 'profile') {
+            if (isAdmin(principal)) {
+                navigate('/admin/dashboard'); // ✅ 관리자면 관리자 대시보드
+            } else {
+                navigate('/me'); // ✅ 일반 유저면 마이페이지
+            }
+        }
         if (pageKey === 'write') navigate('/boards/1/recipe/write');
     };
 

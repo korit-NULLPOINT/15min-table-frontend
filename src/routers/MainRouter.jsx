@@ -6,10 +6,12 @@ import HomePage from '../pages/home/home-page/HomePage';
 import MyPageRouter from './MypageRouter';
 import OAuth2Page from '../pages/auth-page/OAuth2Page';
 import UserProfileRouter from './UserProfileRouter';
+import AdminRouter from './AdminRouter';
 
 export default function MainRouter() {
     return (
         <Routes>
+            <Route path="/admin/*" element={<AdminRouter />} />
             <Route element={<RootLayout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/boards/*" element={<BoardsRouter />} />
