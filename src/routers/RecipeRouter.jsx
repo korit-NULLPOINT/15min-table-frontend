@@ -8,7 +8,7 @@ export default function RecipeRouter() {
     return (
         <Routes>
             {/* /boards/:boardId/recipe */}
-            <Route path="" element={<RecipeListPage />} />
+            <Route path="filtered" element={<RecipeListPage />} />
             <Route path="write" element={<RecipeWritePage />} />
             <Route path=":recipeId/edit" element={<RecipeEditPage />} />
             <Route path=":recipeId" element={<RecipeDetailPage />} />

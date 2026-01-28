@@ -14,10 +14,6 @@ import type {
   UseMutationResult
 } from '@tanstack/react-query';
 
-import type {
-  ApiRespDtoVoid
-} from '../openAPIDefinition.schemas';
-
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -30,7 +26,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type sendMailResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
