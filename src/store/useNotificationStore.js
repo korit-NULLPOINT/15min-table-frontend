@@ -14,29 +14,49 @@ function formatDateTime(isoString) {
     return `${yyyy}.${mm}.${dd} ${hh}:${mi}`;
 }
 
+function normalizeNotificationType(n) {
+    // ✅ 목록(NotificationRespDto): notificationType
+    // ✅ SSE 푸시(NotificationPushRespDto): type
+    return (n?.notificationType ?? n?.type ?? '').toUpperCase();
+}
+
+function buildTargetTitle(n) {
+    const tt = (n?.targetType ?? '').toUpperCase();
+    const tid = n?.targetId;
+
+    if (tt === 'RECIPE' && tid != null) return `레시피 #${tid}`;
+    if (tt === 'POST' && tid != null) return `게시글 #${tid}`;
+
+    // follow 같은 경우 target이 없을 수 있음
+    if (n?.commentId != null) return `댓글 #${n.commentId}`;
+
+    const typeUpper = normalizeNotificationType(n);
+    return typeUpper || '알림';
+}
+
 function toUINotification(n) {
-    const typeUpper = (n.notificationType ?? '').toUpperCase();
+    const typeUpper = normalizeNotificationType(n);
 
     const uiType =
         typeUpper === 'FOLLOW'
             ? 'follow'
-            : typeUpper.includes('COMMENT')
+            : typeUpper === 'COMMENT'
               ? 'comment'
-              : 'post';
+              : 'post'; // RECIPE_POST 등
+
+    const timestamp = formatDateTime(n?.createDt ?? new Date().toISOString());
 
     return {
-        id: n.notificationId,
+        id: n?.notificationId,
         type: uiType,
-        userName: n.actorUsername ?? '알 수 없음',
+        userName:
+            n?.actorUsername ??
+            (n?.actorUserId != null ? `사용자#${n.actorUserId}` : '알 수 없음'),
         userImage: '',
-        postTitle:
-            n.recipeId != null
-                ? `레시피 #${n.recipeId}`
-                : n.commentId != null
-                  ? `댓글 #${n.commentId}`
-                  : typeUpper,
-        isRead: Number(n.isRead) === 1,
-        timestamp: formatDateTime(n.createDt),
+        // ✅ 기존 recipeId 제거 → targetType/targetId 기반으로 표시
+        postTitle: buildTargetTitle(n),
+        isRead: Number(n?.isRead) === 1, // 목록은 0/1
+        timestamp,
         raw: n,
     };
 }

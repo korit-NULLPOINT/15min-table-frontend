@@ -15,7 +15,7 @@ export function useNotificationRealtime({
 }) {
     const pollIdRef = useRef(null);
 
-    // ✅ 최신값을 ref에 보관 (deps 폭발/무한루프 방지)
+    // ✅ 최신값을 ref에 보관
     const tabRef = useRef(activeTab);
     const ingestRef = useRef(ingest);
     const refreshRef = useRef(refreshUnreadCount);
@@ -36,7 +36,7 @@ export function useNotificationRealtime({
         const startPolling = () => {
             if (pollIdRef.current) return;
             pollIdRef.current = setInterval(() => {
-                refreshUnreadCount?.();
+                refreshRef.current?.();
             }, pollMs);
         };
 
@@ -52,32 +52,34 @@ export function useNotificationRealtime({
             return;
         }
 
-        // ✅ 연결 전/실패 대비: 폴링은 항상 켜두고, 연결되면 그대로 둬도 되고(부하 적음),
-        // 원하면 onOpen에서 stopPolling()해도 됨.
+        // ✅ 폴링(뱃지 동기화) + SSE 동시 사용
         startPolling();
 
         const token = localStorage.getItem('AccessToken');
+
         connectNotificationSse({
             url: '/notifications/subscribe',
             token,
             onMessage: (e) => {
-                // e.type: 'notification' | 'message' 등 (addEventListener로 받으면 type이 들어옴)
-                if (e?.type !== 'notification') return;
+                // named event: 'notification'
+                // fallback: 'message'
+                const t = e?.type;
+                if (t !== 'notification' && t !== 'message') return;
 
                 let payload;
                 try {
                     payload = JSON.parse(e.data);
                 } catch (err) {
-                    console.warn(
-                        '[SSE] notification parse failed:',
-                        e.data,
-                        err,
-                    );
+                    console.warn('[SSE] parse failed:', e?.data, err);
                     return;
                 }
 
-                refreshUnreadCount?.();
-                if (activeTab === 'UNREAD') ingest?.(payload);
+                refreshRef.current?.();
+
+                // ✅ 현재 탭이 UNREAD일 때만 리스트에 즉시 반영
+                if (tabRef.current === 'UNREAD') {
+                    ingestRef.current?.(payload);
+                }
             },
         });
 
@@ -85,7 +87,5 @@ export function useNotificationRealtime({
             stopPolling();
             disconnectNotificationSse();
         };
-        // enabled, pollMs도 의존성에 넣되, ingest/refreshUnreadCount는 안정적인 함수여야 좋음
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [enabled, pollMs]);
 }
