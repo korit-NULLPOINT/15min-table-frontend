@@ -153,25 +153,6 @@ export interface ApiRespDtoInteger {
   data?: number;
 }
 
-export interface AiHashtagReqDto {
-  title?: string;
-  intro?: string;
-  ingredients?: string;
-  steps?: string;
-  limit?: number;
-}
-
-export interface AiHashtagRespDto {
-  hashtags?: string[];
-}
-
-export interface ApiRespDtoAiHashtagRespDto {
-  status?: string;
-  message?: string;
-  /** 응답 데이터(없으면 null) */
-  data?: AiHashtagRespDto;
-}
-
 export interface UserProfileRespDto {
   userId?: number;
   username?: string;
@@ -215,10 +196,10 @@ export interface PrincipalUser {
   status?: string;
   userRoles?: UserRole[];
   authorities?: GrantedAuthority[];
-  enabled?: boolean;
-  credentialsNonExpired?: boolean;
   accountNonExpired?: boolean;
   accountNonLocked?: boolean;
+  credentialsNonExpired?: boolean;
+  enabled?: boolean;
 }
 
 export interface ApiRespDtoPrincipalUser {
@@ -387,6 +368,12 @@ export interface ApiRespDtoListBoard {
   data?: Board[];
 }
 
+export interface RecipeFilterReqDto {
+  mainCategoryId?: number;
+  subCategoryId?: number;
+  keyword?: string;
+}
+
 export interface RecipeDetailRespDto {
   recipeId?: number;
   boardId?: number;
@@ -445,6 +432,47 @@ export interface ApiRespDtoListUser {
   data?: User[];
 }
 
+export interface AdminStatsRespDto {
+  totalUsers?: number;
+  totalRecipes?: number;
+  totalCommunityPosts?: number;
+}
+
+export interface ApiRespDtoAdminStatsRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: AdminStatsRespDto;
+}
+
+export interface AdminTimeSeriesPointDto {
+  date?: string;
+  count?: number;
+}
+
+export interface ApiRespDtoListAdminTimeSeriesPointDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: AdminTimeSeriesPointDto[];
+}
+
+export interface AdminActivityRespDto {
+  type?: string;
+  action?: string;
+  targetId?: number;
+  title?: string;
+  username?: string;
+  occurredAt?: string;
+}
+
+export interface ApiRespDtoListAdminActivityRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: AdminActivityRespDto[];
+}
+
 export type GetRecipeListByUserIdParams = {
 page?: number;
 size?: number;
@@ -468,5 +496,26 @@ mode?: string;
 export type GetRecipeListParams = {
 page?: number;
 size?: number;
+};
+
+export type GetFilteredRecipeListParams = {
+page?: number;
+size?: number;
+recipeFilterReqDto: RecipeFilterReqDto;
+};
+
+export type GetDashboardStatsParams = {
+range?: string;
+};
+
+export type GetTimeSeriesParams = {
+metric: string;
+bucket: string;
+from?: string;
+to?: string;
+};
+
+export type GetRecentActivitiesParams = {
+limit?: number;
 };
 

@@ -24,9 +24,6 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ApiRespDtoRatingSummaryRespDto,
-  ApiRespDtoRecipeRatingRespDto,
-  ApiRespDtoVoid,
   UpsertRatingReqDto
 } from '../openAPIDefinition.schemas';
 
@@ -42,7 +39,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type upsertRatingResponse200 = {
-  data: ApiRespDtoRecipeRatingRespDto
+  data: Blob
   status: 200
 }
     
@@ -118,7 +115,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getUpsertRatingMutationOptions(options), queryClient);
     }
     export type deleteRatingResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -193,7 +190,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getDeleteRatingMutationOptions(options), queryClient);
     }
     export type getSummaryResponse200 = {
-  data: ApiRespDtoRatingSummaryRespDto
+  data: Blob
   status: 200
 }
     
@@ -297,7 +294,7 @@ export function useGetSummary<TData = Awaited<ReturnType<typeof getSummary>>, TE
 
 
 export type getRatingResponse200 = {
-  data: ApiRespDtoRecipeRatingRespDto
+  data: Blob
   status: 200
 }
     

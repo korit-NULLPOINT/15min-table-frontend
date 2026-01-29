@@ -25,10 +25,7 @@ import type {
 
 import type {
   AddRecipeReqDto,
-  ApiRespDtoInteger,
-  ApiRespDtoRecipeDetailRespDto,
-  ApiRespDtoRecipeListPageRespDto,
-  ApiRespDtoVoid,
+  GetFilteredRecipeListParams,
   GetRecipeListParams,
   ModifyRecipeReqDto
 } from '../openAPIDefinition.schemas';
@@ -45,7 +42,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type modifyRecipeResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -124,7 +121,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getModifyRecipeMutationOptions(options), queryClient);
     }
     export type addRecipeResponse200 = {
-  data: ApiRespDtoInteger
+  data: Blob
   status: 200
 }
     
@@ -201,7 +198,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getAddRecipeMutationOptions(options), queryClient);
     }
     export type getRecipeListResponse200 = {
-  data: ApiRespDtoRecipeListPageRespDto
+  data: Blob
   status: 200
 }
     
@@ -319,8 +316,127 @@ export function useGetRecipeList<TData = Awaited<ReturnType<typeof getRecipeList
 
 
 
+export type getFilteredRecipeListResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type getFilteredRecipeListResponseSuccess = (getFilteredRecipeListResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getFilteredRecipeListResponse = (getFilteredRecipeListResponseSuccess)
+
+export const getGetFilteredRecipeListUrl = (boardId: number,
+    params: GetFilteredRecipeListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/board/${boardId}/recipes/list/filtered?${stringifiedParams}` : `/board/${boardId}/recipes/list/filtered`
+}
+
+export const getFilteredRecipeList = async (boardId: number,
+    params: GetFilteredRecipeListParams, options?: RequestInit): Promise<getFilteredRecipeListResponse> => {
+  
+  return customInstance<getFilteredRecipeListResponse>(getGetFilteredRecipeListUrl(boardId,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getGetFilteredRecipeListQueryKey = (boardId: number,
+    params?: GetFilteredRecipeListParams,) => {
+    return [
+    `/board/${boardId}/recipes/list/filtered`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetFilteredRecipeListQueryOptions = <TData = Awaited<ReturnType<typeof getFilteredRecipeList>>, TError = unknown>(boardId: number,
+    params: GetFilteredRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFilteredRecipeList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFilteredRecipeListQueryKey(boardId,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFilteredRecipeList>>> = ({ signal }) => getFilteredRecipeList(boardId,params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(boardId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFilteredRecipeList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetFilteredRecipeListQueryResult = NonNullable<Awaited<ReturnType<typeof getFilteredRecipeList>>>
+export type GetFilteredRecipeListQueryError = unknown
+
+
+export function useGetFilteredRecipeList<TData = Awaited<ReturnType<typeof getFilteredRecipeList>>, TError = unknown>(
+ boardId: number,
+    params: GetFilteredRecipeListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFilteredRecipeList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFilteredRecipeList>>,
+          TError,
+          Awaited<ReturnType<typeof getFilteredRecipeList>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFilteredRecipeList<TData = Awaited<ReturnType<typeof getFilteredRecipeList>>, TError = unknown>(
+ boardId: number,
+    params: GetFilteredRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFilteredRecipeList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFilteredRecipeList>>,
+          TError,
+          Awaited<ReturnType<typeof getFilteredRecipeList>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFilteredRecipeList<TData = Awaited<ReturnType<typeof getFilteredRecipeList>>, TError = unknown>(
+ boardId: number,
+    params: GetFilteredRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFilteredRecipeList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetFilteredRecipeList<TData = Awaited<ReturnType<typeof getFilteredRecipeList>>, TError = unknown>(
+ boardId: number,
+    params: GetFilteredRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFilteredRecipeList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetFilteredRecipeListQueryOptions(boardId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 export type getRecipeDetailResponse200 = {
-  data: ApiRespDtoRecipeDetailRespDto
+  data: Blob
   status: 200
 }
     
@@ -432,7 +548,7 @@ export function useGetRecipeDetail<TData = Awaited<ReturnType<typeof getRecipeDe
 
 
 export type removeRecipeResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     

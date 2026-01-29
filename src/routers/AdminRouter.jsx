@@ -11,7 +11,8 @@ export default function AdminRouter() {
             <Route path="users" element={<AdminPage />} />
             <Route path="recipes" element={<AdminPage />} />
             <Route path="community" element={<AdminPage />} />
-
+            <Route path="stats" element={<AdminPage />} />
+            <Route path="stats/:type" element={<AdminPage />} />
             {/* 나머지 잘못된 경로는 대시보드로 */}
             <Route path="*" element={<Navigate to="dashboard" replace />} />
         </Routes>
