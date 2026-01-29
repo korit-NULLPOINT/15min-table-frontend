@@ -19,6 +19,12 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import type {
+  GetDashboardStatsParams,
+  GetRecentActivitiesParams,
+  GetTimeSeriesParams
+} from '../openAPIDefinition.schemas';
+
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -229,6 +235,339 @@ export function useGetUserList<TData = Awaited<ReturnType<typeof getUserList>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetUserListQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getDashboardStatsResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type getDashboardStatsResponseSuccess = (getDashboardStatsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getDashboardStatsResponse = (getDashboardStatsResponseSuccess)
+
+export const getGetDashboardStatsUrl = (params?: GetDashboardStatsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/admin/manage/stats?${stringifiedParams}` : `/admin/manage/stats`
+}
+
+export const getDashboardStats = async (params?: GetDashboardStatsParams, options?: RequestInit): Promise<getDashboardStatsResponse> => {
+  
+  return customInstance<getDashboardStatsResponse>(getGetDashboardStatsUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getGetDashboardStatsQueryKey = (params?: GetDashboardStatsParams,) => {
+    return [
+    `/admin/manage/stats`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetDashboardStatsQueryOptions = <TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>(params?: GetDashboardStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDashboardStatsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboardStats>>> = ({ signal }) => getDashboardStats(params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetDashboardStatsQueryResult = NonNullable<Awaited<ReturnType<typeof getDashboardStats>>>
+export type GetDashboardStatsQueryError = unknown
+
+
+export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>(
+ params: undefined |  GetDashboardStatsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDashboardStats>>,
+          TError,
+          Awaited<ReturnType<typeof getDashboardStats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>(
+ params?: GetDashboardStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDashboardStats>>,
+          TError,
+          Awaited<ReturnType<typeof getDashboardStats>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>(
+ params?: GetDashboardStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>(
+ params?: GetDashboardStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetDashboardStatsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getTimeSeriesResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type getTimeSeriesResponseSuccess = (getTimeSeriesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getTimeSeriesResponse = (getTimeSeriesResponseSuccess)
+
+export const getGetTimeSeriesUrl = (params: GetTimeSeriesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/admin/manage/stats/timeseries?${stringifiedParams}` : `/admin/manage/stats/timeseries`
+}
+
+export const getTimeSeries = async (params: GetTimeSeriesParams, options?: RequestInit): Promise<getTimeSeriesResponse> => {
+  
+  return customInstance<getTimeSeriesResponse>(getGetTimeSeriesUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getGetTimeSeriesQueryKey = (params?: GetTimeSeriesParams,) => {
+    return [
+    `/admin/manage/stats/timeseries`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetTimeSeriesQueryOptions = <TData = Awaited<ReturnType<typeof getTimeSeries>>, TError = unknown>(params: GetTimeSeriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTimeSeries>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTimeSeriesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTimeSeries>>> = ({ signal }) => getTimeSeries(params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTimeSeries>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTimeSeriesQueryResult = NonNullable<Awaited<ReturnType<typeof getTimeSeries>>>
+export type GetTimeSeriesQueryError = unknown
+
+
+export function useGetTimeSeries<TData = Awaited<ReturnType<typeof getTimeSeries>>, TError = unknown>(
+ params: GetTimeSeriesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTimeSeries>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTimeSeries>>,
+          TError,
+          Awaited<ReturnType<typeof getTimeSeries>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTimeSeries<TData = Awaited<ReturnType<typeof getTimeSeries>>, TError = unknown>(
+ params: GetTimeSeriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTimeSeries>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTimeSeries>>,
+          TError,
+          Awaited<ReturnType<typeof getTimeSeries>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTimeSeries<TData = Awaited<ReturnType<typeof getTimeSeries>>, TError = unknown>(
+ params: GetTimeSeriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTimeSeries>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTimeSeries<TData = Awaited<ReturnType<typeof getTimeSeries>>, TError = unknown>(
+ params: GetTimeSeriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTimeSeries>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTimeSeriesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getRecentActivitiesResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type getRecentActivitiesResponseSuccess = (getRecentActivitiesResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getRecentActivitiesResponse = (getRecentActivitiesResponseSuccess)
+
+export const getGetRecentActivitiesUrl = (params?: GetRecentActivitiesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/admin/manage/activities?${stringifiedParams}` : `/admin/manage/activities`
+}
+
+export const getRecentActivities = async (params?: GetRecentActivitiesParams, options?: RequestInit): Promise<getRecentActivitiesResponse> => {
+  
+  return customInstance<getRecentActivitiesResponse>(getGetRecentActivitiesUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getGetRecentActivitiesQueryKey = (params?: GetRecentActivitiesParams,) => {
+    return [
+    `/admin/manage/activities`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetRecentActivitiesQueryOptions = <TData = Awaited<ReturnType<typeof getRecentActivities>>, TError = unknown>(params?: GetRecentActivitiesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecentActivities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRecentActivitiesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecentActivities>>> = ({ signal }) => getRecentActivities(params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRecentActivities>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetRecentActivitiesQueryResult = NonNullable<Awaited<ReturnType<typeof getRecentActivities>>>
+export type GetRecentActivitiesQueryError = unknown
+
+
+export function useGetRecentActivities<TData = Awaited<ReturnType<typeof getRecentActivities>>, TError = unknown>(
+ params: undefined |  GetRecentActivitiesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecentActivities>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRecentActivities>>,
+          TError,
+          Awaited<ReturnType<typeof getRecentActivities>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRecentActivities<TData = Awaited<ReturnType<typeof getRecentActivities>>, TError = unknown>(
+ params?: GetRecentActivitiesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecentActivities>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRecentActivities>>,
+          TError,
+          Awaited<ReturnType<typeof getRecentActivities>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRecentActivities<TData = Awaited<ReturnType<typeof getRecentActivities>>, TError = unknown>(
+ params?: GetRecentActivitiesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecentActivities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetRecentActivities<TData = Awaited<ReturnType<typeof getRecentActivities>>, TError = unknown>(
+ params?: GetRecentActivitiesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRecentActivities>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetRecentActivitiesQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
