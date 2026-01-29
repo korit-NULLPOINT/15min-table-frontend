@@ -1,11 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, Search, Filter, Star } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { mainCategory, subCategory } from '../../utils/categoryData';
-import { useGetRecipeList } from '../../apis/generated/recipe-controller/recipe-controller';
+import { useGetFilteredRecipeList } from '../../apis/generated/recipe-controller/recipe-controller';
+import { useDebounce } from '../../hooks/useDebounce';
 
 export function RecipeBoard({ onNavigate, onRecipeClick }) {
     const [searchQuery, setSearchQuery] = useState('');
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
+
     const [selectedMainCategoryId, setSelectedMainCategoryId] = useState(0);
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState(0);
 
@@ -13,35 +16,25 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 9;
 
-    // boardId=1 (레시피 게시판), fetch max items for client-side pagination
-    const { data: recipeData, isLoading } = useGetRecipeList(1, {
-        page: 0,
-        size: 1000,
-    });
+    // Filter API Call
+    const { data: recipeData, isLoading } = useGetFilteredRecipeList(
+        1, // boardId
+        {
+            mainCategoryId:
+                selectedMainCategoryId === 0
+                    ? undefined
+                    : selectedMainCategoryId,
+            subCategoryId:
+                selectedSubCategoryId === 0 ? undefined : selectedSubCategoryId,
+            keyword: debouncedSearchQuery || undefined,
+            page: currentPage - 1, // API is 0-indexed
+            size: ITEMS_PER_PAGE,
+        },
+    );
+
     const recipes = recipeData?.data?.data?.items || [];
-
-    // Filter Logic
-    const filteredRecipes = useMemo(() => {
-        return recipes.filter((recipe) => {
-            const matchesSearch = recipe.title
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase());
-            const matchesMainCategory =
-                selectedMainCategoryId === 0 ||
-                recipe.mainCategoryId === selectedMainCategoryId;
-            const matchesSubCategory =
-                selectedSubCategoryId === 0 ||
-                recipe.subCategoryId === selectedSubCategoryId;
-            return matchesSearch && matchesMainCategory && matchesSubCategory;
-        });
-    }, [recipes, searchQuery, selectedMainCategoryId, selectedSubCategoryId]);
-
-    // Pagination Logic
-    const totalItems = filteredRecipes.length;
-    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    const currentItems = filteredRecipes.slice(startIndex, endIndex);
+    const totalCount = recipeData?.data?.data?.totalCount || 0;
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
     // Reset page on filter change
     const handleFilterChange = (setter, value) => {
@@ -49,9 +42,13 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
         setCurrentPage(1);
     };
 
+    // Reset page when search query changes (debounced)
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debouncedSearchQuery]);
+
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
-        setCurrentPage(1);
     };
 
     return (
@@ -171,7 +168,7 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                         <div className="mb-4 text-[#6b5d4f]">
                             총{' '}
                             <span className="text-[#3d3226] font-bold">
-                                {filteredRecipes.length}
+                                {totalCount}
                             </span>
                             개의 레시피
                         </div>
@@ -182,7 +179,7 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {currentItems.map((recipe) => (
+                                {recipes.map((recipe) => (
                                     <div
                                         key={recipe.recipeId}
                                         onClick={() =>
@@ -243,7 +240,7 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                             </div>
                         )}
 
-                        {filteredRecipes.length === 0 && !isLoading && (
+                        {totalCount === 0 && !isLoading && (
                             <div className="text-center py-12 text-[#6b5d4f]">
                                 검색 결과가 없습니다.
                             </div>
