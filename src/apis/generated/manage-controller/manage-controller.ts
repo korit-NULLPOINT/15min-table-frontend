@@ -5,22 +5,26 @@
  * OpenAPI spec version: v0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
 
 import type {
-  GetDashboardStatsParams,
+  GetAdminRecipeListParams,
   GetRecentActivitiesParams,
   GetTimeSeriesParams
 } from '../openAPIDefinition.schemas';
@@ -36,7 +40,157 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type getUserByUsernameResponse200 = {
+export type restoreUserResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type restoreUserResponseSuccess = (restoreUserResponse200) & {
+  headers: Headers;
+};
+;
+
+export type restoreUserResponse = (restoreUserResponseSuccess)
+
+export const getRestoreUserUrl = (userId: number,) => {
+
+
+  
+
+  return `/admin/manage/user/${userId}/restore`
+}
+
+export const restoreUser = async (userId: number, options?: RequestInit): Promise<restoreUserResponse> => {
+  
+  return customInstance<restoreUserResponse>(getRestoreUserUrl(userId),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+
+
+
+
+export const getRestoreUserMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof restoreUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof restoreUser>>, TError,{userId: number}, TContext> => {
+
+const mutationKey = ['restoreUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof restoreUser>>, {userId: number}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  restoreUser(userId,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RestoreUserMutationResult = NonNullable<Awaited<ReturnType<typeof restoreUser>>>
+    
+    export type RestoreUserMutationError = unknown
+
+    export const useRestoreUser = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof restoreUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof restoreUser>>,
+        TError,
+        {userId: number},
+        TContext
+      > => {
+      return useMutation(getRestoreUserMutationOptions(options), queryClient);
+    }
+    export type banUserResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type banUserResponseSuccess = (banUserResponse200) & {
+  headers: Headers;
+};
+;
+
+export type banUserResponse = (banUserResponseSuccess)
+
+export const getBanUserUrl = (userId: number,) => {
+
+
+  
+
+  return `/admin/manage/user/${userId}/ban`
+}
+
+export const banUser = async (userId: number, options?: RequestInit): Promise<banUserResponse> => {
+  
+  return customInstance<banUserResponse>(getBanUserUrl(userId),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+
+
+
+
+export const getBanUserMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof banUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof banUser>>, TError,{userId: number}, TContext> => {
+
+const mutationKey = ['banUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof banUser>>, {userId: number}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  banUser(userId,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type BanUserMutationResult = NonNullable<Awaited<ReturnType<typeof banUser>>>
+    
+    export type BanUserMutationError = unknown
+
+    export const useBanUser = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof banUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof banUser>>,
+        TError,
+        {userId: number},
+        TContext
+      > => {
+      return useMutation(getBanUserMutationOptions(options), queryClient);
+    }
+    export type getUserByUsernameResponse200 = {
   data: Blob
   status: 200
 }
@@ -256,24 +410,17 @@ export type getDashboardStatsResponseSuccess = (getDashboardStatsResponse200) & 
 
 export type getDashboardStatsResponse = (getDashboardStatsResponseSuccess)
 
-export const getGetDashboardStatsUrl = (params?: GetDashboardStatsParams,) => {
-  const normalizedParams = new URLSearchParams();
+export const getGetDashboardStatsUrl = () => {
 
-  Object.entries(params || {}).forEach(([key, value]) => {
-    
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
-    }
-  });
 
-  const stringifiedParams = normalizedParams.toString();
+  
 
-  return stringifiedParams.length > 0 ? `/admin/manage/stats?${stringifiedParams}` : `/admin/manage/stats`
+  return `/admin/manage/stats`
 }
 
-export const getDashboardStats = async (params?: GetDashboardStatsParams, options?: RequestInit): Promise<getDashboardStatsResponse> => {
+export const getDashboardStats = async ( options?: RequestInit): Promise<getDashboardStatsResponse> => {
   
-  return customInstance<getDashboardStatsResponse>(getGetDashboardStatsUrl(params),
+  return customInstance<getDashboardStatsResponse>(getGetDashboardStatsUrl(),
   {      
     ...options,
     method: 'GET'
@@ -286,23 +433,23 @@ export const getDashboardStats = async (params?: GetDashboardStatsParams, option
 
 
 
-export const getGetDashboardStatsQueryKey = (params?: GetDashboardStatsParams,) => {
+export const getGetDashboardStatsQueryKey = () => {
     return [
-    `/admin/manage/stats`, ...(params ? [params] : [])
+    `/admin/manage/stats`
     ] as const;
     }
 
     
-export const getGetDashboardStatsQueryOptions = <TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>(params?: GetDashboardStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetDashboardStatsQueryOptions = <TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetDashboardStatsQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetDashboardStatsQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboardStats>>> = ({ signal }) => getDashboardStats(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboardStats>>> = ({ signal }) => getDashboardStats({ signal, ...requestOptions });
 
       
 
@@ -316,7 +463,7 @@ export type GetDashboardStatsQueryError = unknown
 
 
 export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>(
- params: undefined |  GetDashboardStatsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>> & Pick<
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getDashboardStats>>,
           TError,
@@ -326,7 +473,7 @@ export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashbo
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>(
- params?: GetDashboardStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>> & Pick<
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getDashboardStats>>,
           TError,
@@ -336,16 +483,16 @@ export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashbo
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>(
- params?: GetDashboardStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashboardStats>>, TError = unknown>(
- params?: GetDashboardStatsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDashboardStats>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetDashboardStatsQueryOptions(params,options)
+  const queryOptions = getGetDashboardStatsQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -457,6 +604,117 @@ export function useGetTimeSeries<TData = Awaited<ReturnType<typeof getTimeSeries
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTimeSeriesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getAdminRecipeListResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type getAdminRecipeListResponseSuccess = (getAdminRecipeListResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getAdminRecipeListResponse = (getAdminRecipeListResponseSuccess)
+
+export const getGetAdminRecipeListUrl = (params?: GetAdminRecipeListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/admin/manage/recipes?${stringifiedParams}` : `/admin/manage/recipes`
+}
+
+export const getAdminRecipeList = async (params?: GetAdminRecipeListParams, options?: RequestInit): Promise<getAdminRecipeListResponse> => {
+  
+  return customInstance<getAdminRecipeListResponse>(getGetAdminRecipeListUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getGetAdminRecipeListQueryKey = (params?: GetAdminRecipeListParams,) => {
+    return [
+    `/admin/manage/recipes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetAdminRecipeListQueryOptions = <TData = Awaited<ReturnType<typeof getAdminRecipeList>>, TError = unknown>(params?: GetAdminRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminRecipeList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminRecipeListQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminRecipeList>>> = ({ signal }) => getAdminRecipeList(params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminRecipeList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAdminRecipeListQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminRecipeList>>>
+export type GetAdminRecipeListQueryError = unknown
+
+
+export function useGetAdminRecipeList<TData = Awaited<ReturnType<typeof getAdminRecipeList>>, TError = unknown>(
+ params: undefined |  GetAdminRecipeListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminRecipeList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAdminRecipeList>>,
+          TError,
+          Awaited<ReturnType<typeof getAdminRecipeList>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAdminRecipeList<TData = Awaited<ReturnType<typeof getAdminRecipeList>>, TError = unknown>(
+ params?: GetAdminRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminRecipeList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAdminRecipeList>>,
+          TError,
+          Awaited<ReturnType<typeof getAdminRecipeList>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAdminRecipeList<TData = Awaited<ReturnType<typeof getAdminRecipeList>>, TError = unknown>(
+ params?: GetAdminRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminRecipeList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetAdminRecipeList<TData = Awaited<ReturnType<typeof getAdminRecipeList>>, TError = unknown>(
+ params?: GetAdminRecipeListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminRecipeList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAdminRecipeListQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

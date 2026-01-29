@@ -112,7 +112,7 @@ export function AdminLayout({
             <main
                 className={`pt-16 transition-all duration-300 ${sidebarOpen ? 'lg:pl-64' : ''}`}
             >
-                <div className="p-6">{children}</div>
+                <div className="p-3">{children}</div>
             </main>
 
             {/* Overlay for mobile */}

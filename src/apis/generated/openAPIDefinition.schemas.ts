@@ -196,8 +196,9 @@ export interface PrincipalUser {
   status?: string;
   userRoles?: UserRole[];
   authorities?: GrantedAuthority[];
-  accountNonExpired?: boolean;
+  enabled?: boolean;
   credentialsNonExpired?: boolean;
+  accountNonExpired?: boolean;
   accountNonLocked?: boolean;
   credentialsNonExpired?: boolean;
   enabled?: boolean;
@@ -417,6 +418,7 @@ export interface User {
   deleteDt?: string;
   userRoles?: UserRole[];
   active?: boolean;
+  banned?: boolean;
 }
 
 export interface ApiRespDtoUser {
@@ -456,6 +458,25 @@ export interface ApiRespDtoListAdminTimeSeriesPointDto {
   message?: string;
   /** 응답 데이터(없으면 null) */
   data?: AdminTimeSeriesPointDto[];
+}
+
+export interface AdminRecipeRespDto {
+  recipeId?: number;
+  userId?: number;
+  viewCount?: number;
+  commentCount?: number;
+  title?: string;
+  username?: string;
+  profileImgUrl?: string;
+  createDt?: string;
+  updateDt?: string;
+}
+
+export interface ApiRespDtoListAdminRecipeRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: AdminRecipeRespDto[];
 }
 
 export interface AdminActivityRespDto {
@@ -505,15 +526,42 @@ size?: number;
 recipeFilterReqDto: RecipeFilterReqDto;
 };
 
-export type GetDashboardStatsParams = {
-range?: string;
-};
-
 export type GetTimeSeriesParams = {
 metric: string;
 bucket: string;
 from?: string;
 to?: string;
+};
+
+export type GetAdminRecipeListParams = {
+/**
+ * 검색어(제목 또는 작성자 username)
+ */
+keyword?: string;
+/**
+ * 정렬 기준
+ */
+sortKey?: string;
+/**
+ * 정렬 방향
+ */
+sortBy?: string;
+/**
+ * 커서: 마지막으로 받은 아이템의 recipeId
+ */
+cursorId?: number;
+/**
+ * 커서(정렬=createDt일 때): 마지막 아이템의 createDt
+ */
+cursorCreateDt?: string;
+/**
+ * 커서(정렬=viewCount일 때): 마지막 아이템의 viewCount
+ */
+cursorViewCount?: number;
+/**
+ * 한 번에 가져올 개수(기본 20, 최대 50)
+ */
+size?: number;
 };
 
 export type GetRecentActivitiesParams = {
