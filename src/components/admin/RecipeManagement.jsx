@@ -1,237 +1,660 @@
-import { useState } from 'react';
-import { Search, EyeOff, Trash2, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { getAdminRecipeList } from '../../apis/generated/manage-controller/manage-controller';
+import { useRemoveRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
+import { usePrincipalState } from '../../store/usePrincipalState';
+import { useDebounce } from '../../hooks/useDebounce';
+
+// MUI Imports
+import {
+    Box,
+    Typography,
+    TextField,
+    InputAdornment,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Paper,
+    IconButton,
+    CircularProgress,
+    Avatar,
+    TableSortLabel,
+} from '@mui/material';
+import {
+    Search as SearchIcon,
+    Delete as DeleteIcon,
+} from '@mui/icons-material';
 
 export function RecipeManagement() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const { principal } = usePrincipalState();
+    const [searchQuery, setSearchQuery] = useState('');
+    const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  // Mock 레시피 데이터
-  const [recipes, setRecipes] = useState([
-    {
-      id: 1,
-      title: '김치볶음밥 간단 레시피',
-      author: '김철수',
-      date: '2025-01-28',
-      views: 1234,
-      isHidden: false,
-    },
-    {
-      id: 2,
-      title: '10분 만에 완성하는 계란덮밥',
-      author: '이영희',
-      date: '2025-01-27',
-      views: 856,
-      isHidden: false,
-    },
-    {
-      id: 3,
-      title: '초간단 라면 레시피',
-      author: '박민수',
-      date: '2025-01-26',
-      views: 2341,
-      isHidden: true,
-    },
-    {
-      id: 4,
-      title: '참치김치찌개 꿀팁',
-      author: '최지영',
-      date: '2025-01-25',
-      views: 567,
-      isHidden: false,
-    },
-    {
-      id: 5,
-      title: '간단한 된장찌개 레시피',
-      author: '정수연',
-      date: '2025-01-24',
-      views: 789,
-      isHidden: false,
-    },
-    {
-      id: 6,
-      title: '자취생 필수 떡볶이',
-      author: '강동원',
-      date: '2025-01-23',
-      views: 1456,
-      isHidden: false,
-    },
-    {
-      id: 7,
-      title: '건강한 샐러드 만들기',
-      author: '윤서준',
-      date: '2025-01-22',
-      views: 432,
-      isHidden: false,
-    },
-    {
-      id: 8,
-      title: '초보자를 위한 파스타',
-      author: '김철수',
-      date: '2025-01-21',
-      views: 987,
-      isHidden: false,
-    },
-  ]);
+    // Sorting State
+    const [sortConfig, setSortConfig] = useState({
+        key: 'createDt',
+        direction: 'desc',
+    });
 
-  // 검색 필터링
-  const filteredRecipes = recipes.filter(
-    (recipe) =>
-      recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.author.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    // Check Admin Access
+    useEffect(() => {
+        const isAdmin = principal?.userRoles?.some((r) => r.role?.roleId === 1);
+        if (principal && !isAdmin) {
+            alert('관리자 권한이 필요합니다.');
+            navigate('/');
+        }
+    }, [principal, navigate]);
 
-  // 페이지네이션
-  const totalPages = Math.ceil(filteredRecipes.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentRecipes = filteredRecipes.slice(startIndex, endIndex);
+    // Constant for Page Size
+    const PAGE_SIZE = 10;
 
-  const handleToggleHide = (recipeId) => {
-    setRecipes(
-      recipes.map((recipe) =>
-        recipe.id === recipeId ? { ...recipe, isHidden: !recipe.isHidden } : recipe
-      )
-    );
-  };
+    // Infinite Query
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        status,
+        error,
+    } = useInfiniteQuery({
+        queryKey: ['adminRecipeList', debouncedSearchQuery, sortConfig],
+        queryFn: async ({ pageParam }) => {
+            const params = {
+                keyword: debouncedSearchQuery || undefined,
+                size: PAGE_SIZE,
+                sortKey: sortConfig.key,
+                sortBy: sortConfig.direction,
+                ...pageParam,
+            };
+            const response = await getAdminRecipeList(params);
+            return response.data;
+        },
+        initialPageParam: undefined,
+        getNextPageParam: (lastPage) => {
+            const items = lastPage?.data || [];
+            // If items returned is less than PAGE_SIZE, we reached the end
+            if (items.length === 0 || items.length < PAGE_SIZE) {
+                return undefined;
+            }
+            const lastItem = items[items.length - 1];
+            return {
+                cursorId: lastItem.recipeId,
+                cursorCreateDt: lastItem.createDt,
+                cursorViewCount: lastItem.viewCount,
+            };
+        },
+    });
 
-  const handleDelete = (recipeId) => {
-    if (window.confirm('정말로 이 레시피를 삭제하시겠습니까?')) {
-      setRecipes(recipes.filter((recipe) => recipe.id !== recipeId));
-    }
-  };
+    // Intersection Observer
+    const observerRef = useRef();
 
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-serif text-[#3d3226] mb-2">레시피 관리</h1>
-        <p className="text-[#6b5d4f]">레시피 숨김 및 삭제 관리</p>
-      </div>
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (
+                    entries[0].isIntersecting &&
+                    hasNextPage &&
+                    !isFetchingNextPage
+                ) {
+                    fetchNextPage();
+                }
+            },
+            { threshold: 0.5 },
+        );
 
-      {/* 검색 */}
-      <div className="mb-6">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6b5d4f]" size={20} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="제목 또는 작성자로 검색"
-            className="w-full pl-10 pr-4 py-3 rounded-md border-2 border-[#d4cbbf] bg-white text-[#3d3226] focus:outline-none focus:border-[#3d3226] transition-colors"
-          />
-        </div>
-      </div>
+        if (observerRef.current) {
+            observer.observe(observerRef.current);
+        }
 
-      {/* 레시피 테이블 */}
-      <div className="bg-white rounded-lg border-2 border-[#d4cbbf] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#3d3226] text-[#f5f1eb]">
-              <tr>
-                <th className="px-6 py-4 text-left">제목</th>
-                <th className="px-6 py-4 text-left">작성자</th>
-                <th className="px-6 py-4 text-left">작성일</th>
-                <th className="px-6 py-4 text-left">조회수</th>
-                <th className="px-6 py-4 text-left">상태</th>
-                <th className="px-6 py-4 text-center">작업</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentRecipes.map((recipe) => (
-                <tr key={recipe.id} className="border-b border-[#e5dfd5] hover:bg-[#f5f1eb] transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="text-[#3d3226] max-w-md truncate">
-                      {recipe.title}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-[#6b5d4f]">{recipe.author}</td>
-                  <td className="px-6 py-4 text-[#6b5d4f]">{recipe.date}</td>
-                  <td className="px-6 py-4 text-[#6b5d4f]">{recipe.views.toLocaleString()}</td>
-                  <td className="px-6 py-4">
-                    {recipe.isHidden ? (
-                      <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm border border-gray-300">
-                        숨김
-                      </span>
-                    ) : (
-                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm border border-green-300">
-                        공개
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => handleToggleHide(recipe.id)}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
-                          recipe.isHidden
-                            ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 border-2 border-blue-300'
-                            : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-2 border-gray-300'
-                        }`}
-                        title={recipe.isHidden ? '공개' : '숨김'}
-                      >
-                        {recipe.isHidden ? <Eye size={16} /> : <EyeOff size={16} />}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(recipe.id)}
-                        className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-700 hover:bg-red-100 border-2 border-red-300 rounded-md transition-colors"
-                        title="삭제"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        return () => observer.disconnect();
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-        {/* 페이지네이션 */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 py-4 border-t border-[#e5dfd5]">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="p-2 rounded-md hover:bg-[#f5f1eb] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="text-[#3d3226]" size={20} />
-            </button>
+    // Flatten data
+    const recipes = useMemo(() => {
+        return data?.pages.flatMap((page) => page?.data || []) || [];
+    }, [data]);
 
-            <div className="flex gap-1">
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentPage(index + 1)}
-                  className={`px-4 py-2 rounded-md transition-colors ${
-                    currentPage === index + 1
-                      ? 'bg-[#3d3226] text-[#f5f1eb]'
-                      : 'hover:bg-[#f5f1eb] text-[#3d3226]'
-                  }`}
+    // Delete Mutation
+    const { mutate: deleteRecipe } = useRemoveRecipe();
+
+    // Confirming State for "Round Slot Modal"
+    const [confirmingId, setConfirmingId] = useState(null);
+    const [isCooldown, setIsCooldown] = useState(false);
+
+    // Click Outside Listener
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (confirmingId && !event.target.closest('.delete-confirm-box')) {
+                setConfirmingId(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [confirmingId]);
+
+    const handleClickTrash = (recipeId) => {
+        if (confirmingId === recipeId) {
+            // Second click: Execute Delete
+            handleExecuteDelete(recipeId);
+        } else {
+            // First click: Show confirm UI
+            setConfirmingId(recipeId);
+
+            // Start Cooldown (Prevent immediate second click)
+            setIsCooldown(true);
+            setTimeout(() => setIsCooldown(false), 5000);
+        }
+    };
+
+    const handleExecuteDelete = (recipeId) => {
+        deleteRecipe(
+            { boardId: 1, recipeId },
+            {
+                onSuccess: () => {
+                    queryClient.invalidateQueries({
+                        queryKey: ['adminRecipeList'],
+                    });
+                    setConfirmingId(null);
+                    alert('삭제되었습니다.');
+                },
+                onError: (err) => {
+                    console.error('Delete failed', err);
+                    alert('삭제에 실패했습니다. (게시판 ID 불일치 가능성)');
+                },
+            },
+        );
+    };
+
+    const handleSort = (key) => {
+        setSortConfig((prev) => {
+            const isAsc = prev.key === key && prev.direction === 'asc';
+            return {
+                key,
+                direction: isAsc ? 'desc' : 'asc',
+            };
+        });
+    };
+
+    return (
+        <Box sx={{ p: 3, maxWidth: 1440, margin: '0 auto' }}>
+            <Box sx={{ mb: 4 }}>
+                <Typography
+                    variant="h4"
+                    component="h1"
+                    sx={{
+                        fontFamily: 'serif',
+                        color: '#3d3226',
+                        mb: 1,
+                        fontWeight: 'bold',
+                    }}
                 >
-                  {index + 1}
-                </button>
-              ))}
-            </div>
+                    레시피 관리
+                </Typography>
+                <Typography variant="body1" sx={{ color: '#6b5d4f' }}>
+                    레시피 조회 및 삭제 관리
+                </Typography>
+            </Box>
 
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-md hover:bg-[#f5f1eb] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            {/* 검색 */}
+            <Box sx={{ mb: 4, maxWidth: 480 }}>
+                <TextField
+                    fullWidth
+                    variant="outlined"
+                    placeholder="제목 또는 작성자로 검색"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon sx={{ color: '#6b5d4f' }} />
+                            </InputAdornment>
+                        ),
+                        sx: {
+                            borderRadius: '12px',
+                            backgroundColor: 'white',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#d4cbbf',
+                                borderWidth: 2,
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#3d3226',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#3d3226',
+                            },
+                        },
+                    }}
+                />
+            </Box>
+
+            {/* 레시피 테이블 */}
+            <Paper
+                sx={{
+                    width: '100%',
+                    overflow: 'hidden',
+                    borderRadius: '12px',
+                    border: '2px solid #d4cbbf',
+                    boxShadow: 'none',
+                }}
             >
-              <ChevronRight className="text-[#3d3226]" size={20} />
-            </button>
-          </div>
-        )}
-      </div>
+                <TableContainer
+                    sx={{
+                        maxHeight: 600,
+                        '&::-webkit-scrollbar': {
+                            width: '8px',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: '#d4cbbf',
+                            borderRadius: '4px',
+                        },
+                    }}
+                >
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell
+                                    sx={{
+                                        backgroundColor: '#3d3226',
+                                        color: '#f5f1eb',
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    <Typography paddingX={10}>제목</Typography>
+                                </TableCell>
+                                <TableCell
+                                    sx={{
+                                        backgroundColor: '#3d3226',
+                                        color: '#f5f1eb',
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    <Typography paddingX={5}>작성자</Typography>
+                                </TableCell>
+                                <TableCell
+                                    align="center"
+                                    sx={{
+                                        backgroundColor: '#3d3226',
+                                        color: '#f5f1eb',
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    <TableSortLabel
+                                        active={sortConfig.key === 'createDt'}
+                                        direction={
+                                            sortConfig.key === 'createDt'
+                                                ? sortConfig.direction
+                                                : 'asc'
+                                        }
+                                        onClick={() => handleSort('createDt')}
+                                        sx={{
+                                            '&.MuiTableSortLabel-root': {
+                                                color: '#f5f1eb',
+                                            },
+                                            '&.MuiTableSortLabel-root:hover': {
+                                                color: '#d4cbbf',
+                                            },
+                                            '&.Mui-active': {
+                                                color: '#f5f1eb',
+                                            },
+                                            '& .MuiTableSortLabel-icon': {
+                                                color: '#f5f1eb !important',
+                                                opacity: 0.5, // Always show with low opacity
+                                            },
+                                            '&.Mui-active .MuiTableSortLabel-icon':
+                                                {
+                                                    opacity: 1, // Full opacity when active
+                                                },
+                                        }}
+                                    >
+                                        작성일
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell
+                                    align="center"
+                                    sx={{
+                                        backgroundColor: '#3d3226',
+                                        color: '#f5f1eb',
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    <TableSortLabel
+                                        active={sortConfig.key === 'viewCount'}
+                                        direction={
+                                            sortConfig.key === 'viewCount'
+                                                ? sortConfig.direction
+                                                : 'asc'
+                                        }
+                                        onClick={() => handleSort('viewCount')}
+                                        sx={{
+                                            '&.MuiTableSortLabel-root': {
+                                                color: '#f5f1eb',
+                                            },
+                                            '&.MuiTableSortLabel-root:hover': {
+                                                color: '#d4cbbf',
+                                            },
+                                            '&.Mui-active': {
+                                                color: '#f5f1eb',
+                                            },
+                                            '& .MuiTableSortLabel-icon': {
+                                                color: '#f5f1eb !important',
+                                                opacity: 0.5,
+                                            },
+                                            '&.Mui-active .MuiTableSortLabel-icon':
+                                                {
+                                                    opacity: 1,
+                                                },
+                                        }}
+                                    >
+                                        조회수
+                                    </TableSortLabel>
+                                </TableCell>
+                                <TableCell
+                                    align="center"
+                                    sx={{
+                                        backgroundColor: '#3d3226',
+                                        color: '#f5f1eb',
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    답글수
+                                </TableCell>
+                                <TableCell
+                                    align="center"
+                                    sx={{
+                                        backgroundColor: '#3d3226',
+                                        color: '#f5f1eb',
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    작업
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {status === 'pending' ? (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={5}
+                                        align="center"
+                                        sx={{ py: 4 }}
+                                    >
+                                        <CircularProgress
+                                            sx={{ color: '#3d3226' }}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                            ) : status === 'error' ? (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={5}
+                                        align="center"
+                                        sx={{ py: 4, color: 'error.main' }}
+                                    >
+                                        에러가 발생했습니다: {error.message}
+                                    </TableCell>
+                                </TableRow>
+                            ) : recipes.length > 0 ? (
+                                recipes.map((recipe) => (
+                                    <TableRow
+                                        key={recipe.recipeId}
+                                        hover
+                                        sx={{
+                                            '&:hover': {
+                                                backgroundColor: '#f5f1eb',
+                                            },
+                                        }}
+                                    >
+                                        <TableCell sx={{ maxWidth: 300 }}>
+                                            <Typography
+                                                paddingX={3}
+                                                noWrap
+                                                onClick={() => {
+                                                    navigate(
+                                                        `/boards/1/recipe/${recipe.recipeId}`,
+                                                    );
+                                                }}
+                                                title={recipe.title}
+                                                sx={{
+                                                    color: '#3d3226',
+                                                    cursor: 'pointer',
+                                                }}
+                                            >
+                                                {recipe.title}
+                                            </Typography>
+                                        </TableCell>
+                                        <TableCell sx={{ color: '#6b5d4f' }}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 1.5,
+                                                }}
+                                            >
+                                                <Avatar
+                                                    alt={recipe.username}
+                                                    src={recipe.profileImgUrl}
+                                                    sx={{
+                                                        width: 32,
+                                                        height: 32,
+                                                    }}
+                                                />
+                                                <Typography
+                                                    variant="body2"
+                                                    noWrap
+                                                >
+                                                    {recipe.username}
+                                                </Typography>
+                                            </Box>
+                                        </TableCell>
+                                        <TableCell
+                                            align="center"
+                                            sx={{ color: '#6b5d4f' }}
+                                        >
+                                            {new Date(
+                                                recipe.createDt,
+                                            ).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell
+                                            align="center"
+                                            sx={{ color: '#6b5d4f' }}
+                                        >
+                                            {recipe.viewCount.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell
+                                            align="center"
+                                            sx={{ color: '#6b5d4f' }}
+                                        >
+                                            {recipe.commentCount.toLocaleString()}
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Box
+                                                sx={{
+                                                    position: 'relative',
+                                                    display: 'inline-block',
+                                                    width: 40,
+                                                    height: 40,
+                                                }}
+                                            >
+                                                <Box
+                                                    className="delete-confirm-box"
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        right: 0,
+                                                        top: '50%',
+                                                        transform:
+                                                            'translateY(-50%)',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        justifyContent:
+                                                            'flex-end',
+                                                        backgroundColor:
+                                                            confirmingId ===
+                                                            recipe.recipeId
+                                                                ? '#ffebee'
+                                                                : 'transparent',
+                                                        borderRadius: '24px',
+                                                        border:
+                                                            confirmingId ===
+                                                            recipe.recipeId
+                                                                ? '1px solid #ef9a9a'
+                                                                : '1px solid transparent',
+                                                        transition:
+                                                            'all 0.4s ease',
+                                                        overflow: 'hidden',
+                                                        whiteSpace: 'nowrap',
+                                                        maxWidth:
+                                                            confirmingId ===
+                                                            recipe.recipeId
+                                                                ? '200px'
+                                                                : '40px',
+                                                        width:
+                                                            confirmingId ===
+                                                            recipe.recipeId
+                                                                ? '200px'
+                                                                : '40px',
+                                                        padding:
+                                                            confirmingId ===
+                                                            recipe.recipeId
+                                                                ? '0 4px 0 12px'
+                                                                : '0',
+                                                        zIndex:
+                                                            confirmingId ===
+                                                            recipe.recipeId
+                                                                ? 10
+                                                                : 1,
+                                                        boxShadow:
+                                                            confirmingId ===
+                                                            recipe.recipeId
+                                                                ? '0 2px 8px rgba(0,0,0,0.1)'
+                                                                : 'none',
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="caption"
+                                                        sx={{
+                                                            color: '#d32f2f',
+                                                            opacity:
+                                                                confirmingId ===
+                                                                recipe.recipeId
+                                                                    ? 1
+                                                                    : 0,
+                                                            transition:
+                                                                'opacity 0.3s ease 0.1s',
+                                                            mr: 1,
+                                                            fontWeight: 'bold',
+                                                            display:
+                                                                confirmingId ===
+                                                                recipe.recipeId
+                                                                    ? 'block'
+                                                                    : 'none',
+                                                        }}
+                                                    >
+                                                        정말 삭제하시겠습니까?
+                                                    </Typography>
+                                                    <IconButton
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleClickTrash(
+                                                                recipe.recipeId,
+                                                            );
+                                                        }}
+                                                        className={
+                                                            confirmingId ===
+                                                            recipe.recipeId
+                                                                ? 'animate-shake'
+                                                                : ''
+                                                        }
+                                                        sx={{
+                                                            color: '#d32f2f',
+                                                            border:
+                                                                confirmingId ===
+                                                                recipe.recipeId
+                                                                    ? 'none'
+                                                                    : '1px solid #ef9a9a',
+                                                            bgcolor:
+                                                                confirmingId ===
+                                                                recipe.recipeId
+                                                                    ? 'transparent'
+                                                                    : '#ffebee',
+                                                            '&:hover': {
+                                                                bgcolor:
+                                                                    '#ffcdd2',
+                                                            },
+                                                            p: 1,
+                                                            minWidth: '34px',
+                                                        }}
+                                                        size="small"
+                                                        title={
+                                                            confirmingId ===
+                                                            recipe.recipeId
+                                                                ? '삭제 확인'
+                                                                : '삭제'
+                                                        }
+                                                        disabled={
+                                                            isCooldown &&
+                                                            confirmingId ===
+                                                                recipe.recipeId
+                                                        }
+                                                    >
+                                                        <DeleteIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Box>
+                                            </Box>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={5}
+                                        align="center"
+                                        sx={{ py: 8, color: '#6b5d4f' }}
+                                    >
+                                        데이터가 없습니다.
+                                    </TableCell>
+                                </TableRow>
+                            )}
 
-      {filteredRecipes.length === 0 && (
-        <div className="text-center py-12 text-[#6b5d4f]">
-          검색 결과가 없습니다.
-        </div>
-      )}
-    </div>
-  );
+                            {/* Sentinel Row (Always rendered at bottom of body) */}
+                            <TableRow>
+                                <TableCell
+                                    colSpan={5}
+                                    padding="none"
+                                    sx={{ borderBottom: 'none' }}
+                                >
+                                    <Box
+                                        ref={observerRef}
+                                        sx={{
+                                            height: 40,
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        {isFetchingNextPage && (
+                                            <Typography
+                                                variant="caption"
+                                                color="text.secondary"
+                                            >
+                                                더 불러오는 중...
+                                            </Typography>
+                                        )}
+                                    </Box>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
+        </Box>
+    );
 }

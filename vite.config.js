@@ -64,6 +64,12 @@ export default defineConfig({
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
+
+            // Admin API (API 요청만 프록시)
+            '/admin/manage/': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+            },
         },
     },
 });
