@@ -1,225 +1,293 @@
-import { useState } from 'react';
-import { Search, Ban, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { useInView } from 'react-intersection-observer';
+import {
+    useGetUserList,
+    useBanUser,
+    useRestoreUser,
+} from '../../apis/generated/manage-controller/manage-controller';
+import { AdminManagementLayout } from './common/AdminManagementLayout';
+import { ActionConfirmButton } from './common/ActionConfirmButton';
+import { useQueryClient } from '@tanstack/react-query';
+
+// MUI Imports
+import { TableRow, TableCell, Typography, Avatar, Chip } from '@mui/material';
+import {
+    Block as BanIcon,
+    CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
+import { formatDate } from '../../apis/utils/formatDate';
 
 export function UserManagement() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+    const queryClient = useQueryClient();
+    const [searchQuery, setSearchQuery] = useState('');
 
-  // Mock 사용자 데이터
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
-      nickname: '김철수',
-      email: 'kim@example.com',
-      joinDate: '2025-01-15',
-      isBlocked: false,
-    },
-    {
-      id: 2,
-      profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
-      nickname: '이영희',
-      email: 'lee@example.com',
-      joinDate: '2025-01-20',
-      isBlocked: false,
-    },
-    {
-      id: 3,
-      profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
-      nickname: '박민수',
-      email: 'park@example.com',
-      joinDate: '2025-01-22',
-      isBlocked: true,
-    },
-    {
-      id: 4,
-      profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=4',
-      nickname: '최지영',
-      email: 'choi@example.com',
-      joinDate: '2025-01-25',
-      isBlocked: false,
-    },
-    {
-      id: 5,
-      profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=5',
-      nickname: '정수연',
-      email: 'jung@example.com',
-      joinDate: '2025-01-26',
-      isBlocked: false,
-    },
-    {
-      id: 6,
-      profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=6',
-      nickname: '강동원',
-      email: 'kang@example.com',
-      joinDate: '2025-01-27',
-      isBlocked: false,
-    },
-    {
-      id: 7,
-      profileImage: 'https://api.dicebear.com/7.x/avataaars/svg?seed=7',
-      nickname: '윤서준',
-      email: 'yoon@example.com',
-      joinDate: '2025-01-28',
-      isBlocked: false,
-    },
-  ]);
+    // API Query
+    const { data: userListResponse, isLoading, error } = useGetUserList();
 
-  // 검색 필터링
-  const filteredUsers = users.filter(
-    (user) =>
-      user.nickname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    const mockUsers = Array.isArray(userListResponse?.data)
+        ? userListResponse.data
+        : userListResponse?.data?.data || [];
 
-  // 페이지네이션
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentUsers = filteredUsers.slice(startIndex, endIndex);
+    // Filter Logic
+    const filteredUsers = useMemo(() => {
+        if (!searchQuery) return mockUsers;
+        const lowerQuery = searchQuery.toLowerCase();
+        return mockUsers.filter(
+            (user) =>
+                user.username?.toLowerCase().includes(lowerQuery) ||
+                user.email?.toLowerCase().includes(lowerQuery),
+        );
+    }, [mockUsers, searchQuery]);
 
-  const handleToggleBlock = (userId) => {
-    setUsers(
-      users.map((user) =>
-        user.id === userId ? { ...user, isBlocked: !user.isBlocked } : user
-      )
+    // Client-side Infinite Scroll Logic
+    const ITEMS_PER_PAGE = 20;
+    const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+
+    // Intersection Observer
+    const { ref: observerRef, inView } = useInView({
+        threshold: 0,
+        triggerOnce: false,
+    });
+
+    useEffect(() => {
+        if (inView && visibleCount < filteredUsers.length) {
+            setVisibleCount((prev) =>
+                Math.min(prev + ITEMS_PER_PAGE, filteredUsers.length),
+            );
+        }
+    }, [inView, filteredUsers.length, visibleCount]);
+
+    // Reset visible count when filter changes
+    useEffect(() => {
+        setVisibleCount(ITEMS_PER_PAGE);
+    }, [searchQuery]);
+
+    const currentUsers = filteredUsers.slice(0, visibleCount);
+
+    // Mutations
+    const { mutate: banUser } = useBanUser();
+    const { mutate: restoreUser } = useRestoreUser();
+
+    const [confirmingId, setConfirmingId] = useState(null);
+
+    const handleBan = (userId) => {
+        banUser(
+            { userId },
+            {
+                onSuccess: () => {
+                    queryClient.invalidateQueries({
+                        queryKey: ['/admin/manage/user/list'],
+                    });
+                    setConfirmingId(null);
+                },
+                onError: (err) => {
+                    alert('차단 처리에 실패했습니다.');
+                    console.error(err);
+                },
+            },
+        );
+    };
+
+    const handleRestore = (userId) => {
+        restoreUser(
+            { userId },
+            {
+                onSuccess: () => {
+                    queryClient.invalidateQueries({
+                        queryKey: ['/admin/manage/user/list'],
+                    });
+                    setConfirmingId(null);
+                },
+                onError: (err) => {
+                    alert('차단 해제에 실패했습니다.');
+                    console.error(err);
+                },
+            },
+        );
+    };
+
+    const tableHead = (
+        <TableRow>
+            <TableCell
+                sx={{
+                    backgroundColor: '#3d3226',
+                    color: '#f5f1eb',
+                    fontWeight: 'bold',
+                }}
+            >
+                <Typography paddingX={5}>이메일</Typography>
+            </TableCell>
+            <TableCell
+                sx={{
+                    backgroundColor: '#3d3226',
+                    color: '#f5f1eb',
+                    fontWeight: 'bold',
+                }}
+            >
+                <Typography paddingX={5}>프로필</Typography>
+            </TableCell>
+            <TableCell
+                align="center"
+                sx={{
+                    backgroundColor: '#3d3226',
+                    color: '#f5f1eb',
+                    fontWeight: 'bold',
+                }}
+            >
+                가입일
+            </TableCell>
+            <TableCell
+                align="center"
+                sx={{
+                    backgroundColor: '#3d3226',
+                    color: '#f5f1eb',
+                    fontWeight: 'bold',
+                }}
+            >
+                권한
+            </TableCell>
+            <TableCell
+                align="center"
+                sx={{
+                    backgroundColor: '#3d3226',
+                    color: '#f5f1eb',
+                    fontWeight: 'bold',
+                }}
+            >
+                상태
+            </TableCell>
+            <TableCell
+                align="center"
+                sx={{
+                    backgroundColor: '#3d3226',
+                    color: '#f5f1eb',
+                    fontWeight: 'bold',
+                }}
+            >
+                작업
+            </TableCell>
+        </TableRow>
     );
-  };
 
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-serif text-[#3d3226] mb-2">사용자 관리</h1>
-        <p className="text-[#6b5d4f]">회원 정보 및 차단 관리</p>
-      </div>
-
-      {/* 검색 */}
-      <div className="mb-6">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#6b5d4f]" size={20} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
+    const tableBody = currentUsers.map((user) => (
+        <TableRow
+            key={user.userId}
+            hover
+            sx={{
+                '&:hover': {
+                    backgroundColor: '#f5f1eb',
+                },
             }}
-            placeholder="닉네임 또는 이메일로 검색"
-            className="w-full pl-10 pr-4 py-3 rounded-md border-2 border-[#d4cbbf] bg-white text-[#3d3226] focus:outline-none focus:border-[#3d3226] transition-colors"
-          />
-        </div>
-      </div>
-
-      {/* 사용자 테이블 */}
-      <div className="bg-white rounded-lg border-2 border-[#d4cbbf] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-[#3d3226] text-[#f5f1eb]">
-              <tr>
-                <th className="px-6 py-4 text-left">프로필</th>
-                <th className="px-6 py-4 text-left">닉네임</th>
-                <th className="px-6 py-4 text-left">이메일</th>
-                <th className="px-6 py-4 text-left">가입일</th>
-                <th className="px-6 py-4 text-left">상태</th>
-                <th className="px-6 py-4 text-center">작업</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentUsers.map((user) => (
-                <tr key={user.id} className="border-b border-[#e5dfd5] hover:bg-[#f5f1eb] transition-colors">
-                  <td className="px-6 py-4">
-                    <img
-                      src={user.profileImage}
-                      alt={user.nickname}
-                      className="w-10 h-10 rounded-full border-2 border-[#d4cbbf]"
-                    />
-                  </td>
-                  <td className="px-6 py-4 text-[#3d3226]">{user.nickname}</td>
-                  <td className="px-6 py-4 text-[#6b5d4f]">{user.email}</td>
-                  <td className="px-6 py-4 text-[#6b5d4f]">{user.joinDate}</td>
-                  <td className="px-6 py-4">
-                    {user.isBlocked ? (
-                      <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm border border-red-300">
-                        차단됨
-                      </span>
-                    ) : (
-                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm border border-green-300">
-                        활성
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleToggleBlock(user.id)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors mx-auto ${
-                        user.isBlocked
-                          ? 'bg-green-50 text-green-700 hover:bg-green-100 border-2 border-green-300'
-                          : 'bg-red-50 text-red-700 hover:bg-red-100 border-2 border-red-300'
-                      }`}
-                    >
-                      {user.isBlocked ? (
-                        <>
-                          <CheckCircle size={16} />
-                          <span>차단 해제</span>
-                        </>
-                      ) : (
-                        <>
-                          <Ban size={16} />
-                          <span>차단</span>
-                        </>
-                      )}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* 페이지네이션 */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 py-4 border-t border-[#e5dfd5]">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="p-2 rounded-md hover:bg-[#f5f1eb] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="text-[#3d3226]" size={20} />
-            </button>
-
-            <div className="flex gap-1">
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentPage(index + 1)}
-                  className={`px-4 py-2 rounded-md transition-colors ${
-                    currentPage === index + 1
-                      ? 'bg-[#3d3226] text-[#f5f1eb]'
-                      : 'hover:bg-[#f5f1eb] text-[#3d3226]'
-                  }`}
+        >
+            <TableCell sx={{ color: '#6b5d4f' }}>{user.email}</TableCell>
+            <TableCell>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                    }}
                 >
-                  {index + 1}
-                </button>
-              ))}
-            </div>
+                    <Avatar
+                        alt={user.username}
+                        src={user.profileImgUrl}
+                        sx={{ width: 40, height: 40 }}
+                    />
+                    <Typography
+                        variant="body2"
+                        fontWeight="bold"
+                        sx={{ color: '#3d3226' }}
+                    >
+                        {user.username}
+                    </Typography>
+                </div>
+            </TableCell>
+            <TableCell align="center" sx={{ color: '#6b5d4f' }}>
+                {formatDate(user.createDt)}
+            </TableCell>
+            <TableCell align="center" sx={{ color: '#6b5d4f' }}>
+                {(() => {
+                    if (!user.userRoles || user.userRoles.length === 0)
+                        return '-';
+                    const mainRole = [...user.userRoles].sort(
+                        (a, b) => a.roleId - b.roleId,
+                    )[0];
+                    return mainRole.role?.roleNameKor || '-';
+                })()}
+            </TableCell>
+            <TableCell align="center">
+                {user.status === 'BANNED' ? (
+                    <Chip
+                        label="차단됨"
+                        color="error"
+                        size="small"
+                        sx={{ fontWeight: 'bold' }}
+                    />
+                ) : user.status === 'INACTIVE' ? (
+                    <Chip
+                        label="비활성"
+                        color="default"
+                        size="small"
+                        sx={{ fontWeight: 'bold', color: '#6b5d4f' }}
+                    />
+                ) : (
+                    <Chip
+                        label="활성"
+                        color="success"
+                        size="small"
+                        variant="outlined"
+                        sx={{ fontWeight: 'bold' }}
+                    />
+                )}
+            </TableCell>
+            <TableCell align="center">
+                {user.status === 'BANNED' ? (
+                    <ActionConfirmButton
+                        id={user.userId}
+                        onConfirm={handleRestore}
+                        confirmingId={confirmingId}
+                        setConfirmingId={setConfirmingId}
+                        icon={<CheckCircleIcon fontSize="small" />}
+                        title="차단 해제"
+                        message="차단을 해제하시겠습니까?"
+                        color="success"
+                    />
+                ) : user.status === 'ACTIVE' ? (
+                    <ActionConfirmButton
+                        id={user.userId}
+                        onConfirm={handleBan}
+                        confirmingId={confirmingId}
+                        setConfirmingId={setConfirmingId}
+                        icon={<BanIcon fontSize="small" />}
+                        title="차단"
+                        message="이 사용자를 차단하시겠습니까?"
+                        color="error"
+                    />
+                ) : (
+                    <Typography variant="caption" color="text.secondary">
+                        -
+                    </Typography>
+                )}
+            </TableCell>
+        </TableRow>
+    ));
 
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="p-2 rounded-md hover:bg-[#f5f1eb] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight className="text-[#3d3226]" size={20} />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {filteredUsers.length === 0 && (
-        <div className="text-center py-12 text-[#6b5d4f]">
-          검색 결과가 없습니다.
-        </div>
-      )}
-    </div>
-  );
+    return (
+        <AdminManagementLayout
+            title="사용자 관리"
+            description="회원 정보 조회 및 차단 관리"
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            searchPlaceholder="닉네임, 아이디 또는 이메일로 검색"
+            tableHead={tableHead}
+            tableBody={tableBody}
+            isLoading={isLoading}
+            error={error}
+            isEmpty={mockUsers.length === 0}
+            observerRef={
+                visibleCount < filteredUsers.length ? observerRef : null
+            }
+            isFetchingNextPage={visibleCount < filteredUsers.length}
+        />
+    );
 }
