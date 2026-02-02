@@ -6,8 +6,8 @@ export default function FreeEditPage() {
     const navigate = useNavigate();
 
     const onNavigate = (key) => {
-        if (key === 'community') navigate(`/boards/${boardId}/free`);
-        if (key === 'detail') navigate(`/boards/${boardId}/free/${freeId}`);
+        if (key === 'community') navigate(`/board/${boardId}/free`);
+        if (key === 'detail') navigate(`/board/${boardId}/free/${freeId}`);
     };
 
     return <CommunityEdit postId={freeId} onNavigate={onNavigate} />;

@@ -14,7 +14,7 @@ export default function MainRouter() {
             <Route path="/admin/*" element={<AdminRouter />} />
             <Route element={<RootLayout />}>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/boards/*" element={<BoardsRouter />} />
+                <Route path="/board/*" element={<BoardsRouter />} />
                 <Route path="/me/*" element={<MyPageRouter />} />
                 <Route path="/users/*" element={<UserProfileRouter />} />
                 <Route path="/auth/oauth2/*" element={<OAuth2Page />} />

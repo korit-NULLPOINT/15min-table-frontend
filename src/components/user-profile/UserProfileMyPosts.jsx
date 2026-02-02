@@ -37,7 +37,7 @@ export default function UserProfileMyPosts({
     };
 
     const handleEditClick = (recipeId) => {
-        navigate(`/boards/1/recipe/${recipeId}/edit`);
+        navigate(`/board/1/recipe/${recipeId}/edit`);
     };
 
     const handleDeleteClick = async (recipeId) => {

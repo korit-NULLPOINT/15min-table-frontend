@@ -48,7 +48,9 @@ export default function RecipeDetailPage() {
                 레시피를 찾을 수 없어요.
                 <button
                     className="mt-4 px-4 py-2 rounded bg-[#3d3226] text-[#f5f1eb]"
-                    onClick={() => navigate(`/boards/${boardId}/recipe`)}
+                    onClick={() =>
+                        navigate(`/boards/${boardId}/recipe/filtered`)
+                    }
                 >
                     목록으로
                 </button>
@@ -60,13 +62,7 @@ export default function RecipeDetailPage() {
         <RecipeDetail
             recipeDetail={recipeDetail}
             comments={comments}
-            onNavigate={(path) => {
-                if (path === 'profile') {
-                    navigate('/me');
-                } else {
-                    navigate(`/boards/${boardId}/recipe`);
-                }
-            }}
+            onNavigate={() => navigate(`/board/${boardId}/recipe/filtered`)}
             isLoggedIn={isLoggedIn}
             onOpenAuth={() => openAuthModal('signin')} // ✅ 전역 모달 열기
             currentUsername={principal?.username ?? ''}

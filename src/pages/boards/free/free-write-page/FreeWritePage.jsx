@@ -1,24 +1,27 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { CommunityWrite } from '../../../../components/community/CommunityWrite';
+import { addPost } from '../../../../apis/generated/post-controller/post-controller';
 
 export default function FreeWritePage() {
     const { boardId } = useParams();
     const navigate = useNavigate();
 
     const onNavigate = (key) => {
-        if (key === 'community') navigate(`/boards/${boardId}/free`);
+        if (key === 'community') navigate(`/board/${boardId}/free`);
     };
 
-    // CommunityWrite가 등록 완료 시 콜백을 지원하면 여기에 붙이고,
-    // 지원 안 하면 내부에서 onNavigate로 목록으로 가게만 맞춰도 됨.
-    const onSubmitSuccess = () => {
-        navigate(`/boards/${boardId}/free`);
+    const handleWriteSubmit = async (data) => {
+        try {
+            await addPost({ boardId: Number(boardId), data });
+            alert('게시글이 등록되었습니다.');
+            navigate(`/board/${boardId}/free`);
+        } catch (err) {
+            console.error(err);
+            alert('게시글 등록 실패');
+        }
     };
 
     return (
-        <CommunityWrite
-            onNavigate={onNavigate}
-            onSubmitSuccess={onSubmitSuccess}
-        />
+        <CommunityWrite onNavigate={onNavigate} onSubmit={handleWriteSubmit} />
     );
 }

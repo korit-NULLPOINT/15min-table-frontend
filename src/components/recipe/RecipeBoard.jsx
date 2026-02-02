@@ -199,8 +199,11 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                         >
                                             <ImageWithFallback
                                                 src={
-                                                    recipe.thumbnailImgUrl ||
-                                                    `https://picsum.photos/seed/${recipe.recipeId}/800/600/`
+                                                    recipe.thumbnailImgUrl &&
+                                                    recipe.thumbnailImgUrl !==
+                                                        'string'
+                                                        ? recipe.thumbnailImgUrl
+                                                        : `https://picsum.photos/seed/${recipe.recipeId}/500`
                                                 }
                                                 alt={recipe.title}
                                                 className="w-full h-full object-contain hover:scale-110 transition-transform duration-300"

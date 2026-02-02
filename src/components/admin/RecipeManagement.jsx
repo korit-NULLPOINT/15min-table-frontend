@@ -297,7 +297,7 @@ export function RecipeManagement() {
                     paddingX={3}
                     noWrap
                     onClick={() => {
-                        navigate(`/boards/1/recipe/${recipe.recipeId}`);
+                        navigate(`/board/1/recipe/${recipe.recipeId}`);
                     }}
                     title={recipe.title}
                     sx={{
