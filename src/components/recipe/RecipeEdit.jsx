@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, Mail, Filter } from 'lucide-react';
+import { ArrowLeft, Upload, Mail, Filter, X } from 'lucide-react';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import {
     useModifyRecipe,

@@ -9,6 +9,7 @@ export default function RecipeWritePage() {
     const onNavigate = (pageKey) => {
         if (pageKey === 'board') navigate(`/boards/${boardId}/recipe`);
         if (pageKey === 'home') navigate(`/`);
+        if (pageKey === 'profile') navigate(`/me`);
     };
 
     return <RecipeWrite onNavigate={onNavigate} />;

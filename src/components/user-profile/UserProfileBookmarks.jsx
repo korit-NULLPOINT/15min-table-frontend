@@ -1,4 +1,5 @@
 import { Bookmark } from 'lucide-react';
+import { Box } from '@mui/material';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 
 export default function UserProfileBookmarks({
@@ -23,30 +24,39 @@ export default function UserProfileBookmarks({
                             onClick={() => onRecipeClick?.(bookmark.recipeId)}
                             className="cursor-pointer bg-white rounded-lg overflow-hidden border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
                         >
-                            <ImageWithFallback
-                                src={
-                                    recipeList?.find(
-                                        (recipe) =>
-                                            recipe.recipeId ==
-                                            bookmark.recipeId,
-                                    )?.thumbnailImgUrl ||
-                                    `https://picsum.photos/seed/${
+                            <Box
+                                sx={{
+                                    position: 'relative',
+                                    aspectRatio: '4 / 3',
+                                    overflow: 'hidden',
+                                    backgroundColor: 'white',
+                                }}
+                            >
+                                <ImageWithFallback
+                                    src={
                                         recipeList?.find(
                                             (recipe) =>
                                                 recipe.recipeId ==
                                                 bookmark.recipeId,
-                                        )?.recipeId
-                                    }/500`
-                                }
-                                alt={
-                                    recipeList?.find(
-                                        (recipe) =>
-                                            recipe.recipeId ==
-                                            bookmark.recipeId,
-                                    )?.title
-                                }
-                                className="w-full aspect-video object-cover"
-                            />
+                                        )?.thumbnailImgUrl ||
+                                        `https://picsum.photos/seed/${
+                                            recipeList?.find(
+                                                (recipe) =>
+                                                    recipe.recipeId ==
+                                                    bookmark.recipeId,
+                                            )?.recipeId
+                                        }/800/600/`
+                                    }
+                                    alt={
+                                        recipeList?.find(
+                                            (recipe) =>
+                                                recipe.recipeId ==
+                                                bookmark.recipeId,
+                                        )?.title
+                                    }
+                                    className="w-full h-full object-contain"
+                                />
+                            </Box>
                             <div className="p-4">
                                 <h4 className="text-lg text-[#3d3226]">
                                     {

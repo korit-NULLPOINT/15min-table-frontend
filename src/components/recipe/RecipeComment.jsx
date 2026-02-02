@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Trash2, Mail } from 'lucide-react';
+import { Alert, AlertTitle, Box, Slide, Typography } from '@mui/material';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrincipalState } from '../../store/usePrincipalState';
@@ -31,6 +32,19 @@ export default function RecipeComment({
         return () => clearTimeout(timer);
     }, [showEmptyWarning]);
 
+    const [showAuthAlert, setShowAuthAlert] = useState(false);
+
+    useEffect(() => {
+        let timer;
+        if (showAuthAlert) {
+            timer = setTimeout(() => {
+                setShowAuthAlert(false);
+                onNavigate('profile');
+            }, 2000);
+        }
+        return () => clearTimeout(timer);
+    }, [showAuthAlert, onNavigate]);
+
     const { principal } = usePrincipalState();
     const isLoggedIn = !!principal;
     const queryClient = useQueryClient();
@@ -49,8 +63,7 @@ export default function RecipeComment({
             ).length > 0;
 
         if (!hasValidRole) {
-            alert('이메일 인증이 필요합니다.');
-            setShowEmailWarning(true);
+            setShowAuthAlert(true);
             return;
         }
 
@@ -76,11 +89,6 @@ export default function RecipeComment({
             console.error('Failed to add comment:', error);
             alert('댓글 등록 중 오류가 발생했습니다.');
         }
-    };
-
-    const handleGoToProfile = () => {
-        setShowEmailWarning(false);
-        onNavigate('profile');
     };
 
     const [shakingCommentId, setShakingCommentId] = useState(null);
@@ -197,61 +205,57 @@ export default function RecipeComment({
                         </div>
                     </div>
 
-                    <button
-                        // onClick={handleCommentSubmit}
-                        className="mt-4 px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5c4c40] transition-colors"
-                    >
-                        댓글 작성
-                    </button>
-                </div>
-            </div>
+                    <div className="mt-4 flex items-start gap-4 min-h-[56px]">
+                        <button
+                            onClick={handleCommentSubmit}
+                            className="px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5c4c40] transition-colors shrink-0"
+                        >
+                            댓글 작성
+                        </button>
 
-            {/* Email Verification Warning Modal */}
-            {showEmailWarning && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full border-2 border-[#e5dfd5]">
-                        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-t-lg">
-                            <h3 className="text-xl font-bold">
-                                이메일 인증 필요
-                            </h3>
-                        </div>
-                        <div className="p-6">
-                            <div className="flex items-start gap-4 mb-6">
-                                <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                                    <Mail
-                                        size={24}
-                                        className="text-emerald-600"
-                                    />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-[#3d3226] mb-2">
-                                        댓글 작성을 위해서는 이메일 인증이
-                                        필요합니다.
-                                    </p>
-                                    <p className="text-sm text-[#6b5d4f]">
-                                        프로필 페이지에서 이메일 인증을
-                                        완료해주세요.
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => setShowEmailWarning(false)}
-                                    className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] text-[#3d3226] rounded-md hover:border-[#3d3226] transition-colors"
+                        <Slide
+                            direction="up"
+                            in={showAuthAlert}
+                            mountOnEnter
+                            unmountOnExit
+                        >
+                            <Box
+                                sx={{
+                                    width: 'auto',
+                                    boxShadow: 3,
+                                    borderRadius: 2,
+                                    zIndex: 10,
+                                }}
+                            >
+                                <Alert
+                                    severity="warning"
+                                    variant="filled"
+                                    sx={{
+                                        py: 0.5,
+                                        px: 2,
+                                        backgroundColor: '#d97706',
+                                        color: '#fff',
+                                        alignItems: 'center',
+                                        '& .MuiAlert-icon': {
+                                            color: '#fff',
+                                            py: 0,
+                                        },
+                                    }}
                                 >
-                                    취소
-                                </button>
-                                <button
-                                    onClick={handleGoToProfile}
-                                    className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-md"
-                                >
-                                    이메일 인증하기
-                                </button>
-                            </div>
-                        </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-bold text-sm">
+                                            미인증 계정입니다.
+                                        </span>
+                                        <span className="text-xs text-white/90">
+                                            2초 후 프로필 이동...
+                                        </span>
+                                    </div>
+                                </Alert>
+                            </Box>
+                        </Slide>
                     </div>
                 </div>
-            )}
+            </div>
 
             <style>{`
                 @keyframes fadeIn {
