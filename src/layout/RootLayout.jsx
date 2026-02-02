@@ -45,8 +45,8 @@ export default function RootLayout() {
 
     const handleNavigate = (pageKey) => {
         if (pageKey === 'home') navigate('/');
-        if (pageKey === 'board') navigate('/boards/1/recipe/filtered');
-        if (pageKey === 'community') navigate('/boards/2/free');
+        if (pageKey === 'board') navigate('/board/1/recipe/filtered');
+        if (pageKey === 'community') navigate('/board/2/free');
         if (pageKey === 'profile') {
             if (isAdmin(principal)) {
                 navigate('/admin/dashboard'); // ✅ 관리자면 관리자 대시보드
@@ -54,7 +54,7 @@ export default function RootLayout() {
                 navigate('/me'); // ✅ 일반 유저면 마이페이지
             }
         }
-        if (pageKey === 'write') navigate('/boards/1/recipe/write');
+        if (pageKey === 'write') navigate('/board/1/recipe/write');
     };
 
     const username = principal?.username || '';
@@ -74,20 +74,17 @@ export default function RootLayout() {
         // FOLLOW → 해당 유저 프로필로
         if (notificationType === 'FOLLOW') {
             if (actorUserId != null) navigate(`/users/${actorUserId}`);
-            return;
         }
 
         // COMMENT / RECIPE_POST → targetType에 따라 이동
         if (targetType === 'RECIPE' && targetId != null) {
             // commentId를 쿼리/해시로 넘기고 싶으면 여기서 붙여
-            // navigate(`/boards/1/recipe/${targetId}?commentId=${commentId ?? ''}`);
-            navigate(`/boards/1/recipe/${targetId}`);
-            return;
-        }
-
-        if (targetType === 'POST' && targetId != null) {
-            navigate(`/boards/2/free/${targetId}`);
-            return;
+            // navigate(`/board/1/recipe/${targetId}?commentId=${commentId ?? ''}`);
+            navigate(`/board/1/recipe/${targetId}`);
+        } else if (targetType === 'POST' && targetId != null) {
+            // navigate(`/board/2/free/${targetId}?commentId=${commentId ?? ''}`);
+            navigate(`/board/2/free/${targetId}`);
+        } else if (targetType === 'FOLLOW') {
         }
 
         // 예외 fallback

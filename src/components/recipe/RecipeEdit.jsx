@@ -8,7 +8,7 @@ import {
 } from '../../apis/generated/recipe-controller/recipe-controller';
 import { useAddRecipeHashtags } from '../../apis/generated/recipe-hashtag-controller/recipe-hashtag-controller';
 import { mainCategory, subCategory } from '../../utils/categoryData';
-import { RecipeHashtag } from '../../components/Recipe/RecipeHashtag';
+import { RecipeHashtag } from '../../components/recipe/RecipeHashtag';
 
 export function RecipeEdit({ recipeId, boardId = 1 }) {
     const navigate = useNavigate();

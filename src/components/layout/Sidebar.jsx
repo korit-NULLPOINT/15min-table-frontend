@@ -33,7 +33,7 @@ export function Sidebar({
     );
 
     const handleRecipeClick = (recipeId) => {
-        navigate(`/boards/1/recipe/${recipeId}`);
+        navigate(`/board/1/recipe/${recipeId}`);
     };
 
     const handleRandomClick = async () => {

@@ -70,14 +70,15 @@ export default function OtherUserProfilePage() {
         );
     }
 
-    const onRecipeClick = (recipeId) => {
-        navigate(`/boards/${RECIPE_BOARD_ID}/recipe/${recipeId}`);
+    const handlePostClick = (recipeId, postId, type) => {
+        if (type === 'RECIPE') {
+            navigate(`/board/${RECIPE_BOARD_ID}/recipe/${recipeId}`);
+        } else {
+            // type === 'POST' (커뮤니티)
+            // 현재 라우터 구조상 /boards/:boardId/free/:postId 라면:
+            navigate(`/board/${COMMUNITY_BOARD_ID}/free/${postId}`);
+        }
     };
-
-    const onCommunityPostClick = (postId) => {
-        navigate(`/boards/${COMMUNITY_BOARD_ID}/free/${postId}`);
-    };
-
     // ✅ 북마크 토글 (HomePage 로직 그대로)
     const handleToggleBookmark = (recipeId, currentBookmarked) => {
         if (!isLoggedIn) {

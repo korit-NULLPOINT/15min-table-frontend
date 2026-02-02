@@ -191,8 +191,11 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                         <div className="relative aspect-video overflow-hidden">
                                             <ImageWithFallback
                                                 src={
-                                                    recipe.thumbnailImgUrl ||
-                                                    `https://picsum.photos/seed/${recipe.recipeId}/500`
+                                                    recipe.thumbnailImgUrl &&
+                                                    recipe.thumbnailImgUrl !==
+                                                        'string'
+                                                        ? recipe.thumbnailImgUrl
+                                                        : `https://picsum.photos/seed/${recipe.recipeId}/500`
                                                 }
                                                 alt={recipe.title}
                                                 className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"

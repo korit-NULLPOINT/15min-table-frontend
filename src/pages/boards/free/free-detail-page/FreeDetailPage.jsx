@@ -6,12 +6,16 @@ export default function FreeDetailPage() {
     const navigate = useNavigate();
 
     const onNavigate = (key) => {
-        if (key === 'community') navigate(`/boards/${boardId}/free`);
+        if (key === 'community') navigate(`/board/${boardId}/free`);
     };
 
     return (
         <>
-            <CommunityDetail postId={freeId} onNavigate={onNavigate} />
+            <CommunityDetail
+                postId={freeId}
+                boardId={boardId}
+                onNavigate={onNavigate}
+            />
         </>
     );
 }

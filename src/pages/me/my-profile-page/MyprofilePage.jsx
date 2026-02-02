@@ -20,12 +20,13 @@ export default function MyProfilePage() {
     const onFollowersClick = () => navigate('/me/followers');
     const onFollowingClick = () => navigate('/me/following');
 
-    const onRecipeClick = (recipeId) => {
-        navigate(`/boards/${RECIPE_BOARD_ID}/recipe/${recipeId}`);
+    const handleRecipeClick = (recipeId, e) => {
+        // e.stopPropagation() etc if needed
+        navigate(`/board/${RECIPE_BOARD_ID}/recipe/${recipeId}`);
     };
 
-    const onEditRecipe = (recipeId) => {
-        navigate(`/boards/${RECIPE_BOARD_ID}/recipe/${recipeId}/edit`);
+    const handleEditClick = (recipeId) => {
+        navigate(`/board/${RECIPE_BOARD_ID}/recipe/${recipeId}/edit`);
     };
 
     const onLogout = () => {

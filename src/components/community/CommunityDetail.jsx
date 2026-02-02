@@ -1,169 +1,397 @@
-import { ArrowLeft, MessageSquare, User, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
-    currentUserCommunityPosts,
-    currentUserComments,
-} from '../../utils/recipeData';
+    Container,
+    Box,
+    Button,
+    Typography,
+    Paper,
+    Divider,
+    TextField,
+    Avatar,
+    IconButton,
+    CircularProgress,
+    List,
+    ListItem,
+    ListItemAvatar,
+    ListItemText,
+} from '@mui/material';
+import {
+    ArrowBack as ArrowBackIcon,
+    Delete as DeleteIcon,
+    Person as PersonIcon,
+} from '@mui/icons-material';
+import { useQueryClient } from '@tanstack/react-query';
+import { useGetPostDetail } from '../../apis/generated/post-controller/post-controller';
+import {
+    useGetPostCommentListByTarget,
+    useAddPostComment,
+    useDeleteComment,
+} from '../../apis/generated/comment-controller/comment-controller';
+import { usePrincipalState } from '../../store/usePrincipalState';
 
-export function CommunityDetail({ postId, onNavigate, username }) {
+export function CommunityDetail({ postId, boardId, onNavigate }) {
     const [newComment, setNewComment] = useState('');
-    const [comments, setComments] = useState(
-        currentUserComments.filter(
-            (c) => c.postId === Number(postId) && c.type === 'community',
-        ) || [],
+    const queryClient = useQueryClient();
+    const principal = usePrincipalState((s) => s.principal);
+
+    // API Hooks
+    const { data: postData, isLoading: isPostLoading } = useGetPostDetail(
+        Number(boardId),
+        Number(postId),
     );
 
-    const post = currentUserCommunityPosts[postId];
+    const { data: commentsData, isLoading: isCommentsLoading } =
+        useGetPostCommentListByTarget(Number(postId));
 
-    if (!post) {
-        return (
-            <div className="min-h-screen bg-[#f5f1eb] pt-20">
-                <div className="max-w-4xl mx-auto px-6 py-12">
-                    <button
-                        onClick={() => onNavigate('community')}
-                        className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
-                    >
-                        <ArrowLeft size={20} />
-                        목록으로 돌아가기
-                    </button>
-                    <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8 text-center">
-                        <p className="text-[#6b5d4f]">
-                            게시글을 찾을 수 없습니다.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    const { mutate: addComment } = useAddPostComment();
+    const { mutate: deleteComment } = useDeleteComment();
 
+    const post = postData?.data?.data;
+    const comments = commentsData?.data?.data || [];
+
+    // Scroll to top on mount
+    React.useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    // Handlers
     const handleSubmitComment = () => {
         if (!newComment.trim()) return;
 
-        const newCommentObj = {
-            id: comments.length + 1,
-            author: username || '현재사용자', // Use actual logged-in user nickname if provided
-            date: new Date().toISOString().split('T')[0].replace(/-/g, '.'),
-            content: newComment,
-        };
-
-        setComments([...comments, newCommentObj]);
-        setNewComment('');
-    };
-
-    const handleDeleteComment = (commentId) => {
-        setComments((prevComments) =>
-            prevComments.filter((comment) => comment.id !== commentId),
+        addComment(
+            { postId: Number(postId), data: { content: newComment } },
+            {
+                onSuccess: () => {
+                    setNewComment('');
+                    queryClient.invalidateQueries([
+                        `/comment/list/post/${postId}`,
+                    ]);
+                },
+                onError: (err) => {
+                    console.error('댓글 작성 실패:', err);
+                    alert('댓글 작성에 실패했습니다.');
+                },
+            },
         );
     };
 
+    const handleDeleteComment = (commentId) => {
+        if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
+
+        deleteComment(
+            { commentId },
+            {
+                onSuccess: () => {
+                    queryClient.invalidateQueries([
+                        `/comment/list/post/${postId}`,
+                    ]);
+                },
+                onError: (err) => {
+                    console.error('댓글 삭제 실패:', err);
+                    alert('댓글 삭제에 실패했습니다.');
+                },
+            },
+        );
+    };
+
+    // Formatter
+    const formatDate = (dateString, timeString) => {
+        if (!dateString) return '';
+        const d = new Date(dateString);
+        let formatted = d.toLocaleDateString();
+        if (timeString) {
+            formatted += ` ${timeString}`;
+        }
+        return formatted;
+    };
+
+    if (isPostLoading) {
+        return (
+            <Box
+                sx={{
+                    minHeight: '100vh',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+            >
+                <CircularProgress sx={{ color: '#3d3226' }} />
+            </Box>
+        );
+    }
+
+    if (!post) {
+        return (
+            <Container maxWidth="md" sx={{ py: 8 }}>
+                <Box sx={{ mb: 3, pt: 6 }}>
+                    <Button
+                        startIcon={<ArrowLeft />}
+                        onClick={() => {
+                            if (onNavigate) {
+                                onNavigate('community');
+                            }
+                        }}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            px: 2,
+                            py: 1,
+                            border: '2px solid #3d3226',
+                            color: '#3d3226',
+                            borderRadius: '0.375rem',
+                            transition: 'all 0.2s',
+                            '&:hover': {
+                                bgcolor: '#3d3226',
+                                color: '#f5f1eb',
+                            },
+                        }}
+                    >
+                        메인으로 돌아가기
+                    </Button>
+                </Box>
+                <Paper sx={{ p: 4, textAlign: 'center' }}>
+                    <Typography color="text.secondary">
+                        게시글을 찾을 수 없습니다.
+                    </Typography>
+                </Paper>
+            </Container>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-[#f5f1eb] pt-20">
-            <div className="max-w-4xl mx-auto px-6 py-12">
-                <button
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f1eb', pt: 14, pb: 8 }}>
+            <Container maxWidth="md">
+                <Button
+                    startIcon={<ArrowBackIcon />}
                     onClick={() => onNavigate('community')}
-                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
+                    sx={{
+                        mb: 3,
+                        color: '#3d3226',
+                        borderColor: '#3d3226',
+                        '&:hover': {
+                            backgroundColor: 'rgba(61, 50, 38, 0.04)',
+                        },
+                    }}
+                    variant="outlined"
                 >
-                    <ArrowLeft size={20} />
                     목록으로 돌아가기
-                </button>
+                </Button>
 
                 {/* Post Content */}
-                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden mb-6">
-                    <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
-                        <h1 className="text-3xl mb-3">{post.title}</h1>
-                        <div className="flex items-center gap-4 text-sm text-[#e5dfd5]">
-                            <span className="flex items-center gap-1">
-                                <User size={16} />
+                <Paper
+                    elevation={0}
+                    sx={{
+                        mb: 4,
+                        border: '1px solid #e5dfd5',
+                        overflow: 'hidden',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            bgcolor: '#3d3226',
+                            color: '#f5f1eb',
+                            px: 4,
+                            py: 3,
+                        }}
+                    >
+                        <Typography variant="h5" gutterBottom fontWeight="bold">
+                            {post.title}
+                        </Typography>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                gap: 2,
+                                fontSize: '0.875rem',
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 0.5,
+                                }}
+                            >
+                                <PersonIcon fontSize="small" />
                                 {post.author}
-                            </span>
-                            <span>{post.date}</span>
-                            <span className="flex items-center gap-1">
-                                <MessageSquare size={16} />
-                                {comments.length}
-                            </span>
-                        </div>
-                    </div>
+                            </Box>
+                            <Box>
+                                {post.createdAt && formatDate(post.createdAt)}
+                            </Box>
+                            <Box>조회 {post.viewCount || 0}</Box>
+                        </Box>
+                    </Box>
 
-                    <div className="p-8">
-                        <div className="text-[#3d3226] whitespace-pre-wrap leading-relaxed">
+                    <Box sx={{ p: 4, minHeight: 200 }}>
+                        <Typography
+                            variant="body1"
+                            sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}
+                        >
                             {post.content}
-                        </div>
-                    </div>
-                </div>
+                        </Typography>
+                    </Box>
+                </Paper>
 
                 {/* Comments Section */}
-                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden">
-                    <div className="bg-[#ebe5db] px-8 py-4 border-b-2 border-[#e5dfd5]">
-                        <h2 className="text-xl text-[#3d3226] flex items-center gap-2">
-                            <MessageSquare size={20} />
+                <Paper variant="outlined" sx={{ borderColor: '#e5dfd5' }}>
+                    <Box
+                        sx={{
+                            bgcolor: '#ebe5db',
+                            px: 3,
+                            py: 2,
+                            borderBottom: '1px solid #e5dfd5',
+                        }}
+                    >
+                        <Typography variant="h6" sx={{ color: '#3d3226' }}>
                             댓글 {comments.length}
-                        </h2>
-                    </div>
+                        </Typography>
+                    </Box>
 
-                    {/* Comments List */}
-                    <div className="divide-y-2 divide-[#e5dfd5]">
-                        {comments.map((comment) => (
-                            <div key={comment.id} className="relative p-6">
-                                <div className="flex items-start gap-3 mb-2">
-                                    <div className="w-8 h-8 bg-[#d4cbbf] rounded-full flex items-center justify-center flex-shrink-0">
-                                        <User
-                                            size={16}
-                                            className="text-[#3d3226]"
-                                        />
-                                    </div>
-                                    <div className="flex-1 pr-8">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-medium text-[#3d3226]">
-                                                {comment.author}
-                                            </span>
-                                            <span className="text-sm text-[#6b5d4f]">
-                                                {comment.date}
-                                            </span>
-                                        </div>
-                                        <p className="text-[#3d3226]">
-                                            {comment.content}
-                                        </p>
-                                    </div>
-                                    {username &&
-                                        username === comment.author && (
-                                            <button
+                    <List disablePadding>
+                        {comments.map((comment, index) => (
+                            <React.Fragment key={comment.commentId || index}>
+                                <ListItem
+                                    alignItems="flex-start"
+                                    sx={{ px: 3, py: 2 }}
+                                >
+                                    <ListItemAvatar>
+                                        <Avatar sx={{ bgcolor: '#d4cbbf' }}>
+                                            <PersonIcon
+                                                sx={{ color: '#3d3226' }}
+                                            />
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={
+                                            <Box
+                                                component="span"
+                                                sx={{
+                                                    display: 'flex',
+                                                    justifyContent:
+                                                        'space-between',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                <Typography
+                                                    component="span"
+                                                    variant="subtitle2"
+                                                    sx={{
+                                                        fontWeight: 'bold',
+                                                        color: '#3d3226',
+                                                    }}
+                                                >
+                                                    {comment.author}
+                                                </Typography>
+                                                <Typography
+                                                    component="span"
+                                                    variant="caption"
+                                                    color="text.secondary"
+                                                >
+                                                    {formatDate(
+                                                        comment.createdAt,
+                                                    )}
+                                                </Typography>
+                                            </Box>
+                                        }
+                                        secondary={
+                                            <Typography
+                                                component="span"
+                                                variant="body2"
+                                                sx={{
+                                                    display: 'block',
+                                                    mt: 0.5,
+                                                    color: '#3d3226',
+                                                }}
+                                            >
+                                                {comment.content}
+                                            </Typography>
+                                        }
+                                    />
+                                    {principal &&
+                                        principal.username ===
+                                            comment.author && (
+                                            <IconButton
+                                                edge="end"
                                                 onClick={() =>
                                                     handleDeleteComment(
-                                                        comment.id,
+                                                        comment.commentId,
                                                     )
                                                 }
-                                                className="absolute top-4 right-4 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
-                                                title="댓글 삭제"
+                                                size="small"
+                                                sx={{ color: '#d32f2f', mt: 1 }}
                                             >
-                                                <Trash2 size={16} />
-                                            </button>
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
                                         )}
-                                </div>
-                            </div>
+                                </ListItem>
+                                {index < comments.length - 1 && (
+                                    <Divider component="li" />
+                                )}
+                            </React.Fragment>
                         ))}
-                    </div>
+                        {comments.length === 0 && (
+                            <Box
+                                sx={{
+                                    p: 4,
+                                    textAlign: 'center',
+                                    color: 'text.secondary',
+                                }}
+                            >
+                                작성된 댓글이 없습니다.
+                            </Box>
+                        )}
+                    </List>
 
                     {/* Comment Input */}
-                    <div className="p-6 bg-[#ebe5db] border-t-2 border-[#e5dfd5]">
-                        <textarea
+                    <Box
+                        sx={{
+                            p: 3,
+                            bgcolor: '#ebe5db',
+                            borderTop: '1px solid #e5dfd5',
+                        }}
+                    >
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={3}
+                            placeholder="댓글을 입력하세요..."
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="댓글을 입력하세요..."
-                            className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:outline-none focus:border-[#3d3226] resize-none bg-white"
-                            rows={3}
+                            sx={{
+                                bgcolor: 'white',
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': { borderColor: '#d4cbbf' },
+                                    '&:hover fieldset': {
+                                        borderColor: '#3d3226',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: '#3d3226',
+                                    },
+                                },
+                            }}
                         />
-                        <div className="flex justify-end mt-3">
-                            <button
-                                onClick={handleSubmitComment}
-                                className="px-6 py-2 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                mt: 2,
+                            }}
+                        >
+                            <Button
+                                variant="contained"
                                 disabled={!newComment.trim()}
+                                onClick={handleSubmitComment}
+                                sx={{
+                                    bgcolor: '#3d3226',
+                                    '&:hover': { bgcolor: '#5d4a36' },
+                                }}
                             >
                                 댓글 작성
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                            </Button>
+                        </Box>
+                    </Box>
+                </Paper>
+            </Container>
+        </Box>
     );
 }
