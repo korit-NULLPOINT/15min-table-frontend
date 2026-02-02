@@ -36,7 +36,7 @@ export function HighRatedCard({
                 <ImageWithFallback
                     src={
                         recipe.thumbnailImgUrl ||
-                        `https://picsum.photos/seed/${recipe.recipeId}/800`
+                        `https://picsum.photos/seed/${recipe.recipeId}/800/600/`
                     }
                     alt={recipe.title}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"

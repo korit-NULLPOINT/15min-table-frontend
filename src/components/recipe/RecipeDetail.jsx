@@ -1,4 +1,5 @@
 import { ArrowLeft, User as UserIcon, Star, Sparkles } from 'lucide-react';
+import { Box } from '@mui/material';
 import { useState, useRef, useMemo, useEffect } from 'react';
 
 import { ImageWithFallback } from '../figma/ImageWithFallback';
@@ -135,16 +136,23 @@ export function RecipeDetail({
 
                 {/* Recipe Header */}
                 <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden mb-8">
-                    <div className="relative aspect-video overflow-hidden">
+                    <Box
+                        sx={{
+                            position: 'relative',
+                            aspectRatio: '4 / 3',
+                            overflow: 'hidden',
+                            backgroundColor: 'white', // Background to match the theme or black if preferred
+                        }}
+                    >
                         <ImageWithFallback
                             src={
                                 recipeDetail.thumbnailImgUrl ||
-                                `https://picsum.photos/seed/${recipeDetail.recipeId}/800`
+                                `https://picsum.photos/seed/${recipeDetail.recipeId}/800/600/`
                             }
                             alt={recipeDetail.title}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
                         />
-                    </div>
+                    </Box>
 
                     <div className="p-8">
                         <div className="flex justify-between items-start mb-2">

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { ArrowLeft, Upload, Mail, Filter, LoaderCircle, X } from 'lucide-react';
+import { Alert, AlertTitle, Box, Button, Slide } from '@mui/material';
 
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { useAddRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
@@ -250,8 +252,73 @@ export function RecipeWrite({ onNavigate }) {
         }
     };
 
+    const isUnverified = useMemo(() => {
+        if (!principal) return false;
+        const minId = Math.min(
+            ...(principal.userRoles?.map((r) => r.roleId) || [Infinity]),
+        );
+        return minId >= 3;
+    }, [principal]);
+
     return (
         <div className="min-h-screen bg-[#f5f1eb] pt-20">
+            {/* Unverified Account Alert (Top Right) */}
+            <Slide
+                direction="left"
+                in={isUnverified}
+                mountOnEnter
+                unmountOnExit
+            >
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        top: 100,
+                        right: 24,
+                        zIndex: 9999, // Ensure it's above other elements
+                        width: 'auto',
+                        maxWidth: 320,
+                        boxShadow: 4,
+                        borderRadius: 2,
+                    }}
+                >
+                    <Alert
+                        severity="warning"
+                        variant="filled"
+                        sx={{
+                            backgroundColor: '#d97706', // amber-600 to match theme roughly
+                            color: '#fff',
+                            '& .MuiAlert-icon': {
+                                color: '#fff',
+                            },
+                        }}
+                        action={
+                            <Button
+                                color="inherit"
+                                size="small"
+                                onClick={handleGoToProfile}
+                                sx={{
+                                    fontWeight: 'bold',
+                                    border: '1px solid rgba(255,255,255,0.3)',
+                                    '&:hover': {
+                                        backgroundColor:
+                                            'rgba(255,255,255,0.1)',
+                                    },
+                                }}
+                            >
+                                인증하기
+                            </Button>
+                        }
+                    >
+                        <AlertTitle sx={{ fontWeight: 'bold' }}>
+                            미인증 계정 알림
+                        </AlertTitle>
+                        레시피 작성을 위해서는
+                        <br />
+                        이메일 인증이 필요합니다.
+                    </Alert>
+                </Box>
+            </Slide>
+
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <button
                     onClick={() => onNavigate?.('home')}

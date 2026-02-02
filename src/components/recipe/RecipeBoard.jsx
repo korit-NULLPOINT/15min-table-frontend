@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Search, Filter, Star } from 'lucide-react';
+import { Box } from '@mui/material';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { mainCategory, subCategory } from '../../utils/categoryData';
 import { useGetFilteredRecipeList } from '../../apis/generated/recipe-controller/recipe-controller';
@@ -188,14 +189,21 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                         }
                                         className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border-2 border-[#e5dfd5] hover:border-[#3d3226]"
                                     >
-                                        <div className="relative aspect-video overflow-hidden">
+                                        <Box
+                                            sx={{
+                                                position: 'relative',
+                                                aspectRatio: '4 / 3',
+                                                overflow: 'hidden',
+                                                backgroundColor: 'white',
+                                            }}
+                                        >
                                             <ImageWithFallback
                                                 src={
                                                     recipe.thumbnailImgUrl ||
-                                                    `https://picsum.photos/seed/${recipe.recipeId}/500`
+                                                    `https://picsum.photos/seed/${recipe.recipeId}/800/600/`
                                                 }
                                                 alt={recipe.title}
-                                                className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                                                className="w-full h-full object-contain hover:scale-110 transition-transform duration-300"
                                             />
                                             {!recipe.thumbnailImgUrl && (
                                                 <div
@@ -208,7 +216,7 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                                     랜덤이미지 입니다.
                                                 </div>
                                             )}
-                                        </div>
+                                        </Box>
 
                                         <div className="p-4">
                                             <h3 className="text-lg text-[#3d3226] mb-2 line-clamp-1">

@@ -2,7 +2,7 @@ export function LogoButton({ onClick }) {
     return (
         <button
             onClick={onClick}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
         >
             {/* Logo: Plate with 15 and utensils */}
             <div className="relative w-12 h-12 flex items-center justify-center">

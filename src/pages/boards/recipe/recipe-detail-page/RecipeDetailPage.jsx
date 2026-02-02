@@ -27,7 +27,7 @@ export default function RecipeDetailPage() {
     const commentQuery = useGetRecipeCommentListByTarget(rId, {
         query: { enabled: Number.isFinite(rId) },
     });
-    
+
     const comments = commentQuery?.data?.data?.data ?? [];
 
     if (recipeQuery.isLoading) {
@@ -60,7 +60,13 @@ export default function RecipeDetailPage() {
         <RecipeDetail
             recipeDetail={recipeDetail}
             comments={comments}
-            onNavigate={() => navigate(`/boards/${boardId}/recipe`)}
+            onNavigate={(path) => {
+                if (path === 'profile') {
+                    navigate('/me');
+                } else {
+                    navigate(`/boards/${boardId}/recipe`);
+                }
+            }}
             isLoggedIn={isLoggedIn}
             onOpenAuth={() => openAuthModal('signin')} // ✅ 전역 모달 열기
             currentUsername={principal?.username ?? ''}
