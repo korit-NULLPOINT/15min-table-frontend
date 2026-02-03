@@ -14,6 +14,8 @@ import {
     ListItemAvatar,
     ListItemText,
 } from '@mui/material';
+import { CommunityHeader } from './CommunityHeader';
+import { ScrollIndicatorWrapper } from './ScrollIndicatorWrapper';
 import {
     Delete as DeleteIcon,
     Person as PersonIcon,
@@ -27,7 +29,12 @@ import {
 } from '../../apis/generated/comment-controller/comment-controller';
 import { usePrincipalState } from '../../store/usePrincipalState';
 
-export function CommunityDetail({ postId, boardId, onNavigate }) {
+export function CommunityDetail({
+    postId,
+    boardId,
+    onNavigate,
+    onIsOwnerFetched,
+}) {
     const [newComment, setNewComment] = useState('');
     const queryClient = useQueryClient();
     const principal = usePrincipalState((s) => s.principal);
@@ -51,6 +58,13 @@ export function CommunityDetail({ postId, boardId, onNavigate }) {
     React.useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
+
+    // Notify parent of ownership
+    React.useEffect(() => {
+        if (post && principal && onIsOwnerFetched) {
+            onIsOwnerFetched(principal.username === post.username);
+        }
+    }, [post, principal, onIsOwnerFetched]);
 
     // Handlers
     const handleSubmitComment = () => {
@@ -142,25 +156,7 @@ export function CommunityDetail({ postId, boardId, onNavigate }) {
             }}
         >
             {/* Fixed Header */}
-            <Box
-                sx={{
-                    bgcolor: '#3d3226',
-                    color: '#f5f1eb',
-                    px: 4,
-                    py: 3,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 1,
-                    flexShrink: 0,
-                }}
-            >
-                <Typography
-                    variant="h4"
-                    fontWeight="bold"
-                    sx={{ fontFamily: 'serif' }}
-                >
-                    {post.title}
-                </Typography>
+            <CommunityHeader title={post.title}>
                 <Box
                     sx={{
                         display: 'flex',
@@ -182,31 +178,10 @@ export function CommunityDetail({ postId, boardId, onNavigate }) {
                     <Box>{post.createDt && formatDate(post.createDt)}</Box>
                     <Box>조회 {post.viewCount || 0}</Box>
                 </Box>
-            </Box>
+            </CommunityHeader>
 
             {/* Scrollable Content Area */}
-            <Box
-                sx={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    bgcolor: 'white',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    '&::-webkit-scrollbar': {
-                        width: '8px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        background: '#f5f1eb',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        background: '#d4cbbf',
-                        borderRadius: '4px',
-                    },
-                    '&::-webkit-scrollbar-thumb:hover': {
-                        background: '#3d3226',
-                    },
-                }}
-            >
+            <ScrollIndicatorWrapper sx={{ bgcolor: 'white' }}>
                 {/* Post Content Body */}
                 <Box sx={{ p: 4, flexGrow: 1 }}>
                     <Typography
@@ -384,7 +359,7 @@ export function CommunityDetail({ postId, boardId, onNavigate }) {
                         </Button>
                     </Box>
                 </Box>
-            </Box>
+            </ScrollIndicatorWrapper>
         </Paper>
     );
 }

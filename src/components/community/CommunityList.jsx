@@ -13,10 +13,12 @@ import {
     ListItemButton,
     Divider,
 } from '@mui/material';
+import { CommunityHeader } from './CommunityHeader';
+import { ScrollIndicatorWrapper } from './ScrollIndicatorWrapper';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { formatDate } from '../../apis/utils/formatDate';
 
-export function CommunityList({ onPostClick, onWriteClick }) {
+export function CommunityList({ onPostClick }) {
     const FREE_BOARD_ID = 2;
     const SIZE = 10;
     const { ref, inView } = useInView();
@@ -81,71 +83,13 @@ export function CommunityList({ onPostClick, onWriteClick }) {
             }}
         >
             {/* Header */}
-            <Box
-                sx={{
-                    bgcolor: '#3d3226',
-                    color: '#f5f1eb',
-                    px: 4,
-                    py: 3,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexShrink: 0,
-                }}
-            >
-                <Box>
-                    <Typography
-                        variant="h4"
-                        component="h1"
-                        sx={{ mb: 1, fontFamily: 'serif' }}
-                    >
-                        자유게시판
-                    </Typography>
-                    <Typography
-                        variant="body2"
-                        sx={{ color: 'rgba(229, 223, 213, 0.8)' }}
-                    >
-                        자유롭게 이야기를 나누는 공간입니다.
-                    </Typography>
-                </Box>
-                <Button
-                    variant="contained"
-                    onClick={onWriteClick}
-                    sx={{
-                        bgcolor: '#f5f1eb',
-                        color: '#3d3226',
-                        fontWeight: 'bold',
-                        '&:hover': {
-                            bgcolor: '#e5dfd5',
-                        },
-                        px: 3,
-                        py: 1.5,
-                    }}
-                >
-                    글쓰기
-                </Button>
-            </Box>
+            <CommunityHeader
+                title="자유게시판"
+                description="자유롭게 이야기를 나누는 공간입니다."
+            />
 
             {/* Posts List Container with Scroll */}
-            <Box
-                sx={{
-                    flex: 1,
-                    overflowY: 'auto',
-                    '&::-webkit-scrollbar': {
-                        width: '8px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        background: '#f1f1f1',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        background: '#d4cbbf',
-                        borderRadius: '4px',
-                    },
-                    '&::-webkit-scrollbar-thumb:hover': {
-                        background: '#3d3226',
-                    },
-                }}
-            >
+            <ScrollIndicatorWrapper>
                 {(data?.pages?.[0]?.data?.data?.items?.length ?? 0) === 0 ? (
                     <Box
                         sx={{
@@ -318,7 +262,7 @@ export function CommunityList({ onPostClick, onWriteClick }) {
                         </div>
                     </List>
                 )}
-            </Box>
+            </ScrollIndicatorWrapper>
         </Paper>
     );
 }

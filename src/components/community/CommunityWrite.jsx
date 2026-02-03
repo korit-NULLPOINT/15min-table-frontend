@@ -13,6 +13,8 @@ import { useGetBoardList } from '../../apis/generated/board-controller/board-con
 import { useAddPost } from '../../apis/generated/post-controller/post-controller';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { CommunityHeader } from './CommunityHeader';
+import { ScrollIndicatorWrapper } from './ScrollIndicatorWrapper';
 
 export function CommunityWrite({ onNavigate }) {
     const [title, setTitle] = useState('');
@@ -130,215 +132,191 @@ export function CommunityWrite({ onNavigate }) {
             }}
         >
             {/* Header */}
-            <Box
-                sx={{
-                    bgcolor: '#3d3226',
-                    color: '#f5f1eb',
-                    px: 4,
-                    py: 3,
-                    flexShrink: 0,
-                }}
-            >
-                <Typography
-                    variant="h4"
-                    component="h1"
-                    sx={{ mb: 1, fontFamily: 'serif' }}
-                >
-                    커뮤니티 글쓰기
-                </Typography>
-                <Typography
-                    variant="body2"
-                    sx={{ color: 'rgba(229, 223, 213, 0.8)' }}
-                >
-                    자유롭게 이야기를 나누는 공간입니다.
-                </Typography>
-            </Box>
+            <CommunityHeader
+                title="커뮤니티 글쓰기"
+                description="자유롭게 이야기를 나누는 공간입니다."
+            />
 
             {/* Scrollable Form Content */}
             <Box
                 sx={{
                     flex: 1,
-                    overflowY: 'auto',
-                    py: 3,
-                    px: 4,
                     bgcolor: 'white',
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 1.5,
-                    '&::-webkit-scrollbar': {
-                        width: '8px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        background: '#f1f1f1',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        background: '#d4cbbf',
-                        borderRadius: '4px',
-                    },
-                    '&::-webkit-scrollbar-thumb:hover': {
-                        background: '#3d3226',
-                    },
+                    minHeight: 0,
                 }}
             >
-                {/* Title */}
-                <FormControl fullWidth>
-                    <FormLabel
+                <ScrollIndicatorWrapper>
+                    <Box
                         sx={{
-                            mb: 1,
-                            color: '#3d3226',
-                            fontWeight: 'bold',
+                            p: 4,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1.5,
                         }}
                     >
-                        제목
-                    </FormLabel>
-                    <TextField
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="제목을 입력하세요"
-                        variant="outlined"
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: '#d4cbbf',
-                                    borderWidth: 2,
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: '#3d3226',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: '#3d3226',
-                                },
-                            },
-                        }}
-                    />
-                </FormControl>
-
-                {/* Content */}
-                <FormControl fullWidth>
-                    <FormLabel
-                        sx={{
-                            mb: 1,
-                            color: '#3d3226',
-                            fontWeight: 'bold',
-                        }}
-                    >
-                        내용
-                    </FormLabel>
-                    <TextField
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        placeholder="내용을 입력하세요..."
-                        multiline
-                        rows={10}
-                        variant="outlined"
-                        sx={{
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: '#d4cbbf',
-                                    borderWidth: 2,
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: '#3d3226',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: '#3d3226',
-                                },
-                            },
-                        }}
-                    />
-                </FormControl>
-
-                {/* Image Upload */}
-                <Box>
-                    <FormLabel
-                        sx={{
-                            mb: 1,
-                            display: 'block',
-                            color: '#3d3226',
-                            fontWeight: 'bold',
-                        }}
-                    >
-                        이미지 (API 미설정으로 랜덤 이미지가 등록됩니다)
-                    </FormLabel>
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleImageUpload}
-                        accept="image/*"
-                        style={{ display: 'none' }}
-                    />
-                    <Button
-                        variant="contained"
-                        startIcon={<Upload size={20} />}
-                        onClick={() => fileInputRef.current?.click()}
-                        sx={{
-                            bgcolor: '#3d3226',
-                            '&:hover': { bgcolor: '#5d4a36' },
-                            py: 1,
-                            px: 3,
-                            color: '#f5f1eb',
-                        }}
-                    >
-                        이미지 선택
-                    </Button>
-
-                    {imagePreview && (
-                        <Box
-                            sx={{
-                                mt: 2,
-                                position: 'relative',
-                                width: 'fit-content',
-                            }}
-                        >
-                            <ImageWithFallback
-                                src={imagePreview}
-                                alt="Preview"
-                                style={{
-                                    height: 200,
-                                    borderRadius: 8,
-                                    border: '2px solid #d4cbbf',
-                                    objectFit: 'cover',
-                                }}
-                            />
-                            <Button
-                                onClick={removeImage}
+                        {/* Title */}
+                        <FormControl fullWidth>
+                            <FormLabel
                                 sx={{
-                                    position: 'absolute',
-                                    top: 8,
-                                    right: 8,
-                                    minWidth: 'auto',
-                                    p: 0.5,
-                                    bgcolor: 'rgba(239, 68, 68, 0.9)',
-                                    color: 'white',
-                                    '&:hover': {
-                                        bgcolor: '#dc2626',
-                                    },
-                                    borderRadius: '50%',
+                                    mb: 1,
+                                    color: '#3d3226',
+                                    fontWeight: 'bold',
                                 }}
                             >
-                                <X size={16} />
-                            </Button>
-                        </Box>
-                    )}
-                </Box>
+                                제목
+                            </FormLabel>
+                            <TextField
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                placeholder="제목을 입력하세요"
+                                variant="outlined"
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: '#d4cbbf',
+                                            borderWidth: 2,
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: '#3d3226',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#3d3226',
+                                        },
+                                    },
+                                }}
+                            />
+                        </FormControl>
 
-                {/* Submit Button */}
-                <Button
-                    onClick={handleSubmit}
-                    fullWidth
-                    variant="contained"
-                    sx={{
-                        py: 1.5,
-                        mt: 1.5,
-                        bgcolor: '#3d3226',
-                        fontSize: '1.1rem',
-                        '&:hover': { bgcolor: '#5d4a36' },
-                        color: '#f5f1eb',
-                        fontWeight: 'bold',
-                    }}
-                >
-                    게시글 등록하기
-                </Button>
+                        {/* Content */}
+                        <FormControl fullWidth>
+                            <FormLabel
+                                sx={{
+                                    mb: 1,
+                                    color: '#3d3226',
+                                    fontWeight: 'bold',
+                                }}
+                            >
+                                내용
+                            </FormLabel>
+                            <TextField
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                placeholder="내용을 입력하세요..."
+                                multiline
+                                rows={10}
+                                variant="outlined"
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '& fieldset': {
+                                            borderColor: '#d4cbbf',
+                                            borderWidth: 2,
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: '#3d3226',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#3d3226',
+                                        },
+                                    },
+                                }}
+                            />
+                        </FormControl>
+
+                        {/* Image Upload */}
+                        <Box>
+                            <FormLabel
+                                sx={{
+                                    mb: 1,
+                                    display: 'block',
+                                    color: '#3d3226',
+                                    fontWeight: 'bold',
+                                }}
+                            >
+                                이미지 (API 미설정으로 랜덤 이미지가 등록됩니다)
+                            </FormLabel>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
+                                accept="image/*"
+                                style={{ display: 'none' }}
+                            />
+                            <Button
+                                variant="contained"
+                                startIcon={<Upload size={20} />}
+                                onClick={() => fileInputRef.current?.click()}
+                                sx={{
+                                    bgcolor: '#3d3226',
+                                    '&:hover': { bgcolor: '#5d4a36' },
+                                    py: 1,
+                                    px: 3,
+                                    color: '#f5f1eb',
+                                }}
+                            >
+                                이미지 선택
+                            </Button>
+
+                            {imagePreview && (
+                                <Box
+                                    sx={{
+                                        mt: 2,
+                                        position: 'relative',
+                                        width: 'fit-content',
+                                    }}
+                                >
+                                    <ImageWithFallback
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        style={{
+                                            height: 200,
+                                            borderRadius: 8,
+                                            border: '2px solid #d4cbbf',
+                                            objectFit: 'cover',
+                                        }}
+                                    />
+                                    <Button
+                                        onClick={removeImage}
+                                        sx={{
+                                            position: 'absolute',
+                                            top: 8,
+                                            right: 8,
+                                            minWidth: 'auto',
+                                            p: 0.5,
+                                            bgcolor: 'rgba(239, 68, 68, 0.9)',
+                                            color: 'white',
+                                            '&:hover': {
+                                                bgcolor: '#dc2626',
+                                            },
+                                            borderRadius: '50%',
+                                        }}
+                                    >
+                                        <X size={16} />
+                                    </Button>
+                                </Box>
+                            )}
+                        </Box>
+
+                        {/* Submit Button */}
+                        <Button
+                            onClick={handleSubmit}
+                            fullWidth
+                            variant="contained"
+                            sx={{
+                                py: 1.5,
+                                mt: 1.5,
+                                bgcolor: '#3d3226',
+                                fontSize: '1.1rem',
+                                '&:hover': { bgcolor: '#5d4a36' },
+                                color: '#f5f1eb',
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            게시글 등록하기
+                        </Button>
+                    </Box>
+                </ScrollIndicatorWrapper>
             </Box>
         </Paper>
     );

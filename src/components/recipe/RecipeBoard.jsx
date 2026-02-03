@@ -53,8 +53,8 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
     };
 
     return (
-        <div className="pt-8">
-            <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="pt-4">
+            <div className="max-w-7xl mx-auto px-6 py-4">
                 <button
                     onClick={() => onNavigate('/')}
                     className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
@@ -203,7 +203,7 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                                     recipe.thumbnailImgUrl !==
                                                         'string'
                                                         ? recipe.thumbnailImgUrl
-                                                        : `https://picsum.photos/seed/${recipe.recipeId}/500`
+                                                        : `https://picsum.photos/seed/${recipe.recipeId}/800/600`
                                                 }
                                                 alt={recipe.title}
                                                 className="w-full h-full object-contain hover:scale-110 transition-transform duration-300"
