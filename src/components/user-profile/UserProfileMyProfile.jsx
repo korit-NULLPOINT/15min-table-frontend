@@ -225,15 +225,15 @@ export default function UserProfileMyProfile({
     }, [isSavingUsername, usernameDraft, profileData.username]);
 
     return (
-        <div className="px-8 py-6">
-            <div className="h-13 flex items-center mb-6 gap-2 border-2 border-[#ebe5db]/0">
+        <div className="px-8 pt-3 pb-4">
+            <div className="h-12 flex items-center mb-6 gap-2">
                 <div className="w-8 h-8 flex items-center justify-center">
                     <UserIcon size={20} strokeWidth={2.5} />
                 </div>
                 <h3 className="text-xl text-[#3d3226]">프로필 설정</h3>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-1">
                 {/* 프로필 이미지 변경 */}
                 <div className="flex flex-col items-center">
                     <div className="relative">

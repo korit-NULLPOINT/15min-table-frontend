@@ -48,7 +48,7 @@ export function Header({ onOpenAuth, onNavigate, onNotificationClick }) {
 
     return (
         <>
-            <header className="fixed top-0 left-0 right-0 bg-[#f5f1eb] border-b-2 border-[#3d3226] z-50">
+            <header className="w-full bg-[#f5f1eb] border-b-2 border-[#3d3226] z-50">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     {/* Left: Menu & Logo */}
                     <div className="flex items-center gap-4">

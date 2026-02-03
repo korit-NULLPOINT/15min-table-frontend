@@ -189,8 +189,8 @@ export function UserProfile({
     };
 
     return (
-        <div className="min-h-screen bg-[#f5f1eb] pt-20">
-            <div className="max-w-4xl mx-auto px-6 py-6">
+        <div className="pt-4">
+            <div className="max-w-4xl mx-auto px-6">
                 <button
                     onClick={() => onNavigate('home')}
                     className="flex items-center gap-2 mb-4 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
@@ -279,7 +279,7 @@ export function UserProfile({
                     </div>
 
                     {/* Tab Content */}
-                    <div className="h-[583px] scrollbar-hide scrollbar-thin scrollbar-track-gray-200 scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full overflow-y-auto">
+                    <div className="h-[600px] scrollbar-hide scrollbar-thin scrollbar-track-gray-200 scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full overflow-y-auto">
                         {activeTab === 'myProfile' && (
                             <UserProfileMyProfile
                                 profileData={profileData}

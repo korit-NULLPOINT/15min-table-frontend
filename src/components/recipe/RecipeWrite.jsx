@@ -261,7 +261,7 @@ export function RecipeWrite({ onNavigate }) {
     }, [principal]);
 
     return (
-        <div className="min-h-screen bg-[#f5f1eb] pt-20">
+        <div className="pt-8">
             {/* Unverified Account Alert (Top Right) */}
             <Slide
                 direction="left"

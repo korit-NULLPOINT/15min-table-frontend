@@ -81,23 +81,20 @@ export default function UserProfileMyPosts({
     const myCommunityPosts = currentUserCommunityPosts;
 
     return (
-        // 1. Remove global px-8 py-6. 2. Sticky header wrapper with background and padding.
-        <div>
-            <div className="sticky top-0 z-10 bg-white px-8 pt-6 mb-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 flex items-center justify-center">
-                            <FileText size={20} />
-                        </div>
-                        <h3 className="text-xl text-[#3d3226]">
-                            내가 작성한 게시글
-                        </h3>
-                    </div>
+        <div className="px-8 pt-3 pb-4">
+            <div className="sticky top-0 z-20 bg-white h-12 flex items-center mb-6 gap-2">
+                <div className="w-8 h-8 flex items-center justify-center">
+                    <FileText size={20} />
+                </div>
+                <div className="flex-1 flex items-center justify-between">
+                    <h3 className="text-xl text-[#3d3226]">
+                        내가 작성한 게시글
+                    </h3>
 
                     <div className="flex gap-2 bg-[#ebe5db] p-1 rounded-md border-2 border-[#d4cbbf]">
                         <button
                             onClick={() => setMyProfilePostType('recipe')}
-                            className={`w-24 px-4 py-2 rounded-md transition-colors ${
+                            className={`w-24 px-4 py-2 rounded-md transition-colors text-sm ${
                                 myProfilePostType === 'recipe'
                                     ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
                                     : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
@@ -107,7 +104,7 @@ export default function UserProfileMyPosts({
                         </button>
                         <button
                             onClick={() => setMyProfilePostType('comments')}
-                            className={`w-24 px-4 py-2 rounded-md transition-colors ${
+                            className={`w-24 px-4 py-2 rounded-md transition-colors text-sm ${
                                 myProfilePostType === 'comments'
                                     ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
                                     : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
@@ -117,7 +114,7 @@ export default function UserProfileMyPosts({
                         </button>
                         <button
                             onClick={() => setMyProfilePostType('community')}
-                            className={`w-24 px-4 py-2 rounded-md transition-colors ${
+                            className={`w-24 px-4 py-2 rounded-md transition-colors text-sm ${
                                 myProfilePostType === 'community'
                                     ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
                                     : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
@@ -129,7 +126,7 @@ export default function UserProfileMyPosts({
                 </div>
             </div>
 
-            <div className="px-8 pb-4 bg-white">
+            <div className="pb-4 bg-white">
                 {myProfilePostType === 'recipe' && (
                     <div className="grid grid-cols-2 gap-4">
                         {myPostList.map((post) => (
