@@ -123,8 +123,8 @@ export function RecipeDetail({
     };
 
     return (
-        <div className="min-h-screen bg-[#f5f1eb] pt-20">
-            <div className="max-w-5xl mx-auto px-6 py-12">
+        <div className="pt-3">
+            <div className="max-w-[1200px] mx-auto px-2 py-3">
                 {/* Back Button */}
                 <button
                     onClick={handleBack}

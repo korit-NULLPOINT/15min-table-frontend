@@ -53,7 +53,7 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#f5f1eb] pt-20">
+        <div className="pt-8">
             <div className="max-w-7xl mx-auto px-6 py-12">
                 <button
                     onClick={() => onNavigate('/')}

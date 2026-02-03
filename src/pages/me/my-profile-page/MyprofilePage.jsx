@@ -34,13 +34,18 @@ export default function MyProfilePage() {
         navigate('/');
     };
 
+    const handleCommunityPostClick = (postId) => {
+        // Community is board 2
+        navigate(`/board/2/community/${postId}`);
+    };
+
     return (
         <UserProfile
             onNavigate={onNavigate}
             onFollowersClick={onFollowersClick}
             onFollowingClick={onFollowingClick}
-            onRecipeClick={onRecipeClick}
-            onEditRecipe={onEditRecipe}
+            onRecipeClick={handleRecipeClick}
+            onCommunityPostClick={handleCommunityPostClick}
             onLogout={onLogout}
         />
     );

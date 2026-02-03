@@ -92,7 +92,7 @@ export default function RootLayout() {
     };
 
     return (
-        <div className="min-h-screen bg-[#f5f1eb]">
+        <div className="flex flex-col h-screen overflow-hidden bg-[#f5f1eb]">
             <Header
                 onOpenAuth={openAuthModal}
                 onNavigate={handleNavigate}
@@ -101,7 +101,9 @@ export default function RootLayout() {
                 onNotificationClick={handleNotificationClick}
                 onLogout={handleLogout}
             />
-            <Outlet context={{ openAuthModal }} />
+            <main className="flex-1 overflow-y-auto">
+                <Outlet context={{ openAuthModal }} />
+            </main>
 
             <AuthModal
                 isOpen={isAuthModalOpen}

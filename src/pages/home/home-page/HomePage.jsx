@@ -74,11 +74,11 @@ export default function HomePage() {
     };
 
     if (isLoading) {
-        return <div className="pt-20 text-center">로딩 중...</div>;
+        return <div className="pt-8 text-center">로딩 중...</div>;
     }
 
     return (
-        <main className="pt-20">
+        <main className="pt-8">
             {/* Hero Section */}
             <section className="px-6 py-8 max-w-7xl mx-auto">
                 <div className="text-center mb-4">
