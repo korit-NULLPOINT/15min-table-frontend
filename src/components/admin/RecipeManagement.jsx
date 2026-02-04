@@ -124,7 +124,7 @@ export function RecipeManagement() {
     // Actually, the previous implementation handled it in parent. Let's keep it here.
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (confirmingId && !event.target.closest('.delete-confirm-box')) {
+            if (confirmingId && !event.target.closest('.action-confirm-box')) {
                 setConfirmingId(null);
             }
         };
@@ -144,6 +144,7 @@ export function RecipeManagement() {
                         queryKey: ['adminRecipeList'],
                     });
                     setConfirmingId(null);
+                    alert('성공적으로 삭제되었습니다.');
                 },
                 onError: (err) => {
                     console.error('Delete failed', err);

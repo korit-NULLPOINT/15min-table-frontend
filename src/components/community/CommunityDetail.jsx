@@ -199,164 +199,180 @@ export function CommunityDetail({
                     }}
                 />
 
-                {/* Comments Section */}
+                {/* Comments Area Container */}
                 <Box
                     sx={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
                         bgcolor: '#ebe5db',
-                        px: 3,
-                        py: 2,
-                        borderBottom: '1px solid #e5dfd5',
                     }}
                 >
-                    <Typography variant="h6" sx={{ color: '#3d3226' }}>
-                        댓글 {comments.length}
-                    </Typography>
-                </Box>
-
-                <List disablePadding>
-                    {comments.map((comment, index) => (
-                        <React.Fragment key={comment.commentId || index}>
-                            <ListItem
-                                alignItems="flex-start"
-                                sx={{ px: 3, py: 2 }}
-                            >
-                                <ListItemAvatar>
-                                    <Avatar
-                                        src={
-                                            comment.profileImgUrl ||
-                                            `https://picsum.photos/seed/${comment.userId}/200`
-                                        }
-                                        sx={{ bgcolor: '#d4cbbf' }}
-                                    />
-                                </ListItemAvatar>
-                                <ListItemText
-                                    primary={
-                                        <Box
-                                            component="span"
-                                            sx={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                            }}
-                                        >
-                                            <Typography
-                                                component="span"
-                                                variant="subtitle2"
-                                                sx={{
-                                                    fontWeight: 'bold',
-                                                    color: '#3d3226',
-                                                }}
-                                            >
-                                                {comment.username}
-                                            </Typography>
-                                            <Typography
-                                                component="span"
-                                                variant="caption"
-                                                color="text.secondary"
-                                            >
-                                                {formatDate(comment.createDt)}
-                                            </Typography>
-                                        </Box>
-                                    }
-                                    secondary={
-                                        <Typography
-                                            component="span"
-                                            variant="body2"
-                                            sx={{
-                                                display: 'block',
-                                                mt: 0.5,
-                                                color: '#3d3226',
-                                            }}
-                                        >
-                                            {comment.content}
-                                        </Typography>
-                                    }
-                                />
-                                {principal &&
-                                    principal.username === comment.username && (
-                                        <IconButton
-                                            edge="end"
-                                            onClick={() =>
-                                                handleDeleteComment(
-                                                    comment.commentId,
-                                                )
-                                            }
-                                            size="small"
-                                            sx={{
-                                                color: '#d32f2f',
-                                                mt: 1,
-                                            }}
-                                        >
-                                            <DeleteIcon fontSize="small" />
-                                        </IconButton>
-                                    )}
-                            </ListItem>
-                            {index < comments.length - 1 && (
-                                <Divider component="li" />
-                            )}
-                        </React.Fragment>
-                    ))}
-                    {comments.length === 0 && (
-                        <Box
-                            sx={{
-                                p: 4,
-                                textAlign: 'center',
-                                color: 'text.secondary',
-                            }}
-                        >
-                            작성된 댓글이 없습니다.
-                        </Box>
-                    )}
-                </List>
-
-                {/* Comment Input */}
-                <Box
-                    sx={{
-                        p: 3,
-                        bgcolor: '#ebe5db',
-                        borderTop: '1px solid #e5dfd5',
-                    }}
-                >
-                    <TextField
-                        fullWidth
-                        multiline
-                        rows={3}
-                        placeholder="댓글을 입력하세요..."
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        sx={{
-                            bgcolor: 'white',
-                            '& .MuiOutlinedInput-root': {
-                                '& fieldset': {
-                                    borderColor: '#d4cbbf',
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: '#3d3226',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: '#3d3226',
-                                },
-                            },
-                        }}
-                    />
+                    {/* Comments Section Header */}
                     <Box
                         sx={{
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                            mt: 2,
+                            px: 3,
+                            py: 2,
+                            borderBottom: '1px solid #e5dfd5',
                         }}
                     >
-                        <Button
-                            variant="contained"
-                            disabled={!newComment.trim()}
-                            onClick={handleSubmitComment}
+                        <Typography variant="h6" sx={{ color: '#3d3226' }}>
+                            댓글 {comments.length}
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{ flex: 1, bgcolor: 'white' }}>
+                        <List disablePadding>
+                            {comments.map((comment, index) => (
+                                <React.Fragment
+                                    key={comment.commentId || index}
+                                >
+                                    <ListItem
+                                        alignItems="flex-start"
+                                        sx={{ px: 3, py: 2 }}
+                                    >
+                                        <ListItemAvatar>
+                                            <Avatar
+                                                src={
+                                                    comment.profileImgUrl ||
+                                                    `https://picsum.photos/seed/${comment.userId}/200`
+                                                }
+                                                sx={{ bgcolor: '#d4cbbf' }}
+                                            />
+                                        </ListItemAvatar>
+                                        <ListItemText
+                                            primary={
+                                                <Box
+                                                    component="span"
+                                                    sx={{
+                                                        display: 'flex',
+                                                        justifyContent:
+                                                            'space-between',
+                                                        alignItems: 'center',
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        component="span"
+                                                        variant="subtitle2"
+                                                        sx={{
+                                                            fontWeight: 'bold',
+                                                            color: '#3d3226',
+                                                        }}
+                                                    >
+                                                        {comment.username}
+                                                    </Typography>
+                                                    <Typography
+                                                        component="span"
+                                                        variant="caption"
+                                                        color="text.secondary"
+                                                    >
+                                                        {formatDate(
+                                                            comment.createDt,
+                                                        )}
+                                                    </Typography>
+                                                </Box>
+                                            }
+                                            secondary={
+                                                <Typography
+                                                    component="span"
+                                                    variant="body2"
+                                                    sx={{
+                                                        display: 'block',
+                                                        mt: 0.5,
+                                                        color: '#3d3226',
+                                                    }}
+                                                >
+                                                    {comment.content}
+                                                </Typography>
+                                            }
+                                        />
+                                        {principal &&
+                                            principal.username ===
+                                                comment.username && (
+                                                <IconButton
+                                                    edge="end"
+                                                    onClick={() =>
+                                                        handleDeleteComment(
+                                                            comment.commentId,
+                                                        )
+                                                    }
+                                                    size="small"
+                                                    sx={{
+                                                        color: '#d32f2f',
+                                                        mt: 1,
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            )}
+                                    </ListItem>
+                                    {index < comments.length - 1 && (
+                                        <Divider component="li" />
+                                    )}
+                                </React.Fragment>
+                            ))}
+                            {comments.length === 0 && (
+                                <Box
+                                    sx={{
+                                        p: 4,
+                                        textAlign: 'center',
+                                        color: 'text.secondary',
+                                    }}
+                                >
+                                    작성된 댓글이 없습니다.
+                                </Box>
+                            )}
+                        </List>
+                    </Box>
+
+                    {/* Comment Input */}
+                    <Box
+                        sx={{
+                            p: 3,
+                            borderTop: '1px solid #e5dfd5',
+                        }}
+                    >
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={3}
+                            placeholder="댓글을 입력하세요..."
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
                             sx={{
-                                bgcolor: '#3d3226',
-                                '&:hover': { bgcolor: '#5d4a36' },
+                                bgcolor: 'white',
+                                '& .MuiOutlinedInput-root': {
+                                    '& fieldset': {
+                                        borderColor: '#d4cbbf',
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: '#3d3226',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: '#3d3226',
+                                    },
+                                },
+                            }}
+                        />
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'flex-end',
+                                mt: 2,
                             }}
                         >
-                            댓글 작성
-                        </Button>
+                            <Button
+                                variant="contained"
+                                disabled={!newComment.trim()}
+                                onClick={handleSubmitComment}
+                                sx={{
+                                    bgcolor: '#3d3226',
+                                    '&:hover': { bgcolor: '#5d4a36' },
+                                }}
+                            >
+                                댓글 작성
+                            </Button>
+                        </Box>
                     </Box>
                 </Box>
             </ScrollIndicatorWrapper>

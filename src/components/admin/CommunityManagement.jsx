@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     TableSortLabel,
     TableRow,
@@ -12,15 +13,14 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
 import { AdminManagementLayout } from './common/AdminManagementLayout';
 import { ActionConfirmButton } from './common/ActionConfirmButton';
-import {
-    getPostList,
-    useDeletePost,
-} from '../../apis/generated/post-controller/post-controller';
+import { getAdminPostList } from '../../apis/generated/manage-controller/manage-controller';
+import { useDeletePost } from '../../apis/generated/post-controller/post-controller';
 import { formatDate } from '../../apis/utils/formatDate';
 
 export function CommunityManagement() {
     const FREE_BOARD_ID = 2;
     const SIZE = 20;
+    const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { ref, inView } = useInView();
 
@@ -40,20 +40,32 @@ export function CommunityManagement() {
         isLoading: isPostLoading,
         error,
     } = useInfiniteQuery({
-        queryKey: ['admin-posts', FREE_BOARD_ID, searchQuery],
-        queryFn: ({ pageParam }) =>
-            getPostList(FREE_BOARD_ID, {
+        queryKey: ['admin-posts', searchQuery, sortConfig],
+        queryFn: ({ pageParam }) => {
+            const { cursorId, cursorCreateDt, cursorViewCount } =
+                pageParam || {};
+            return getAdminPostList({
                 size: SIZE,
-                cursor: pageParam || undefined,
                 keyword: searchQuery || undefined,
-            }),
+                sortKey: sortConfig.key,
+                sortBy: sortConfig.direction,
+                cursorId,
+                cursorCreateDt,
+                cursorViewCount,
+            });
+        },
         initialPageParam: null,
         getNextPageParam: (lastPage) => {
             const responseData = lastPage?.data?.data;
-            if (!responseData) return undefined;
-            return responseData.hasNext ? responseData.nextCursor : undefined;
+            if (!responseData || responseData.length < SIZE) return undefined;
+
+            const lastItem = responseData[responseData.length - 1];
+            return {
+                cursorId: lastItem.postId,
+                cursorCreateDt: lastItem.createDt,
+                cursorViewCount: lastItem.viewCount,
+            };
         },
-        enabled: !!FREE_BOARD_ID,
     });
 
     const { mutate: deletePost } = useDeletePost({
@@ -79,32 +91,11 @@ export function CommunityManagement() {
 
     // Flatten data for display
     const posts = useMemo(() => {
-        return (
-            data?.pages.flatMap((page) => page.data?.data?.items || []) || []
-        );
+        return data?.pages.flatMap((page) => page.data?.data || []) || [];
     }, [data]);
 
-    // Client-side Sort Logic (since API might not support it for all fields)
-    // We sort only the items currently loaded.
-    const sortedPosts = useMemo(() => {
-        const sorted = [...posts];
-        if (sortConfig.key === 'createDt') {
-            sorted.sort((a, b) => {
-                const dateA = new Date(a.createDt);
-                const dateB = new Date(b.createDt);
-                return sortConfig.direction === 'asc'
-                    ? dateA - dateB
-                    : dateB - dateA;
-            });
-        } else if (sortConfig.key === 'viewCount') {
-            sorted.sort((a, b) => {
-                return sortConfig.direction === 'asc'
-                    ? (a.viewCount || 0) - (b.viewCount || 0)
-                    : (b.viewCount || 0) - (a.viewCount || 0);
-            });
-        }
-        return sorted;
-    }, [posts, sortConfig]);
+    // Since we are using API-side sorting now, we don't need client-side sort logic.
+    const sortedPosts = posts;
 
     const handleSort = (key) => {
         setSortConfig((prev) => {
@@ -238,9 +229,15 @@ export function CommunityManagement() {
                     paddingX={3}
                     noWrap
                     title={post.title}
+                    onClick={() => {
+                        navigate(`/board/${FREE_BOARD_ID}/free/${post.postId}`);
+                    }}
                     sx={{
                         color: '#3d3226',
-                        cursor: 'default',
+                        cursor: 'pointer',
+                        '&:hover': {
+                            textDecoration: 'underline',
+                        },
                     }}
                 >
                     {post.title}

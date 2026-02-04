@@ -78,7 +78,7 @@ export default defineConfig({
             },
 
             // Admin API (API 요청만 프록시)
-            '/admin/manage/': {
+            '/admin/manage': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },

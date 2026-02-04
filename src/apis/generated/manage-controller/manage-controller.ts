@@ -24,6 +24,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  GetAdminPostListParams,
   GetAdminRecipeListParams,
   GetRecentActivitiesParams,
   GetTimeSeriesParams
@@ -715,6 +716,117 @@ export function useGetAdminRecipeList<TData = Awaited<ReturnType<typeof getAdmin
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAdminRecipeListQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getAdminPostListResponse200 = {
+  data: Blob
+  status: 200
+}
+    
+export type getAdminPostListResponseSuccess = (getAdminPostListResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getAdminPostListResponse = (getAdminPostListResponseSuccess)
+
+export const getGetAdminPostListUrl = (params?: GetAdminPostListParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/admin/manage/posts?${stringifiedParams}` : `/admin/manage/posts`
+}
+
+export const getAdminPostList = async (params?: GetAdminPostListParams, options?: RequestInit): Promise<getAdminPostListResponse> => {
+  
+  return customInstance<getAdminPostListResponse>(getGetAdminPostListUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getGetAdminPostListQueryKey = (params?: GetAdminPostListParams,) => {
+    return [
+    `/admin/manage/posts`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetAdminPostListQueryOptions = <TData = Awaited<ReturnType<typeof getAdminPostList>>, TError = unknown>(params?: GetAdminPostListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPostList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAdminPostListQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminPostList>>> = ({ signal }) => getAdminPostList(params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAdminPostList>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAdminPostListQueryResult = NonNullable<Awaited<ReturnType<typeof getAdminPostList>>>
+export type GetAdminPostListQueryError = unknown
+
+
+export function useGetAdminPostList<TData = Awaited<ReturnType<typeof getAdminPostList>>, TError = unknown>(
+ params: undefined |  GetAdminPostListParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPostList>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAdminPostList>>,
+          TError,
+          Awaited<ReturnType<typeof getAdminPostList>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAdminPostList<TData = Awaited<ReturnType<typeof getAdminPostList>>, TError = unknown>(
+ params?: GetAdminPostListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPostList>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAdminPostList>>,
+          TError,
+          Awaited<ReturnType<typeof getAdminPostList>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAdminPostList<TData = Awaited<ReturnType<typeof getAdminPostList>>, TError = unknown>(
+ params?: GetAdminPostListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPostList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetAdminPostList<TData = Awaited<ReturnType<typeof getAdminPostList>>, TError = unknown>(
+ params?: GetAdminPostListParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAdminPostList>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAdminPostListQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

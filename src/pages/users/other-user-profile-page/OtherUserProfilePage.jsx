@@ -75,7 +75,7 @@ export default function OtherUserProfilePage() {
             navigate(`/board/${RECIPE_BOARD_ID}/recipe/${recipeId}`);
         } else {
             // type === 'POST' (커뮤니티)
-            // 현재 라우터 구조상 /boards/:boardId/free/:postId 라면:
+            // 현재 라우터 구조상 /board/:boardId/free/:postId 라면:
             navigate(`/board/${COMMUNITY_BOARD_ID}/free/${postId}`);
         }
     };

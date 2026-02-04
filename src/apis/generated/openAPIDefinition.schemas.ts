@@ -497,7 +497,7 @@ export interface ApiRespDtoListUser {
 export interface AdminStatsRespDto {
   totalUsers?: number;
   totalRecipes?: number;
-  totalCommunityPosts?: number;
+  totalPosts?: number;
 }
 
 export interface ApiRespDtoAdminStatsRespDto {
@@ -536,6 +536,25 @@ export interface ApiRespDtoListAdminRecipeRespDto {
   message?: string;
   /** 응답 데이터(없으면 null) */
   data?: AdminRecipeRespDto[];
+}
+
+export interface AdminPostRespDto {
+  postId?: number;
+  userId?: number;
+  viewCount?: number;
+  commentCount?: number;
+  title?: string;
+  username?: string;
+  profileImgUrl?: string;
+  createDt?: string;
+  updateDt?: string;
+}
+
+export interface ApiRespDtoListAdminPostRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: AdminPostRespDto[];
 }
 
 export interface AdminActivityRespDto {
@@ -627,6 +646,16 @@ cursorViewCount?: number;
 /**
  * 한 번에 가져올 개수(기본 20, 최대 50)
  */
+size?: number;
+};
+
+export type GetAdminPostListParams = {
+keyword?: string;
+sortKey?: string;
+sortBy?: string;
+cursorId?: number;
+cursorCreateDt?: string;
+cursorViewCount?: number;
 size?: number;
 };
 
