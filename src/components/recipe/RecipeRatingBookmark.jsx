@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 import { Star, Bookmark, Share2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
+    Paper,
+    Box,
+    Typography,
+    Button,
+    IconButton,
+    Stack,
+    Tooltip,
+} from '@mui/material';
+import {
     useGetRating,
     useUpsertRating,
     useDeleteRating,
@@ -28,8 +37,8 @@ export default function RecipeRatingBookmark({
     const { data: ratingData } = useGetRating(rId, {
         query: {
             enabled: !!isLoggedIn && !!rId,
-            retry: 0, // 404가 뜰 수 있으므로 재시도 안함
-            refetchOnWindowFocus: false, // 알트탭 시 에러 방지
+            retry: 0,
+            refetchOnWindowFocus: false,
         },
     });
 
@@ -160,70 +169,124 @@ export default function RecipeRatingBookmark({
     };
 
     return (
-        <div className="mb-6 p-4 bg-[#ebe5db] rounded-lg border-2 border-[#d4cbbf] flex justify-between items-center">
-            <div>
-                <p className="text-sm text-[#3d3226] mb-2">
+        <Paper
+            elevation={0}
+            sx={{
+                mb: 3,
+                p: 3,
+                bgcolor: '#ebe5db',
+                borderRadius: 2,
+                border: '2px solid #d4cbbf',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 2,
+            }}
+        >
+            <Box>
+                <Typography
+                    variant="body2"
+                    sx={{ color: '#3d3226', mb: 1, fontWeight: 'medium' }}
+                >
                     이 레시피를 평가해주세요
-                </p>
-                <div
-                    className="flex items-center gap-2"
+                </Typography>
+                <Box
+                    sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
                     onMouseLeave={() => setHoverRating(0)}
                 >
                     {[1, 2, 3, 4, 5].map((star) => (
-                        <button
+                        <IconButton
                             key={star}
                             onClick={() => handleRatingClick(star)}
                             onMouseEnter={() => setHoverRating(star)}
-                            className="transition-transform hover:scale-110"
+                            size="small"
+                            sx={{
+                                color:
+                                    star <= (hoverRating || userRating)
+                                        ? '#f59e0b'
+                                        : '#d4cbbf',
+                                transition: 'transform 0.2s',
+                                '&:hover': { transform: 'scale(1.2)' },
+                                p: 0.5,
+                            }}
                         >
                             <Star
                                 size={32}
                                 fill={
                                     star <= (hoverRating || userRating)
-                                        ? '#f59e0b'
+                                        ? 'currentColor'
                                         : 'none'
                                 }
-                                className={
-                                    star <= (hoverRating || userRating)
-                                        ? 'text-[#f59e0b]'
-                                        : 'text-[#d4cbbf]'
-                                }
                             />
-                        </button>
+                        </IconButton>
                     ))}
                     {userRating > 0 && (
-                        <span className="ml-2 text-[#3d3226]">
+                        <Typography
+                            variant="body2"
+                            sx={{ ml: 1, color: '#3d3226', fontWeight: 'bold' }}
+                        >
                             내 평점: {userRating}점
-                        </span>
+                        </Typography>
                     )}
-                </div>
-            </div>
+                </Box>
+            </Box>
 
             {/* Action Buttons */}
-            <div className="flex gap-3">
-                <button
+            <Stack direction="row" spacing={2} sx={{ flexWrap: 'wrap' }}>
+                <Button
                     onClick={handleBookmarkClick}
-                    className={`flex items-center justify-center gap-2 w-[140px] py-3 rounded-md border-2 transition-colors ${
-                        isBookmarked
-                            ? 'bg-blue-100 border-blue-500 text-blue-700'
-                            : 'border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226]'
-                    }`}
+                    startIcon={
+                        <Bookmark
+                            size={20}
+                            fill={isBookmarked ? 'currentColor' : 'none'}
+                        />
+                    }
+                    variant={isBookmarked ? 'contained' : 'outlined'}
+                    sx={{
+                        width: 140,
+                        py: 1.5,
+                        borderRadius: 1,
+                        fontWeight: 'bold',
+                        ...(isBookmarked
+                            ? {
+                                  bgcolor: '#3d3226',
+                                  color: '#f5f1eb',
+                                  '&:hover': { bgcolor: '#2a221a' },
+                              }
+                            : {
+                                  color: '#3d3226',
+                                  borderColor: '#3d3226',
+                                  '&:hover': {
+                                      bgcolor: 'rgba(61, 50, 38, 0.05)',
+                                      borderColor: '#3d3226',
+                                  },
+                              }),
+                    }}
                 >
-                    <Bookmark
-                        size={20}
-                        fill={isBookmarked ? 'currentColor' : 'none'}
-                    />
                     {isBookmarked ? '저장됨' : '저장하기'}
-                </button>
+                </Button>
 
-                <button
+                <Button
                     onClick={handleShareClick}
-                    className="flex items-center justify-center gap-2 w-[140px] py-3 rounded-md border-2 border-[#d4cbbf] text-[#3d3226] hover:border-[#3d3226] transition-colors"
+                    startIcon={<Share2 size={20} />}
+                    variant="outlined"
+                    sx={{
+                        width: 140,
+                        py: 1.5,
+                        borderRadius: 1,
+                        fontWeight: 'bold',
+                        color: '#3d3226',
+                        borderColor: '#3d3226',
+                        '&:hover': {
+                            bgcolor: 'rgba(61, 50, 38, 0.05)',
+                            borderColor: '#3d3226',
+                        },
+                    }}
                 >
-                    <Share2 size={20} />
                     공유하기
-                </button>
-            </div>
-        </div>
+                </Button>
+            </Stack>
+        </Paper>
     );
 }

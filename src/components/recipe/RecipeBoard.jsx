@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Search, Filter, Star } from 'lucide-react';
-import { Box } from '@mui/material';
+import {
+    Box,
+    Container,
+    Paper,
+    Typography,
+    Button,
+    InputBase,
+    IconButton,
+    Stack,
+    Chip,
+    CircularProgress,
+} from '@mui/material';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { mainCategory, subCategory } from '../../utils/categoryData';
 import { useGetFilteredRecipeList } from '../../apis/generated/recipe-controller/recipe-controller';
@@ -53,56 +64,129 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
     };
 
     return (
-        <div className="pt-4">
-            <div className="max-w-7xl mx-auto px-6 py-4">
-                <button
+        <Box sx={{ py: 4, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+            <Container maxWidth="lg">
+                <Button
+                    startIcon={<ArrowLeft size={20} />}
                     onClick={() => onNavigate('/')}
-                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
+                    sx={{
+                        mb: 3,
+                        px: 2,
+                        py: 1,
+                        border: '2px solid #3d3226',
+                        color: '#3d3226',
+                        borderRadius: 1,
+                        fontWeight: 'bold',
+                        '&:hover': {
+                            bgcolor: '#3d3226',
+                            color: '#f5f1eb',
+                        },
+                    }}
                 >
-                    <ArrowLeft size={20} />
                     메인으로 돌아가기
-                </button>
+                </Button>
 
-                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden">
+                <Paper
+                    elevation={3}
+                    sx={{
+                        borderRadius: 2,
+                        border: '2px solid #e5dfd5',
+                        overflow: 'hidden',
+                    }}
+                >
                     {/* Header */}
-                    <div className="bg-[#3d3226] text-[#f5f1eb] px-8 py-6">
-                        <h1 className="text-3xl mb-2">레시피 게시판</h1>
-                        <p className="text-[#e5dfd5]">
+                    <Box
+                        sx={{
+                            bgcolor: '#3d3226',
+                            color: '#f5f1eb',
+                            px: 4,
+                            py: 3,
+                        }}
+                    >
+                        <Typography
+                            variant="h4"
+                            component="h1"
+                            sx={{ fontWeight: 'bold', mb: 1 }}
+                        >
+                            레시피 게시판
+                        </Typography>
+                        <Typography variant="body1" sx={{ color: '#e5dfd5' }}>
                             다양한 레시피를 검색하고 찾아보세요
-                        </p>
-                    </div>
+                        </Typography>
+                    </Box>
 
                     {/* Search Bar */}
-                    <div className="p-6 border-b-2 border-[#e5dfd5] bg-[#ebe5db]">
-                        <div className="relative">
-                            <Search
-                                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6b5d4f]"
-                                size={20}
-                            />
-                            <input
-                                type="text"
+                    <Box
+                        sx={{
+                            p: 3,
+                            borderBottom: '2px solid #e5dfd5',
+                            bgcolor: '#ebe5db',
+                        }}
+                    >
+                        <Box sx={{ position: 'relative' }}>
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    left: 16,
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    color: '#6b5d4f',
+                                    display: 'flex',
+                                }}
+                            >
+                                <Search size={20} />
+                            </Box>
+                            <InputBase
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                                 placeholder="레시피 검색..."
-                                className="w-full pl-12 pr-4 py-4 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white text-[#3d3226]"
+                                fullWidth
+                                sx={{
+                                    pl: 6,
+                                    pr: 2,
+                                    py: 1.5,
+                                    border: '2px solid #d4cbbf',
+                                    borderRadius: 1,
+                                    bgcolor: '#fff',
+                                    color: '#3d3226',
+                                    '&.Mui-focused': {
+                                        border: '2px solid #3d3226',
+                                    },
+                                }}
                             />
-                        </div>
-                    </div>
+                        </Box>
+                    </Box>
 
                     {/* Category Filters */}
-                    <div className="p-6 border-b-2 border-[#e5dfd5]">
-                        <div className="mb-6">
-                            <div className="flex items-center gap-2 mb-3">
-                                <Filter size={18} className="text-[#3d3226]" />
-                                <h3 className="text-sm uppercase tracking-wider text-[#6b5d4f]">
+                    <Box sx={{ p: 3, borderBottom: '2px solid #e5dfd5' }}>
+                        <Box sx={{ mb: 3 }}>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    mb: 1.5,
+                                }}
+                            >
+                                <Filter size={18} color="#3d3226" />
+                                <Typography
+                                    variant="subtitle2"
+                                    sx={{
+                                        color: '#6b5d4f',
+                                        fontWeight: 'bold',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: 1,
+                                    }}
+                                >
                                     메인 카테고리
-                                </h3>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
+                                </Typography>
+                            </Box>
+                            <Stack direction="row" flexWrap="wrap" gap={1}>
                                 {Object.entries(mainCategory).map(
                                     ([id, label]) => (
-                                        <button
+                                        <Chip
                                             key={id}
+                                            label={label}
                                             onClick={() => {
                                                 const categoryId = Number(id);
                                                 handleFilterChange(
@@ -113,32 +197,68 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                                         : categoryId,
                                                 );
                                             }}
-                                            className={`px-4 py-2 rounded-md border-2 transition-colors ${
-                                                selectedMainCategoryId ===
-                                                Number(id)
-                                                    ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                    : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
-                                            }`}
-                                        >
-                                            {label}
-                                        </button>
+                                            sx={{
+                                                bgcolor:
+                                                    selectedMainCategoryId ===
+                                                    Number(id)
+                                                        ? '#3d3226'
+                                                        : '#fff',
+                                                color:
+                                                    selectedMainCategoryId ===
+                                                    Number(id)
+                                                        ? '#f5f1eb'
+                                                        : '#3d3226',
+                                                border: '2px solid',
+                                                borderColor:
+                                                    selectedMainCategoryId ===
+                                                    Number(id)
+                                                        ? '#3d3226'
+                                                        : '#d4cbbf',
+                                                borderRadius: 1,
+                                                fontWeight: 'medium',
+                                                '&:hover': {
+                                                    borderColor: '#3d3226',
+                                                    bgcolor:
+                                                        selectedMainCategoryId ===
+                                                        Number(id)
+                                                            ? '#3d3226'
+                                                            : '#fff',
+                                                },
+                                            }}
+                                        />
                                     ),
                                 )}
-                            </div>
-                        </div>
+                            </Stack>
+                        </Box>
 
-                        <div>
-                            <div className="flex items-center gap-2 mb-3">
-                                <Filter size={18} className="text-[#3d3226]" />
-                                <h3 className="text-sm uppercase tracking-wider text-[#6b5d4f]">
+                        <Box>
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
+                                    mb: 1.5,
+                                }}
+                            >
+                                <Filter size={18} color="#3d3226" />
+                                <Typography
+                                    variant="subtitle2"
+                                    sx={{
+                                        color: '#6b5d4f',
+                                        fontWeight: 'bold',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: 1,
+                                    }}
+                                >
                                     부 카테고리
-                                </h3>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
+                                </Typography>
+                            </Box>
+                            <Stack direction="row" flexWrap="wrap" gap={1}>
                                 {Object.entries(subCategory).map(
                                     ([id, label]) => (
-                                        <button
+                                        <Chip
                                             key={id}
+                                            label={label}
                                             onClick={() => {
                                                 const categoryId = Number(id);
                                                 handleFilterChange(
@@ -149,52 +269,105 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                                         : categoryId,
                                                 );
                                             }}
-                                            className={`px-4 py-2 rounded-md border-2 transition-colors ${
-                                                selectedSubCategoryId ===
-                                                Number(id)
-                                                    ? 'bg-[#3d3226] text-[#f5f1eb] border-[#3d3226]'
-                                                    : 'bg-white text-[#3d3226] border-[#d4cbbf] hover:border-[#3d3226]'
-                                            }`}
-                                        >
-                                            {label}
-                                        </button>
+                                            sx={{
+                                                bgcolor:
+                                                    selectedSubCategoryId ===
+                                                    Number(id)
+                                                        ? '#3d3226'
+                                                        : '#fff',
+                                                color:
+                                                    selectedSubCategoryId ===
+                                                    Number(id)
+                                                        ? '#f5f1eb'
+                                                        : '#3d3226',
+                                                border: '2px solid',
+                                                borderColor:
+                                                    selectedSubCategoryId ===
+                                                    Number(id)
+                                                        ? '#3d3226'
+                                                        : '#d4cbbf',
+                                                borderRadius: 1,
+                                                fontWeight: 'medium',
+                                                '&:hover': {
+                                                    borderColor: '#3d3226',
+                                                    bgcolor:
+                                                        selectedSubCategoryId ===
+                                                        Number(id)
+                                                            ? '#3d3226'
+                                                            : '#fff',
+                                                },
+                                            }}
+                                        />
                                     ),
                                 )}
-                            </div>
-                        </div>
-                    </div>
+                            </Stack>
+                        </Box>
+                    </Box>
 
                     {/* Recipe List */}
-                    <div className="p-6">
-                        <div className="mb-4 text-[#6b5d4f]">
+                    <Box sx={{ p: 3 }}>
+                        <Typography sx={{ mb: 2, color: '#6b5d4f' }}>
                             총{' '}
-                            <span className="text-[#3d3226] font-bold">
+                            <Box
+                                component="span"
+                                sx={{ color: '#3d3226', fontWeight: 'bold' }}
+                            >
                                 {totalCount}
-                            </span>
+                            </Box>{' '}
                             개의 레시피
-                        </div>
+                        </Typography>
 
                         {isLoading ? (
-                            <div className="text-center py-20 text-[#6b5d4f]">
-                                레시피를 불러오는 중입니다...
-                            </div>
+                            <Box sx={{ textAlign: 'center', py: 10 }}>
+                                <CircularProgress sx={{ color: '#3d3226' }} />
+                                <Typography sx={{ mt: 2, color: '#6b5d4f' }}>
+                                    레시피를 불러오는 중입니다...
+                                </Typography>
+                            </Box>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <Box
+                                sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: {
+                                        xs: '1fr',
+                                        sm: '1fr 1fr',
+                                        md: '1fr 1fr 1fr',
+                                    },
+                                    gap: 3,
+                                    alignItems: 'start', // or stretch
+                                }}
+                            >
                                 {recipes.map((recipe) => (
-                                    <div
+                                    <Paper
                                         key={recipe.recipeId}
+                                        elevation={2}
                                         onClick={() =>
                                             onRecipeClick &&
                                             onRecipeClick(recipe.recipeId)
                                         }
-                                        className="cursor-pointer bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border-2 border-[#e5dfd5] hover:border-[#3d3226]"
+                                        sx={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            borderRadius: 2,
+                                            overflow: 'hidden',
+                                            border: '2px solid #e5dfd5',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.3s',
+                                            height: '100%',
+                                            '&:hover': {
+                                                boxShadow: 6,
+                                                borderColor: '#3d3226',
+                                                transform: 'translateY(-4px)',
+                                            },
+                                        }}
                                     >
                                         <Box
                                             sx={{
                                                 position: 'relative',
+                                                width: '100%',
                                                 aspectRatio: '4 / 3',
                                                 overflow: 'hidden',
-                                                backgroundColor: 'white',
+                                                bgcolor: '#f5f5f5',
                                             }}
                                         >
                                             <ImageWithFallback
@@ -206,77 +379,183 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                                         : `https://picsum.photos/seed/${recipe.recipeId}/800/600`
                                                 }
                                                 alt={recipe.title}
-                                                className="w-full h-full object-contain hover:scale-110 transition-transform duration-300"
+                                                className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                                             />
                                             {!recipe.thumbnailImgUrl && (
-                                                <div
-                                                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold pointer-events-none whitespace-nowrap"
-                                                    style={{
+                                                <Box
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        top: '50%',
+                                                        left: '50%',
+                                                        transform:
+                                                            'translate(-50%, -50%)',
+                                                        color: '#ffffff',
+                                                        fontWeight: 'bold',
+                                                        pointerEvents: 'none',
+                                                        whiteSpace: 'nowrap',
+                                                        backgroundColor:
+                                                            'rgba(0, 0, 0, 0.4)',
+                                                        px: 2,
+                                                        py: 0.5,
+                                                        borderRadius: 4,
                                                         textShadow:
-                                                            '-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0px 0px 5px rgba(0,0,0,0.8)',
+                                                            '0 1px 3px rgba(0,0,0,0.8)',
+                                                        boxShadow:
+                                                            '0 2px 4px rgba(0,0,0,0.2)',
+                                                        border: '1px solid rgba(255,255,255,0.2)',
                                                     }}
                                                 >
-                                                    랜덤이미지 입니다.
-                                                </div>
+                                                    랜덤 이미지 입니다.
+                                                </Box>
                                             )}
                                         </Box>
 
-                                        <div className="p-4">
-                                            <h3 className="text-lg text-[#3d3226] mb-2 line-clamp-1">
-                                                {recipe.title}
-                                            </h3>
-                                            <div className="flex items-center justify-between text-sm text-[#6b5d4f]">
-                                                <span>
-                                                    by {recipe.username}
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Star
-                                                        size={14}
-                                                        fill="#f59e0b"
-                                                        className="text-[#f59e0b]"
-                                                    />
-                                                    {(
-                                                        recipe.avgRating || 0
-                                                    ).toFixed(1)}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-3 mt-2 text-xs text-[#6b5d4f]">
-                                                <span>
+                                        <Box
+                                            sx={{
+                                                p: 2,
+                                                flexGrow: 1,
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'space-between',
+                                            }}
+                                        >
+                                            <Box>
+                                                <Typography
+                                                    variant="h6"
+                                                    sx={{
+                                                        color: '#3d3226',
+                                                        mb: 1,
+                                                        overflow: 'hidden',
+                                                        textOverflow:
+                                                            'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '1.125rem',
+                                                    }}
+                                                >
+                                                    {recipe.title}
+                                                </Typography>
+
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        justifyContent:
+                                                            'space-between',
+                                                        alignItems: 'center',
+                                                        mb: 1,
+                                                    }}
+                                                >
+                                                    <Typography
+                                                        variant="body2"
+                                                        sx={{
+                                                            color: '#6b5d4f',
+                                                        }}
+                                                    >
+                                                        by {recipe.username}
+                                                    </Typography>
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems:
+                                                                'center',
+                                                            gap: 0.5,
+                                                        }}
+                                                    >
+                                                        <Star
+                                                            size={14}
+                                                            fill="#f59e0b"
+                                                            color="#f59e0b"
+                                                        />
+                                                        <Typography
+                                                            variant="body2"
+                                                            sx={{
+                                                                color: '#6b5d4f',
+                                                            }}
+                                                        >
+                                                            {(
+                                                                recipe.avgRating ||
+                                                                0
+                                                            ).toFixed(1)}
+                                                        </Typography>
+                                                    </Box>
+                                                </Box>
+                                            </Box>
+
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    gap: 1.5,
+                                                    alignItems: 'center',
+                                                    color: '#6b5d4f',
+                                                    mt: 1,
+                                                }}
+                                            >
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 0.5,
+                                                    }}
+                                                >
                                                     👁 {recipe.viewCount || 0}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    </Paper>
                                 ))}
-                            </div>
+                            </Box>
                         )}
 
                         {totalCount === 0 && !isLoading && (
-                            <div className="text-center py-12 text-[#6b5d4f]">
-                                검색 결과가 없습니다.
-                            </div>
+                            <Box
+                                sx={{
+                                    textAlign: 'center',
+                                    py: 6,
+                                    color: '#6b5d4f',
+                                }}
+                            >
+                                <Typography>검색 결과가 없습니다.</Typography>
+                            </Box>
                         )}
-                    </div>
+                    </Box>
 
                     {/* Pagination Controls */}
                     {!isLoading && totalPages > 0 && (
-                        <div className="flex justify-center items-center gap-2 p-6 border-t-2 border-[#e5dfd5] bg-[#ebe5db]">
-                            <button
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                gap: 1,
+                                p: 3,
+                                borderTop: '2px solid #e5dfd5',
+                                bgcolor: '#ebe5db',
+                            }}
+                        >
+                            <Button
                                 onClick={() =>
                                     setCurrentPage((prev) =>
                                         Math.max(prev - 1, 1),
                                     )
                                 }
                                 disabled={currentPage === 1}
-                                className="px-4 py-2 rounded-md border-2 border-[#d4cbbf] bg-white text-[#3d3226] hover:border-[#3d3226] disabled:opacity-50 disabled:cursor-not-allowed"
+                                sx={{
+                                    px: 2,
+                                    py: 1,
+                                    border: '2px solid #d4cbbf',
+                                    bgcolor: 'white',
+                                    color: '#3d3226',
+                                    '&:hover': { borderColor: '#3d3226' },
+                                    '&.Mui-disabled': { opacity: 0.5 },
+                                }}
                             >
                                 이전
-                            </button>
+                            </Button>
 
-                            {/* Simple Page Numbers */}
-                            <div className="flex items-center gap-1">
+                            <Box sx={{ display: 'flex', gap: 0.5 }}>
                                 {(() => {
-                                    const maxButtons = 5; // 한 번에 보여줄 버튼 개수
+                                    const maxButtons = 5;
                                     let startPage = Math.max(
                                         1,
                                         currentPage -
@@ -287,7 +566,6 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                         startPage + maxButtons - 1,
                                     );
 
-                                    // 끝쪽 페이지에 도달했을 때 startPage 조정
                                     if (endPage - startPage + 1 < maxButtons) {
                                         startPage = Math.max(
                                             1,
@@ -299,38 +577,60 @@ export function RecipeBoard({ onNavigate, onRecipeClick }) {
                                         { length: endPage - startPage + 1 },
                                         (_, i) => startPage + i,
                                     ).map((pageNum) => (
-                                        <button
+                                        <Button
                                             key={pageNum}
                                             onClick={() =>
                                                 setCurrentPage(pageNum)
                                             }
-                                            className={`w-10 h-10 rounded-md font-bold transition-colors ${
-                                                currentPage === pageNum
-                                                    ? 'bg-[#3d3226] text-[#f5f1eb]'
-                                                    : 'text-[#3d3226] hover:bg-[#d4cbbf]'
-                                            }`}
+                                            sx={{
+                                                minWidth: 40,
+                                                height: 40,
+                                                fontWeight: 'bold',
+                                                bgcolor:
+                                                    currentPage === pageNum
+                                                        ? '#3d3226'
+                                                        : 'transparent',
+                                                color:
+                                                    currentPage === pageNum
+                                                        ? '#f5f1eb'
+                                                        : '#3d3226',
+                                                '&:hover': {
+                                                    bgcolor:
+                                                        currentPage === pageNum
+                                                            ? '#3d3226'
+                                                            : '#d4cbbf',
+                                                },
+                                            }}
                                         >
                                             {pageNum}
-                                        </button>
+                                        </Button>
                                     ));
                                 })()}
-                            </div>
+                            </Box>
 
-                            <button
+                            <Button
                                 onClick={() =>
                                     setCurrentPage((prev) =>
                                         Math.min(prev + 1, totalPages),
                                     )
                                 }
                                 disabled={currentPage === totalPages}
-                                className="px-4 py-2 rounded-md border-2 border-[#d4cbbf] bg-white text-[#3d3226] hover:border-[#3d3226] disabled:opacity-50 disabled:cursor-not-allowed"
+                                sx={{
+                                    px: 2,
+                                    py: 1,
+                                    border: '2px solid #d4cbbf',
+                                    bgcolor: 'white',
+                                    color: '#3d3226',
+                                    '&:hover': { borderColor: '#3d3226' },
+                                    '&.Mui-disabled': { opacity: 0.5 },
+                                }}
                             >
                                 다음
-                            </button>
-                        </div>
+                            </Button>
+                        </Box>
                     )}
-                </div>
-            </div>
-        </div>
+                </Paper>
+            </Container>
+        </Box>
     );
 }

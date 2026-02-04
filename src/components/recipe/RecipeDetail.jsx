@@ -1,5 +1,24 @@
-import { ArrowLeft, User as UserIcon, Star, Sparkles } from 'lucide-react';
-import { Box } from '@mui/material';
+import {
+    ArrowLeft,
+    User as UserIcon,
+    Star,
+    Sparkles,
+    MapPin,
+} from 'lucide-react';
+import {
+    Box,
+    Container,
+    Paper,
+    Typography,
+    Button,
+    Chip,
+    Stack,
+    Grid,
+    Divider,
+    IconButton,
+    Avatar,
+    Modal,
+} from '@mui/material';
 import { useState, useRef, useMemo, useEffect } from 'react';
 
 import { ImageWithFallback } from '../figma/ImageWithFallback';
@@ -7,7 +26,6 @@ import RecipeComment from './RecipeComment';
 import RecipeRatingBookmark from './RecipeRatingBookmark';
 import { formatDate } from '../../apis/utils/formatDate';
 import KakaoMap from '../KakaoMap';
-// import { useGetHashtagsByRecipeId } from '../../apis/generated/recipe-hashtag-controller/recipe-hashtag-controller';
 
 function safeJsonArray(value, fallback = []) {
     if (Array.isArray(value)) return value;
@@ -60,7 +78,6 @@ export function RecipeDetail({
             mapRef.current.handleAIStoreMap();
             return;
         }
-        // ref 메서드가 없을 때도 사용자 경험은 유지
         alert(
             '지도 기능을 불러오지 못했습니다. (AiStoreMapPage ref 확인 필요)',
         );
@@ -91,12 +108,6 @@ export function RecipeDetail({
         return `https://picsum.photos/seed/${Math.abs(hash)}/500`;
     }, [recipeDetail?.ingredientImgUrl, recipeDetail?.ingredients]);
 
-    // --- bookmark hooks removed ---
-
-    // const hashtags = useGetHashtagsByRecipeId(recipeDetail.recipeId)?.data?.data
-    //     ?.data;
-    // console.log(hashtags);
-
     const hashtags = useMemo(() => {
         const tags = recipeDetail.hashtags || [
             '15분요리',
@@ -112,36 +123,58 @@ export function RecipeDetail({
                 if (tag.hashtag?.name) return tag.hashtag.name;
                 return '';
             })
-            .filter(Boolean); // Handle mock/fallback strings
+            .filter(Boolean);
     }, [recipeDetail.hashtags]);
+
     const handleBack = () => {
         if (typeof onNavigate === 'function') {
-            // page에서 onNavigate={() => navigate(...)} 형태면 인자 무시됨
             onNavigate('home');
             return;
         }
     };
 
     return (
-        <div className="pt-3">
-            <div className="max-w-[1200px] mx-auto px-2 py-3">
+        <Box sx={{ py: 4, bgcolor: '#f5f5f5', minHeight: '100vh' }}>
+            <Container maxWidth="lg">
                 {/* Back Button */}
-                <button
+                <Button
+                    startIcon={<ArrowLeft size={20} />}
                     onClick={handleBack}
-                    className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
+                    sx={{
+                        mb: 3,
+                        px: 2,
+                        py: 1,
+                        border: '2px solid #3d3226',
+                        color: '#3d3226',
+                        borderRadius: 1,
+                        fontWeight: 'bold',
+                        '&:hover': {
+                            bgcolor: '#3d3226',
+                            color: '#f5f1eb',
+                        },
+                    }}
                 >
-                    <ArrowLeft size={20} />
                     목록으로 돌아가기
-                </button>
+                </Button>
 
-                {/* Recipe Header */}
-                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] overflow-hidden mb-8">
+                {/* Recipe Header Card */}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        borderRadius: 2,
+                        border: '2px solid #e5dfd5',
+                        overflow: 'hidden',
+                        mb: 4,
+                    }}
+                >
                     <Box
                         sx={{
                             position: 'relative',
-                            aspectRatio: '4 / 3',
+                            // width: '100%',
+                            // maxHeight: '600px', // Limit height on large screens
+                            aspectRatio: { xs: '4/3', md: '16/9' },
                             overflow: 'hidden',
-                            backgroundColor: 'white', // Background to match the theme or black if preferred
+                            bgcolor: '#fff',
                         }}
                     >
                         <ImageWithFallback
@@ -154,33 +187,65 @@ export function RecipeDetail({
                         />
                     </Box>
 
-                    <div className="p-8">
-                        <div className="flex justify-between items-start mb-2">
-                            <div className="w-full">
-                                <h1 className="text-4xl mb-4 text-[#3d3226]">
+                    <Box sx={{ p: 4 }}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'flex-start',
+                                mb: 2,
+                            }}
+                        >
+                            <Box sx={{ width: '100%' }}>
+                                <Typography
+                                    variant="h3"
+                                    component="h1"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        color: '#3d3226',
+                                        mb: 2,
+                                    }}
+                                >
                                     {recipeDetail.title}
-                                </h1>
+                                </Typography>
 
                                 {/* Meta Info */}
-                                <div className="flex flex-wrap items-center gap-6 text-[#6b5d4f] mt-4">
-                                    <div className="flex items-center gap-2">
-                                        {recipeDetail.profileImgUrl ? (
-                                            <img
-                                                src={recipeDetail.profileImgUrl}
-                                                alt={recipeDetail.username}
-                                                className="w-10 h-10 rounded-full object-cover border border-[#d4cbbf]"
+                                <Stack
+                                    direction="row"
+                                    flexWrap="wrap"
+                                    alignItems="center"
+                                    spacing={3}
+                                    sx={{ color: '#6b5d4f' }}
+                                >
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                        }}
+                                    >
+                                        <Avatar
+                                            src={recipeDetail.profileImgUrl}
+                                            alt={recipeDetail.username}
+                                            sx={{
+                                                width: 40,
+                                                height: 40,
+                                                border: '1px solid #d4cbbf',
+                                            }}
+                                        >
+                                            <UserIcon
+                                                size={20}
+                                                color="#6b5d4f"
                                             />
-                                        ) : (
-                                            <div className="w-10 h-10 rounded-full bg-[#ebe5db] flex items-center justify-center border border-[#d4cbbf]">
-                                                <UserIcon
-                                                    size={20}
-                                                    className="text-[#6b5d4f]"
-                                                />
-                                            </div>
-                                        )}
-
-                                        <span
-                                            className="cursor-pointer hover:underline"
+                                        </Avatar>
+                                        <Typography
+                                            fontWeight="medium"
+                                            sx={{
+                                                cursor: 'pointer',
+                                                '&:hover': {
+                                                    textDecoration: 'underline',
+                                                },
+                                            }}
                                             onClick={() => {
                                                 if (!recipeDetail.userId)
                                                     return;
@@ -191,157 +256,311 @@ export function RecipeDetail({
                                             }}
                                         >
                                             {recipeDetail.username || 'Unknown'}
-                                        </span>
-                                    </div>
+                                        </Typography>
+                                    </Box>
 
-                                    <div className="flex items-center gap-2">
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 0.5,
+                                        }}
+                                    >
                                         <Star
                                             size={18}
                                             fill="#f59e0b"
-                                            className="text-[#f59e0b]"
+                                            color="#f59e0b"
                                         />
-                                        <span className="font-bold text-[#3d3226]">
+                                        <Typography
+                                            fontWeight="bold"
+                                            sx={{ color: '#3d3226' }}
+                                        >
                                             {averageRating}
-                                        </span>
-                                        <span className="text-sm text-[#6b5d4f]">
+                                        </Typography>
+                                        <Typography variant="body2">
                                             ({totalRatings}명)
-                                        </span>
-                                    </div>
+                                        </Typography>
+                                    </Box>
 
-                                    <div className="flex items-center gap-2">
-                                        <span>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1,
+                                        }}
+                                    >
+                                        <Typography variant="body2">
                                             조회수 {recipeDetail.viewCount}
-                                        </span>
-                                        <span className="w-1 h-1 bg-[#d4cbbf] rounded-full" />
-                                        <span>
+                                        </Typography>
+                                        <Box
+                                            sx={{
+                                                width: 4,
+                                                height: 4,
+                                                bgcolor: '#d4cbbf',
+                                                borderRadius: '50%',
+                                            }}
+                                        />
+                                        <Typography variant="body2">
                                             {recipeDetail.updateDt &&
                                             recipeDetail.updateDt !==
                                                 recipeDetail.createDt
-                                                ? `${formatDate(
-                                                      recipeDetail.updateDt,
-                                                  )} (수정됨)`
+                                                ? `${formatDate(recipeDetail.updateDt)} (수정됨)`
                                                 : formatDate(
                                                       recipeDetail.createDt,
                                                   )}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                                        </Typography>
+                                    </Box>
+                                </Stack>
+                            </Box>
+                        </Box>
 
-                        {/* Rating Section (컴포넌트 유지) */}
-                        <div className="mb-6">
+                        <Box sx={{ mb: 3 }}>
                             <RecipeRatingBookmark
                                 recipeId={recipeDetail.recipeId}
                                 isLoggedIn={isLoggedIn}
                                 onOpenAuth={onOpenAuth}
                                 onStatsChange={handleStatsChange}
                             />
-                        </div>
+                        </Box>
 
-                        {/* Description */}
-                        <p className="text-lg text-[#6b5d4f] leading-relaxed">
-                            {recipeDetail?.intro}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Ingredients */}
-                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8 mb-8">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl text-[#3d3226]">재료</h2>
-
-                        <button
-                            onClick={handleAIStoreMap}
-                            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md"
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                color: '#6b5d4f',
+                                lineHeight: 1.6,
+                                fontWeight: 'normal',
+                            }}
                         >
-                            <Sparkles size={16} />내 근처 재료 찾기
-                        </button>
-                    </div>
+                            {recipeDetail?.intro}
+                        </Typography>
+                    </Box>
+                </Paper>
 
-                    <div className="flex justify-between gap-4">
-                        <div className="flex-1">
-                            <ul className="space-y-3">
+                {/* Ingredients Section */}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        borderRadius: 2,
+                        border: '2px solid #e5dfd5',
+                        overflow: 'hidden',
+                        p: 4,
+                        mb: 4,
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mb: 3,
+                        }}
+                    >
+                        <Typography
+                            variant="h4"
+                            sx={{ color: '#3d3226', fontWeight: 'bold' }}
+                        >
+                            재료
+                        </Typography>
+                        <Button
+                            onClick={handleAIStoreMap}
+                            startIcon={<Sparkles size={16} />}
+                            sx={{
+                                background:
+                                    'linear-gradient(to right, #10b981, #0d9488)',
+                                color: 'white',
+                                px: 2,
+                                py: 1,
+                                borderRadius: 1,
+                                boxShadow: 2,
+                                fontWeight: 'bold',
+                                '&:hover': {
+                                    background:
+                                        'linear-gradient(to right, #059669, #0f766e)',
+                                },
+                            }}
+                        >
+                            내 근처 재료 찾기
+                        </Button>
+                    </Box>
+
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: { xs: 'column-reverse', md: 'row' },
+                            justifyContent: 'space-between',
+                            alignItems: { xs: 'center', md: 'flex-start' },
+                            gap: 4,
+                        }}
+                    >
+                        <Box sx={{ flex: 1, width: '100%' }}>
+                            <Stack spacing={2}>
                                 {ingredientsArr.map((ingredient, index) => (
-                                    <li
+                                    <Box
                                         key={index}
-                                        className="flex items-center gap-3 text-[#6b5d4f]"
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 1.5,
+                                            color: '#6b5d4f',
+                                        }}
                                     >
-                                        <span className="w-2 h-2 bg-[#3d3226] rounded-full flex-shrink-0" />
-                                        <span className="text-lg">
+                                        <Box
+                                            sx={{
+                                                width: 8,
+                                                height: 8,
+                                                bgcolor: '#3d3226',
+                                                borderRadius: '50%',
+                                                flexShrink: 0,
+                                            }}
+                                        />
+                                        <Typography variant="h6">
                                             {ingredient}
-                                        </span>
-                                    </li>
+                                        </Typography>
+                                    </Box>
                                 ))}
-                            </ul>
-                        </div>
+                            </Stack>
+                        </Box>
 
-                        <div className="flex flex-col items-center justify-end gap-2">
-                            <img
-                                src={ingredientImgSrc}
-                                alt="Ingredients"
-                                style={{
-                                    width: `${Math.max(
-                                        120,
-                                        ingredientsArr.length * 40,
-                                    )}px`,
-                                    height: `${Math.max(
-                                        120,
-                                        ingredientsArr.length * 40,
-                                    )}px`,
-                                }}
-                                className="rounded-full object-cover border-2 border-[#d4cbbf] shadow-lg cursor-pointer hover:scale-110 transition-transform duration-200"
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                flexShrink: 0,
+                            }}
+                        >
+                            <Box
                                 onClick={() => setIsIngredientModalOpen(true)}
-                            />
-                            <p className="text-[#6b5d4f] text-xs">
+                                sx={{
+                                    width: { xs: 200, sm: 200 },
+                                    height: { xs: 200, sm: 200 },
+                                    borderRadius: '50%',
+                                    overflow: 'hidden',
+                                    border: '2px solid #d4cbbf',
+                                    cursor: 'pointer',
+                                    boxShadow: 3,
+                                    transition: 'transform 0.2s',
+                                    '&:hover': { transform: 'scale(1.05)' },
+                                    mb: 1,
+                                }}
+                            >
+                                <ImageWithFallback
+                                    src={ingredientImgSrc}
+                                    alt="Ingredients"
+                                    className="w-full h-full object-cover"
+                                />
+                            </Box>
+                            <Typography
+                                variant="caption"
+                                sx={{ color: '#6b5d4f' }}
+                            >
                                 클릭하면 그림이 확대됩니다.
-                            </p>
-                        </div>
-                    </div>
-                    <KakaoMap
-                        ref={mapRef}
-                        ingredients={ingredientsArr}
-                    ></KakaoMap>
-                </div>
+                            </Typography>
+                        </Box>
+                    </Box>
 
-                {/* Steps */}
-                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8">
-                    <h2 className="text-2xl mb-6 text-[#3d3226]">조리 방법</h2>
-                    <div className="space-y-6">
+                    <Box sx={{ mt: 4 }}>
+                        <KakaoMap ref={mapRef} ingredients={ingredientsArr} />
+                    </Box>
+                </Paper>
+
+                {/* Steps Section */}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        borderRadius: 2,
+                        border: '2px solid #e5dfd5',
+                        overflow: 'hidden',
+                        p: 4,
+                        mb: 4,
+                    }}
+                >
+                    <Typography
+                        variant="h4"
+                        sx={{ color: '#3d3226', fontWeight: 'bold', mb: 3 }}
+                    >
+                        조리 방법
+                    </Typography>
+                    <Stack spacing={4}>
                         {(recipeDetail.steps || '')
                             .split('\n')
                             .filter(Boolean)
                             .map((step, index) => (
-                                <div key={index} className="flex gap-4">
-                                    <div className="flex-shrink-0 w-10 h-10 bg-[#3d3226] text-[#f5f1eb] rounded-full flex items-center justify-center font-bold">
+                                <Box
+                                    key={index}
+                                    sx={{ display: 'flex', gap: 2 }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: 40,
+                                            height: 40,
+                                            bgcolor: '#3d3226',
+                                            color: '#f5f1eb',
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontWeight: 'bold',
+                                            flexShrink: 0,
+                                        }}
+                                    >
                                         {index + 1}
-                                    </div>
-                                    <div className="flex-1 pt-1">
-                                        <p className="text-lg text-[#6b5d4f] leading-relaxed">
-                                            {step}
-                                        </p>
-                                    </div>
-                                </div>
+                                    </Box>
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            color: '#6b5d4f',
+                                            lineHeight: 1.6,
+                                            pt: 0.5,
+                                        }}
+                                    >
+                                        {step}
+                                    </Typography>
+                                </Box>
                             ))}
-                    </div>
-                </div>
+                    </Stack>
+                </Paper>
 
-                {/* Hashtags */}
-                <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8 mt-8">
-                    <h2 className="text-2xl mb-4 text-[#3d3226]">해시태그</h2>
-                    <div className="flex flex-wrap gap-3">
+                {/* Hashtags Section */}
+                <Paper
+                    elevation={3}
+                    sx={{
+                        borderRadius: 2,
+                        border: '2px solid #e5dfd5',
+                        overflow: 'hidden',
+                        p: 4,
+                        mb: 4,
+                    }}
+                >
+                    <Typography
+                        variant="h4"
+                        sx={{ color: '#3d3226', fontWeight: 'bold', mb: 3 }}
+                    >
+                        해시태그
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5 }}>
                         {hashtags.map((tag) => (
-                            <button
+                            <Chip
                                 key={tag}
-                                className="px-4 py-2 bg-[#ebe5db] text-[#3d3226] rounded-full border-2 border-[#d4cbbf] hover:border-[#3d3226] transition-colors"
-                            >
-                                #{tag}
-                            </button>
+                                label={`#${tag}`}
+                                sx={{
+                                    bgcolor: '#ebe5db',
+                                    color: '#3d3226',
+                                    fontWeight: 'medium',
+                                    border: '2px solid #d4cbbf',
+                                    fontSize: '1rem',
+                                    py: 2.5,
+                                    px: 1,
+                                    '&:hover': {
+                                        borderColor: '#3d3226',
+                                    },
+                                }}
+                            />
                         ))}
-                    </div>
-                </div>
+                    </Box>
+                </Paper>
 
-                {/* Comments Component (API 댓글 유지) */}
+                {/* Comments Section */}
                 <RecipeComment
                     comments={comments ?? []}
                     isLoggedIn={isLoggedIn}
@@ -352,29 +571,49 @@ export function RecipeDetail({
                 />
 
                 {/* Ingredient Image Modal */}
-                {isIngredientModalOpen && (
-                    <div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
-                        onClick={() => setIsIngredientModalOpen(false)}
+                <Modal
+                    open={isIngredientModalOpen}
+                    onClose={() => setIsIngredientModalOpen(false)}
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: 'rgba(0,0,0,0.8)',
+                    }}
+                >
+                    <Box
+                        sx={{
+                            position: 'relative',
+                            maxWidth: '80vw',
+                            maxHeight: '80vh',
+                            outline: 'none',
+                        }}
                     >
-                        <div className="relative max-w-[80vw] max-h-[80vh]">
-                            <button
-                                onClick={() => setIsIngredientModalOpen(false)}
-                                className="absolute -top-10 right-0 text-white hover:text-gray-300"
-                            >
-                                <span className="text-2xl">&times;</span>
-                            </button>
-
-                            <img
-                                src={ingredientImgSrc}
-                                alt="Ingredients Large"
-                                className="w-full h-full object-contain rounded-lg"
-                                onClick={(e) => e.stopPropagation()}
-                            />
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+                        <IconButton
+                            onClick={() => setIsIngredientModalOpen(false)}
+                            sx={{
+                                position: 'absolute',
+                                top: -50,
+                                right: 0,
+                                color: 'white',
+                            }}
+                        >
+                            <Typography variant="h4">&times;</Typography>
+                        </IconButton>
+                        <img
+                            src={ingredientImgSrc}
+                            alt="Ingredients Large"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                borderRadius: 8,
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    </Box>
+                </Modal>
+            </Container>
+        </Box>
     );
 }
