@@ -17,12 +17,16 @@ export function AdminDashboard() {
     const currentBucket = range;
 
     // Queries for each metric
+    const { data: usersSeries } = useGetTimeSeries({
+        metric: 'users',
+        bucket: currentBucket,
+    });
     const { data: recipesSeries } = useGetTimeSeries({
         metric: 'recipes',
         bucket: currentBucket,
     });
-    const { data: usersSeries } = useGetTimeSeries({
-        metric: 'users',
+    const { data: postsSeries } = useGetTimeSeries({
+        metric: 'posts',
         bucket: currentBucket,
     });
 
@@ -50,6 +54,7 @@ export function AdminDashboard() {
 
     const usersData = transformData(usersSeries?.data?.data, currentBucket);
     const recipesData = transformData(recipesSeries?.data?.data, currentBucket);
+    const postsData = transformData(postsSeries?.data?.data, currentBucket);
 
     const { data: dashboardStats } = useGetDashboardStats();
     const { data: recentActivities } = useGetRecentActivities({ limit: 3 });
@@ -79,7 +84,7 @@ export function AdminDashboard() {
         },
         {
             title: '커뮤니티 게시글 수',
-            value: statsData?.totalCommunityPosts ?? '-',
+            value: statsData?.totalPosts ?? '-',
             icon: MessageSquare,
             bgColor: 'bg-purple-50',
             iconColor: 'text-purple-600',
@@ -105,6 +110,12 @@ export function AdminDashboard() {
         if (activity.type === 'RECIPE' && activity.action === 'UPDATED') {
             return `${activity.username}님이 "${activity.title}" 레시피를 수정하셨습니다.`;
         }
+        if (activity.type === 'POST' && activity.action === 'CREATED') {
+            return `${activity.username}님이 "${activity.title}" 게시글을 작성하셨습니다.`;
+        }
+        if (activity.type === 'POST' && activity.action === 'UPDATED') {
+            return `${activity.username}님이 "${activity.title}" 게시글을 수정하셨습니다.`;
+        }
         if (activity.type === 'SIGNUP' && activity.action === 'CREATED') {
             return `${activity.username}님이 가입하셨습니다.`;
         }
@@ -117,7 +128,9 @@ export function AdminDashboard() {
             ? usersData
             : selectedMetric === 'recipes'
               ? recipesData
-              : [];
+              : selectedMetric === 'community'
+                ? postsData
+                : [];
 
     return (
         <div onClick={() => setSelectedMetric(null)}>
@@ -137,7 +150,6 @@ export function AdminDashboard() {
                             className={`${stat.bgColor} border-2 ${stat.borderColor} rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow cursor-pointer`}
                             onClick={(e) => {
                                 e.stopPropagation();
-                                if (stat.type === 'community') return;
                                 if (selectedMetric === stat.type) {
                                     setSelectedMetric(null);
                                 } else {
@@ -174,7 +186,9 @@ export function AdminDashboard() {
                           ? '사용자 수'
                           : selectedMetric === 'recipes'
                             ? '레시피 수'
-                            : '전체 현황'}
+                            : selectedMetric === 'community'
+                              ? '게시글 수'
+                              : '전체 현황'}
                 </h2>
 
                 {selectedMetric === null ? (
@@ -190,6 +204,11 @@ export function AdminDashboard() {
                                 data: recipesData.map((d) => d.value),
                                 color: '#16A34A',
                                 label: '레시피',
+                            },
+                            {
+                                data: postsData.map((d) => d.value),
+                                color: '#A855F7',
+                                label: '게시글',
                             },
                         ]}
                     />

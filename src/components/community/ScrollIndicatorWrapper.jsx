@@ -85,6 +85,11 @@ export function ScrollIndicatorWrapper({ children, sx = {} }) {
                     flex: 1,
                     overflowY: 'auto',
                     position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    '& > *': {
+                        flexShrink: 0,
+                    },
                     // Default scrollbar styling matching project theme
                     '&::-webkit-scrollbar': {
                         width: '8px',

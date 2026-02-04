@@ -7,7 +7,7 @@ import RecipeEditPage from '../pages/boards/recipe/recipe-edit-page/RecipeEditPa
 export default function RecipeRouter() {
     return (
         <Routes>
-            {/* /boards/:boardId/recipe */}
+            {/* /board/:boardId/recipe */}
             <Route path="" element={<RecipeListPage />} />
             <Route path="filtered" element={<Navigate to=".." replace />} />
             <Route path="write" element={<RecipeWritePage />} />
