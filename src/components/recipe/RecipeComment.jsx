@@ -1,6 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { Trash2, Mail } from 'lucide-react';
-import { Alert, AlertTitle, Box, Slide, Typography } from '@mui/material';
+import { Trash2 } from 'lucide-react';
+import {
+    Alert,
+    Box,
+    Paper,
+    Typography,
+    Stack,
+    TextField,
+    Button,
+    IconButton,
+    Avatar,
+    Fade,
+    Slide,
+} from '@mui/material';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrincipalState } from '../../store/usePrincipalState';
@@ -10,6 +22,7 @@ import {
     getGetRecipeCommentListByTargetQueryKey,
 } from '../../apis/generated/comment-controller/comment-controller';
 import { formatDate } from '../../apis/utils/formatDate';
+import { shake } from '../../styles/animations';
 
 export default function RecipeComment({
     comments,
@@ -18,7 +31,6 @@ export default function RecipeComment({
     recipeDetail,
 }) {
     const [newComment, setNewComment] = useState('');
-    const [showEmailWarning, setShowEmailWarning] = useState(false);
     const [showEmptyWarning, setShowEmptyWarning] = useState(false);
     const textareaRef = useRef(null);
 
@@ -56,7 +68,6 @@ export default function RecipeComment({
             return;
         }
 
-        // Check email verification (roleId 1 or 2)
         const hasValidRole =
             principal.userRoles.filter(
                 (role) => role.roleId === 1 || role.roleId === 2,
@@ -74,12 +85,10 @@ export default function RecipeComment({
         }
 
         try {
-            const response = await addRecipeComment(recipeDetail.recipeId, {
+            await addRecipeComment(recipeDetail.recipeId, {
                 content: newComment,
             });
-            // console.log('Submit comment:', response?.data?.data);
             setNewComment('');
-            // alert('댓글이 등록되었습니다.');
             await queryClient.invalidateQueries({
                 queryKey: getGetRecipeCommentListByTargetQueryKey(
                     recipeDetail.recipeId,
@@ -95,8 +104,6 @@ export default function RecipeComment({
 
     const handleCommentDelete = async (commentId) => {
         setShakingCommentId(commentId);
-
-        // Wait for animation (400ms)
         await new Promise((resolve) => setTimeout(resolve, 400));
         setShakingCommentId(null);
 
@@ -115,158 +122,259 @@ export default function RecipeComment({
     };
 
     return (
-        <>
-            {/* Comments */}
-            <div className="bg-white rounded-lg shadow-lg border-2 border-[#e5dfd5] p-8 mt-8">
-                <h2 className="text-2xl mb-4 text-[#3d3226]">댓글</h2>
-                <div className="space-y-4">
-                    {comments &&
-                        comments.map((comment) => {
-                            const isMine = principal?.userId === comment.userId;
-                            return (
-                                <div
-                                    key={comment.commentId || comment.id}
-                                    className="flex items-center gap-4"
+        <Paper
+            elevation={3}
+            sx={{
+                p: 4,
+                mt: 4,
+                bgcolor: '#ffffff',
+                border: '2px solid #e5dfd5',
+                borderRadius: 2,
+            }}
+        >
+            <Typography
+                variant="h5"
+                sx={{ mb: 2, color: '#3d3226', fontWeight: 'bold' }}
+            >
+                댓글
+            </Typography>
+
+            <Stack spacing={3} sx={{ mb: 4 }}>
+                {comments &&
+                    comments.map((comment) => {
+                        const isMine = principal?.userId === comment.userId;
+                        const isShaking =
+                            shakingCommentId ===
+                            (comment.commentId || comment.id);
+
+                        return (
+                            <Box
+                                key={comment.commentId || comment.id}
+                                sx={{
+                                    display: 'flex',
+                                    gap: 2,
+                                }}
+                            >
+                                {/* Avatar */}
+                                <Box
+                                    sx={{
+                                        width: 48,
+                                        height: 48,
+                                        borderRadius: '50%',
+                                        overflow: 'hidden',
+                                        flexShrink: 0,
+                                        bgcolor: '#3d3226',
+                                    }}
                                 >
-                                    <div className="flex-shrink-0 w-12 h-12 bg-[#3d3226] text-[#f5f1eb] rounded-full flex items-center justify-center font-bold overflow-hidden">
-                                        <ImageWithFallback
-                                            src={
-                                                comment.profileImgUrl ||
-                                                `https://picsum.photos/seed/${comment.userId}/200`
-                                            }
-                                            alt={String(comment.userId)}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <div className="flex items-start justify-between mb-1">
-                                            <div className="flex flex-col gap-0.5">
-                                                <span className="font-bold text-[#3d3226]">
-                                                    {comment.username}
-                                                </span>
-                                                <span className="text-xs text-[#9c9489]">
-                                                    {formatDate(
-                                                        comment.createDt,
-                                                    )}
-                                                </span>
-                                            </div>
-                                            {isMine && (
-                                                <button
-                                                    onClick={() =>
-                                                        handleCommentDelete(
-                                                            comment.commentId ||
-                                                                comment.id,
-                                                        )
-                                                    }
-                                                    className={`hover:text-red-700 transition-colors ${
-                                                        shakingCommentId ===
-                                                        (comment.commentId ||
-                                                            comment.id)
-                                                            ? 'text-red-700 animate-shake'
-                                                            : 'text-red-500'
-                                                    }`}
+                                    <ImageWithFallback
+                                        src={
+                                            comment.profileImgUrl ||
+                                            `https://picsum.photos/seed/${comment.userId}/200`
+                                        }
+                                        alt={String(comment.userId)}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </Box>
+
+                                {/* Content */}
+                                <Box sx={{ flex: 1 }}>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'flex-start',
+                                            mb: 0.5,
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                            }}
+                                        >
+                                            <Typography
+                                                variant="subtitle1"
+                                                sx={{
+                                                    fontWeight: 'bold',
+                                                    color: '#3d3226',
+                                                    lineHeight: 1.2,
+                                                }}
+                                            >
+                                                {comment.username}
+                                            </Typography>
+                                            <Typography
+                                                variant="caption"
+                                                sx={{ color: '#9c9489' }}
+                                            >
+                                                {formatDate(comment.createDt)}
+                                            </Typography>
+                                        </Box>
+
+                                        {isMine && (
+                                            <IconButton
+                                                onClick={() =>
+                                                    handleCommentDelete(
+                                                        comment.commentId ||
+                                                            comment.id,
+                                                    )
+                                                }
+                                                size="small"
+                                                sx={{
+                                                    color: isShaking
+                                                        ? '#ef4444'
+                                                        : '#ef4444',
+                                                    '&:hover': {
+                                                        bgcolor:
+                                                            'rgba(239, 68, 68, 0.1)',
+                                                        color: '#b91c1c',
+                                                    },
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        animation: isShaking
+                                                            ? `${shake} 0.4s ease-in-out`
+                                                            : 'none',
+                                                    }}
                                                 >
-                                                    <Trash2 size={20} />
-                                                </button>
-                                            )}
-                                        </div>
-                                        <p className="text-lg text-[#6b5d4f] leading-relaxed">
-                                            {comment.content}
-                                        </p>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                </div>
-                <div className="mt-6 relative">
-                    <textarea
-                        ref={textareaRef}
-                        value={newComment}
-                        onChange={(e) => {
-                            setNewComment(e.target.value);
-                            if (showEmptyWarning) setShowEmptyWarning(false);
+                                                    <Trash2 size={18} />
+                                                </Box>
+                                            </IconButton>
+                                        )}
+                                    </Box>
+                                    <Typography
+                                        variant="body1"
+                                        sx={{
+                                            color: '#6b5d4f',
+                                            lineHeight: 1.6,
+                                        }}
+                                    >
+                                        {comment.content}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        );
+                    })}
+            </Stack>
+
+            {/* Input Area */}
+            <Box sx={{ position: 'relative', mt: 2 }}>
+                <TextField
+                    inputRef={textareaRef}
+                    value={newComment}
+                    onChange={(e) => {
+                        setNewComment(e.target.value);
+                        if (showEmptyWarning) setShowEmptyWarning(false);
+                    }}
+                    placeholder="댓글을 입력하세요..."
+                    multiline
+                    minRows={3}
+                    fullWidth
+                    variant="outlined"
+                    sx={{
+                        bgcolor: '#ffffff',
+                        '& .MuiOutlinedInput-root': {
+                            '& fieldset': {
+                                borderColor: '#d4cbbf',
+                                borderWidth: 2,
+                            },
+                            '&:hover fieldset': { borderColor: '#3d3226' },
+                            '&.Mui-focused fieldset': {
+                                borderColor: '#3d3226',
+                            },
+                        },
+                    }}
+                />
+
+                {/* Empty Warning Tooltip (Custom) */}
+                <Fade in={showEmptyWarning} mountOnEnter unmountOnExit>
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            bgcolor: 'rgba(61, 50, 38, 0.9)',
+                            color: '#f5f1eb',
+                            px: 3,
+                            py: 1.5,
+                            borderRadius: 4,
+                            boxShadow: 4,
+                            zIndex: 10,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            pointerEvents: 'none',
                         }}
-                        placeholder="댓글을 입력하세요..."
-                        className="w-full p-4 border-2 border-[#d4cbbf] rounded-lg focus:outline-none focus:border-[#3d3226]"
-                    />
-                    {/* Empty Content Warning Tooltip */}
-                    <div
-                        className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500 ease-in-out pointer-events-none ${
-                            showEmptyWarning
-                                ? 'opacity-100 translate-y-[-50%]'
-                                : 'opacity-0 translate-y-[-40%]'
-                        }`}
                     >
-                        <div className="bg-[#3d3226]/90 text-[#f5f1eb] px-6 py-3 rounded-full shadow-xl flex items-center gap-3 backdrop-blur-sm whitespace-nowrap">
-                            <span className="text-xl">✍️</span>
-                            <span className="font-medium">
-                                댓글 내용을 입력해주세요.
-                            </span>
-                        </div>
-                    </div>
+                        <span style={{ fontSize: '1.2rem' }}>✍️</span>
+                        <Typography variant="body2" fontWeight="bold">
+                            댓글 내용을 입력해주세요.
+                        </Typography>
+                    </Box>
+                </Fade>
 
-                    <div className="mt-4 flex items-start gap-4 min-h-[56px]">
-                        <button
-                            onClick={handleCommentSubmit}
-                            className="px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5c4c40] transition-colors shrink-0"
-                        >
-                            댓글 작성
-                        </button>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mt: 2,
+                    }}
+                >
+                    <Button
+                        onClick={handleCommentSubmit}
+                        variant="contained"
+                        sx={{
+                            bgcolor: '#3d3226',
+                            color: '#f5f1eb',
+                            py: 1.5,
+                            px: 3,
+                            fontWeight: 'bold',
+                            '&:hover': { bgcolor: '#5c4c40' },
+                        }}
+                    >
+                        댓글 작성
+                    </Button>
 
-                        <Slide
-                            direction="up"
-                            in={showAuthAlert}
-                            mountOnEnter
-                            unmountOnExit
+                    <Slide
+                        direction="up"
+                        in={showAuthAlert}
+                        mountOnEnter
+                        unmountOnExit
+                    >
+                        <Alert
+                            severity="warning"
+                            variant="filled"
+                            sx={{
+                                bgcolor: '#d97706',
+                                borderRadius: 2,
+                                color: '#fff',
+                                '& .MuiAlert-icon': { color: '#fff' },
+                            }}
                         >
                             <Box
                                 sx={{
-                                    width: 'auto',
-                                    boxShadow: 3,
-                                    borderRadius: 2,
-                                    zIndex: 10,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
                                 }}
                             >
-                                <Alert
-                                    severity="warning"
-                                    variant="filled"
-                                    sx={{
-                                        py: 0.5,
-                                        px: 2,
-                                        backgroundColor: '#d97706',
-                                        color: '#fff',
-                                        alignItems: 'center',
-                                        '& .MuiAlert-icon': {
-                                            color: '#fff',
-                                            py: 0,
-                                        },
-                                    }}
+                                <Typography variant="body2" fontWeight="bold">
+                                    미인증 계정입니다.
+                                </Typography>
+                                <Typography
+                                    variant="caption"
+                                    sx={{ color: 'rgba(255,255,255,0.8)' }}
                                 >
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-bold text-sm">
-                                            미인증 계정입니다.
-                                        </span>
-                                        <span className="text-xs text-white/90">
-                                            2초 후 프로필 이동...
-                                        </span>
-                                    </div>
-                                </Alert>
+                                    2초 후 프로필 이동...
+                                </Typography>
                             </Box>
-                        </Slide>
-                    </div>
-                </div>
-            </div>
-
-            <style>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                @keyframes scaleIn {
-                    from { transform: scale(0.9); opacity: 0; }
-                    to { transform: scale(1); opacity: 1; }
-                }
-            `}</style>
-        </>
+                        </Alert>
+                    </Slide>
+                </Box>
+            </Box>
+        </Paper>
     );
 }
