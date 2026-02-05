@@ -15,6 +15,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiRespDtoString,
+  ApiRespDtoVoid,
   SigninReqDto,
   SignupReqDto
 } from '../openAPIDefinition.schemas';
@@ -31,7 +33,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type signupResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -107,7 +109,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getSignupMutationOptions(options), queryClient);
     }
     export type signinResponse200 = {
-  data: Blob
+  data: ApiRespDtoString
   status: 200
 }
     
@@ -182,8 +184,83 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getSigninMutationOptions(options), queryClient);
     }
+    export type refreshResponse200 = {
+  data: ApiRespDtoString
+  status: 200
+}
+    
+export type refreshResponseSuccess = (refreshResponse200) & {
+  headers: Headers;
+};
+;
+
+export type refreshResponse = (refreshResponseSuccess)
+
+export const getRefreshUrl = () => {
+
+
+  
+
+  return `/user/auth/refresh`
+}
+
+export const refresh = async ( options?: RequestInit): Promise<refreshResponse> => {
+  
+  return customInstance<refreshResponse>(getRefreshUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+
+
+
+
+export const getRefreshMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext> => {
+
+const mutationKey = ['refresh'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refresh>>, void> = () => {
+          
+
+          return  refresh(requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RefreshMutationResult = NonNullable<Awaited<ReturnType<typeof refresh>>>
+    
+    export type RefreshMutationError = unknown
+
+    export const useRefresh = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof refresh>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRefreshMutationOptions(options), queryClient);
+    }
     export type logoutResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     

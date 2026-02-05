@@ -263,6 +263,32 @@ export interface ApiRespDtoRatingSummaryRespDto {
   data?: RatingSummaryRespDto;
 }
 
+export interface PostListRespDto {
+  postId?: number;
+  userId?: number;
+  username?: string;
+  title?: string;
+  profileImgUrl?: string;
+  thumbnailImgUrl?: string;
+  viewCount?: number;
+  commentCount?: number;
+  createDt?: string;
+  updateDt?: string;
+}
+
+export interface CursorRespDtoPostListRespDto {
+  items?: PostListRespDto[];
+  hasNext?: boolean;
+  nextCursor?: string;
+}
+
+export interface ApiRespDtoCursorRespDtoPostListRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: CursorRespDtoPostListRespDto;
+}
+
 export interface NotificationRespDto {
   notificationId?: number;
   actorUserId?: number;
@@ -417,32 +443,6 @@ export interface ApiRespDtoRecipeDetailRespDto {
   data?: RecipeDetailRespDto;
 }
 
-export interface PostListRespDto {
-  postId?: number;
-  userId?: number;
-  username?: string;
-  title?: string;
-  profileImgUrl?: string;
-  thumbnailImgUrl?: string;
-  viewCount?: number;
-  commentCount?: number;
-  createDt?: string;
-  updateDt?: string;
-}
-
-export interface CursorRespDtoPostListRespDto {
-  items?: PostListRespDto[];
-  hasNext?: boolean;
-  nextCursor?: string;
-}
-
-export interface ApiRespDtoCursorRespDtoPostListRespDto {
-  status?: string;
-  message?: string;
-  /** 응답 데이터(없으면 null) */
-  data?: CursorRespDtoPostListRespDto;
-}
-
 export interface PostDetailRespDto {
   postId?: number;
   boardId?: number;
@@ -585,6 +585,28 @@ size?: number;
 
 export type SearchHashtagsParams = {
 keyword: string;
+};
+
+export type GetPostListByUserIdByCursorParams = {
+/**
+ * 한 번에 가져올 개수(기본 20, 최대 50)
+ */
+size?: number;
+/**
+ * 커서(형식: createDt|postId)
+ */
+cursor?: string;
+};
+
+export type GetMyPostListByCursorParams = {
+/**
+ * 한 번에 가져올 개수(기본 20, 최대 50)
+ */
+size?: number;
+/**
+ * 커서(형식: createDt|postId)
+ */
+cursor?: string;
 };
 
 export type GetNotificationsParams = {
