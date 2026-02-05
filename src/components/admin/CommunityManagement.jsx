@@ -15,7 +15,7 @@ import { AdminManagementLayout } from './common/AdminManagementLayout';
 import { ActionConfirmButton } from './common/ActionConfirmButton';
 import { getAdminPostList } from '../../apis/generated/manage-controller/manage-controller';
 import { useDeletePost } from '../../apis/generated/post-controller/post-controller';
-import { formatDate } from '../../apis/utils/formatDate';
+import { formatDate } from '../../utils/formatDate';
 
 export function CommunityManagement() {
     const FREE_BOARD_ID = 2;

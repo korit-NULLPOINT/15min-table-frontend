@@ -15,7 +15,7 @@ import {
     Block as BanIcon,
     CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
-import { formatDate } from '../../apis/utils/formatDate';
+import { formatDate } from '../../utils/formatDate';
 
 export function UserManagement() {
     const queryClient = useQueryClient();

@@ -21,7 +21,7 @@ import {
     deleteComment,
     getGetRecipeCommentListByTargetQueryKey,
 } from '../../apis/generated/comment-controller/comment-controller';
-import { formatDate } from '../../apis/utils/formatDate';
+import { formatDate } from '../../utils/formatDate';
 import { shake } from '../../styles/animations';
 
 export default function RecipeComment({

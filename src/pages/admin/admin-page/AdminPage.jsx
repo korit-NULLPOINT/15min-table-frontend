@@ -9,7 +9,6 @@ import { AdminDashboard } from '../../../components/admin/AdminDashboard';
 import { UserManagement } from '../../../components/admin/UserManagement';
 import { RecipeManagement } from '../../../components/admin/RecipeManagement';
 import { CommunityManagement } from '../../../components/admin/CommunityManagement';
-import { AdminStats } from '../../../components/admin/AdminStats';
 
 function isAdminUser(principal) {
     const roles = principal?.userRoles ?? [];
@@ -44,7 +43,7 @@ export default function AdminPage() {
     }, [location.pathname]);
 
     useEffect(() => {
-        const allowed = ['dashboard', 'users', 'recipes', 'community', 'stats'];
+        const allowed = ['dashboard', 'users', 'recipes', 'community'];
         if (!allowed.includes(currentPage)) {
             navigate('/admin/dashboard', { replace: true });
         }
@@ -146,8 +145,6 @@ export default function AdminPage() {
                 return <CommunityManagement />;
             default:
                 return <AdminDashboard />;
-            case 'stats':
-                return <AdminStats />;
         }
     };
 
