@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePrincipalState } from '../../store/usePrincipalState';
-import { currentUserCommunityPosts } from '../../utils/recipeData';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { formatDate } from '../../utils/formatDate';
-import { Pen, PenIcon, Trash2Icon, Trash2, FileText } from 'lucide-react';
+import { PenIcon, Trash2Icon, FileText, Loader2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { removeRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
 import {
@@ -13,19 +12,92 @@ import {
 } from '../../apis/generated/comment-controller/comment-controller';
 import { getGetMyRecipeListQueryKey } from '../../apis/generated/user-recipe-controller/user-recipe-controller';
 import { targetData } from '../../utils/targetData';
+import { getMyPostListByCursor } from '../../apis/generated/user-post-controller/user-post-controller';
+import { deletePost } from '../../apis/generated/post-controller/post-controller';
 
 export default function UserProfileMyPosts({
     onRecipeClick,
     onCommunityPostClick,
     myCommentList,
     myPostList,
-    // recipeList,
 }) {
     const principal = usePrincipalState((s) => s.principal);
     const [myProfilePostType, setMyProfilePostType] = useState('recipe');
     const [shakingIcon, setShakingIcon] = useState({ id: null, type: null });
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+
+    // 커뮤니티 게시글 무한 스크롤 상태
+    const [myCommunityPosts, setMyCommunityPosts] = useState([]);
+    const [communityNextCursor, setCommunityNextCursor] = useState(null);
+    const [communityHasNext, setCommunityHasNext] = useState(true);
+    const [communityLoading, setCommunityLoading] = useState(false);
+    const [communityInitialLoaded, setCommunityInitialLoaded] = useState(false);
+
+    // 커뮤니티 게시글 데이터 fetch 함수
+    const fetchCommunityPosts = useCallback(
+        async (cursor = null) => {
+            if (communityLoading) return;
+
+            setCommunityLoading(true);
+            try {
+                const response = await getMyPostListByCursor({
+                    size: 10,
+                    cursor: cursor || undefined,
+                });
+
+                const data = response?.data?.data;
+                if (data) {
+                    setMyCommunityPosts((prev) =>
+                        cursor ? [...prev, ...data.items] : data.items,
+                    );
+                    setCommunityHasNext(data.hasNext);
+                    setCommunityNextCursor(data.nextCursor);
+                }
+            } catch (error) {
+                console.error('Failed to fetch community posts:', error);
+            } finally {
+                setCommunityLoading(false);
+            }
+        },
+        [communityLoading],
+    );
+
+    // 커뮤니티 탭 선택 시 초기 데이터 로드
+    useEffect(() => {
+        if (myProfilePostType === 'community' && !communityInitialLoaded) {
+            fetchCommunityPosts();
+            setCommunityInitialLoaded(true);
+        }
+    }, [myProfilePostType, communityInitialLoaded, fetchCommunityPosts]);
+
+    // 더보기 핸들러
+    const handleLoadMoreCommunity = () => {
+        if (communityHasNext && !communityLoading) {
+            fetchCommunityPosts(communityNextCursor);
+        }
+    };
+
+    // 커뮤니티 게시글 수정 핸들러
+    const handleCommunityEditClick = (postId) => {
+        navigate(`/board/2/free/${postId}/edit`);
+    };
+
+    // 커뮤니티 게시글 삭제 핸들러
+    const handleCommunityDeleteClick = async (postId) => {
+        if (window.confirm('정말 삭제하시겠습니까?')) {
+            try {
+                await deletePost(1, postId); // boardId = 1 (커뮤니티 게시판)
+                // 삭제 후 목록에서 제거
+                setMyCommunityPosts((prev) =>
+                    prev.filter((post) => post.postId !== postId),
+                );
+            } catch (error) {
+                console.error('Failed to delete community post:', error);
+                alert('삭제 중 오류가 발생했습니다.');
+            }
+        }
+    };
 
     const handleIconClick = (e, id, type, action) => {
         e.stopPropagation();
@@ -70,19 +142,9 @@ export default function UserProfileMyPosts({
         }
     };
 
-    // Fetch recipes for current user
-    // console.log(myPostList);
-    // console.log(recipeList);
-
-    // console.log(myPostList);
-    // console.log(myCommentList);
-
-    // Mock community posts
-    const myCommunityPosts = currentUserCommunityPosts;
-
     return (
         <div className="px-8 pt-3 pb-4">
-            <div className="sticky top-0 z-20 bg-white h-12 flex items-center mb-6 gap-2">
+            <div className="bg-white sticky h-12 flex items-center mb-6 gap-2">
                 <div className="w-8 h-8 flex items-center justify-center">
                     <FileText size={20} />
                 </div>
@@ -214,22 +276,124 @@ export default function UserProfileMyPosts({
 
                 {myProfilePostType === 'community' && (
                     <div className="space-y-4">
-                        {myCommunityPosts.map((post) => (
-                            <div
-                                key={post.id}
-                                onClick={() => onCommunityPostClick?.(post.id)}
-                                className="cursor-pointer p-6 bg-white rounded-lg border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
-                            >
-                                <h4 className="text-lg text-[#3d3226] mb-2">
-                                    {post.title}
-                                </h4>
-                                <div className="flex items-center gap-4 text-sm text-[#6b5d4f]">
-                                    <span>{post.date}</span>
-                                    <span>조회 {post.views}</span>
-                                    <span>댓글 {post.comments}</span>
-                                </div>
+                        {communityLoading && myCommunityPosts.length === 0 ? (
+                            <div className="flex items-center justify-center py-8">
+                                <Loader2
+                                    className="animate-spin text-[#6b5d4f]"
+                                    size={32}
+                                />
                             </div>
-                        ))}
+                        ) : myCommunityPosts.length === 0 ? (
+                            <p className="text-center text-[#6b5d4f] py-8">
+                                작성한 커뮤니티 게시글이 없습니다.
+                            </p>
+                        ) : (
+                            <>
+                                {myCommunityPosts.map((post) => (
+                                    <div
+                                        key={post.postId}
+                                        onClick={() =>
+                                            onCommunityPostClick?.(post.postId)
+                                        }
+                                        className="cursor-pointer p-6 bg-white rounded-lg border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <h4 className="text-lg text-[#3d3226] mb-2">
+                                                    {post.title}
+                                                </h4>
+                                                <div className="flex items-center gap-4 text-sm text-[#6b5d4f]">
+                                                    <span>
+                                                        {formatDate(
+                                                            post.createDt,
+                                                        )}
+                                                    </span>
+                                                    <span>
+                                                        조회 {post.viewCount}
+                                                    </span>
+                                                    <span>
+                                                        댓글 {post.commentCount}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <button
+                                                    onClick={(e) =>
+                                                        handleIconClick(
+                                                            e,
+                                                            post.postId,
+                                                            'community-edit',
+                                                            () =>
+                                                                handleCommunityEditClick(
+                                                                    post.postId,
+                                                                ),
+                                                        )
+                                                    }
+                                                    className={`p-1 hover:bg-gray-100 rounded-full transition-transform duration-200 hover:scale-110 ${
+                                                        shakingIcon.id ===
+                                                            post.postId &&
+                                                        shakingIcon.type ===
+                                                            'community-edit'
+                                                            ? 'animate-shake'
+                                                            : ''
+                                                    }`}
+                                                >
+                                                    <PenIcon
+                                                        size={18}
+                                                        className="text-green-600"
+                                                    />
+                                                </button>
+                                                <button
+                                                    onClick={(e) =>
+                                                        handleIconClick(
+                                                            e,
+                                                            post.postId,
+                                                            'community-delete',
+                                                            () =>
+                                                                handleCommunityDeleteClick(
+                                                                    post.postId,
+                                                                ),
+                                                        )
+                                                    }
+                                                    className={`p-1 hover:bg-gray-100 rounded-full transition-transform duration-200 hover:scale-110 ${
+                                                        shakingIcon.id ===
+                                                            post.postId &&
+                                                        shakingIcon.type ===
+                                                            'community-delete'
+                                                            ? 'animate-shake'
+                                                            : ''
+                                                    }`}
+                                                >
+                                                    <Trash2Icon
+                                                        size={18}
+                                                        className="text-red-500"
+                                                    />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {communityHasNext && (
+                                    <button
+                                        onClick={handleLoadMoreCommunity}
+                                        disabled={communityLoading}
+                                        className="w-full py-3 bg-[#f5f1eb] hover:bg-[#ebe5db] text-[#3d3226] rounded-lg border-2 border-[#d4cbbf] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {communityLoading ? (
+                                            <>
+                                                <Loader2
+                                                    className="animate-spin"
+                                                    size={18}
+                                                />
+                                                로딩 중...
+                                            </>
+                                        ) : (
+                                            '더보기'
+                                        )}
+                                    </button>
+                                )}
+                            </>
+                        )}
                     </div>
                 )}
 

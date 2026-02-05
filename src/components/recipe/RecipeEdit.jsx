@@ -224,8 +224,8 @@ export function RecipeEdit({ recipeId, boardId = 1 }) {
     };
 
     return (
-        <div className="min-h-screen bg-[#f5f1eb] pt-20">
-            <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="min-h-screen bg-[#f5f1eb]">
+            <div className="max-w-4xl mx-auto px-6 py-6">
                 <button
                     onClick={() => navigate(-1)} // 이전 페이지로 돌아가기
                     className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"

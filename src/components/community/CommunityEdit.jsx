@@ -16,7 +16,7 @@ import {
 } from '../../apis/generated/post-controller/post-controller';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { CommunityHeader } from './CommunityHeader';
-import { ScrollIndicatorWrapper } from './ScrollIndicatorWrapper';
+import { ScrollIndicatorWrapper } from '../common/ScrollIndicatorWrapper';
 
 export function CommunityEdit({ postId, boardId, onNavigate }) {
     const [title, setTitle] = useState('');
