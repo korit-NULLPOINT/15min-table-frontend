@@ -4,334 +4,372 @@
  * OpenAPI definition
  * OpenAPI spec version: v0
  */
-import {
-  useMutation
-} from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import type {
-  MutationFunction,
-  QueryClient,
-  UseMutationOptions,
-  UseMutationResult
+    MutationFunction,
+    QueryClient,
+    UseMutationOptions,
+    UseMutationResult,
 } from '@tanstack/react-query';
 
 import type {
-  ApiRespDtoString,
-  ApiRespDtoVoid,
-  SigninReqDto,
-  SignupReqDto
+    ApiRespDtoString,
+    ApiRespDtoVoid,
+    SigninReqDto,
+    SignupReqDto,
 } from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
-
-
 export type signupResponse200 = {
-  data: ApiRespDtoVoid
-  status: 200
-}
-    
-export type signupResponseSuccess = (signupResponse200) & {
-  headers: Headers;
+    data: ApiRespDtoVoid;
+    status: 200;
 };
-;
 
-export type signupResponse = (signupResponseSuccess)
+export type signupResponseSuccess = signupResponse200 & {
+    headers: Headers;
+};
+export type signupResponse = signupResponseSuccess;
 
 export const getSignupUrl = () => {
+    return `/user/auth/signup`;
+};
 
+export const signup = async (
+    signupReqDto: SignupReqDto,
+    options?: RequestInit,
+): Promise<signupResponse> => {
+    return customInstance<signupResponse>(getSignupUrl(), {
+        ...options,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(signupReqDto),
+    });
+};
 
-  
-
-  return `/user/auth/signup`
-}
-
-export const signup = async (signupReqDto: SignupReqDto, options?: RequestInit): Promise<signupResponse> => {
-  
-  return customInstance<signupResponse>(getSignupUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      signupReqDto,)
-  }
-);}
-
-
-
-
-export const getSignupMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof signup>>, TError,{data: SignupReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof signup>>, TError,{data: SignupReqDto}, TContext> => {
-
-const mutationKey = ['signup'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof signup>>, {data: SignupReqDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  signup(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SignupMutationResult = NonNullable<Awaited<ReturnType<typeof signup>>>
-    export type SignupMutationBody = SignupReqDto
-    export type SignupMutationError = unknown
-
-    export const useSignup = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof signup>>, TError,{data: SignupReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getSignupMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof signup>>,
         TError,
-        {data: SignupReqDto},
+        { data: SignupReqDto },
         TContext
-      > => {
-      return useMutation(getSignupMutationOptions(options), queryClient);
-    }
-    export type signinResponse200 = {
-  data: ApiRespDtoString
-  status: 200
-}
-    
-export type signinResponseSuccess = (signinResponse200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof signup>>,
+    TError,
+    { data: SignupReqDto },
+    TContext
+> => {
+    const mutationKey = ['signup'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type signinResponse = (signinResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof signup>>,
+        { data: SignupReqDto }
+    > = (props) => {
+        const { data } = props ?? {};
+
+        return signup(data, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type SignupMutationResult = NonNullable<
+    Awaited<ReturnType<typeof signup>>
+>;
+export type SignupMutationBody = SignupReqDto;
+export type SignupMutationError = unknown;
+
+export const useSignup = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof signup>>,
+            TError,
+            { data: SignupReqDto },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof signup>>,
+    TError,
+    { data: SignupReqDto },
+    TContext
+> => {
+    return useMutation(getSignupMutationOptions(options), queryClient);
+};
+export type signinResponse200 = {
+    data: ApiRespDtoString;
+    status: 200;
+};
+
+export type signinResponseSuccess = signinResponse200 & {
+    headers: Headers;
+};
+export type signinResponse = signinResponseSuccess;
 
 export const getSigninUrl = () => {
+    return `/user/auth/signin`;
+};
 
+export const signin = async (
+    signinReqDto: SigninReqDto,
+    options?: RequestInit,
+): Promise<signinResponse> => {
+    return customInstance<signinResponse>(getSigninUrl(), {
+        ...options,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...options?.headers },
+        body: JSON.stringify(signinReqDto),
+    });
+};
 
-  
-
-  return `/user/auth/signin`
-}
-
-export const signin = async (signinReqDto: SigninReqDto, options?: RequestInit): Promise<signinResponse> => {
-  
-  return customInstance<signinResponse>(getSigninUrl(),
-  {      
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      signinReqDto,)
-  }
-);}
-
-
-
-
-export const getSigninMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof signin>>, TError,{data: SigninReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof signin>>, TError,{data: SigninReqDto}, TContext> => {
-
-const mutationKey = ['signin'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof signin>>, {data: SigninReqDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  signin(data,requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type SigninMutationResult = NonNullable<Awaited<ReturnType<typeof signin>>>
-    export type SigninMutationBody = SigninReqDto
-    export type SigninMutationError = unknown
-
-    export const useSignin = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof signin>>, TError,{data: SigninReqDto}, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getSigninMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof signin>>,
         TError,
-        {data: SigninReqDto},
+        { data: SigninReqDto },
         TContext
-      > => {
-      return useMutation(getSigninMutationOptions(options), queryClient);
-    }
-    export type refreshResponse200 = {
-  data: ApiRespDtoString
-  status: 200
-}
-    
-export type refreshResponseSuccess = (refreshResponse200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof signin>>,
+    TError,
+    { data: SigninReqDto },
+    TContext
+> => {
+    const mutationKey = ['signin'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type refreshResponse = (refreshResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof signin>>,
+        { data: SigninReqDto }
+    > = (props) => {
+        const { data } = props ?? {};
+
+        return signin(data, requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type SigninMutationResult = NonNullable<
+    Awaited<ReturnType<typeof signin>>
+>;
+export type SigninMutationBody = SigninReqDto;
+export type SigninMutationError = unknown;
+
+export const useSignin = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof signin>>,
+            TError,
+            { data: SigninReqDto },
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof signin>>,
+    TError,
+    { data: SigninReqDto },
+    TContext
+> => {
+    return useMutation(getSigninMutationOptions(options), queryClient);
+};
+export type refreshResponse200 = {
+    data: ApiRespDtoString;
+    status: 200;
+};
+
+export type refreshResponseSuccess = refreshResponse200 & {
+    headers: Headers;
+};
+export type refreshResponse = refreshResponseSuccess;
 
 export const getRefreshUrl = () => {
+    return `/user/auth/refresh`;
+};
 
+export const refresh = async (
+    options?: RequestInit,
+): Promise<refreshResponse> => {
+    return customInstance<refreshResponse>(getRefreshUrl(), {
+        ...options,
+        method: 'POST',
+    });
+};
 
-  
-
-  return `/user/auth/refresh`
-}
-
-export const refresh = async ( options?: RequestInit): Promise<refreshResponse> => {
-  
-  return customInstance<refreshResponse>(getRefreshUrl(),
-  {      
-    ...options,
-    method: 'POST'
-    
-    
-  }
-);}
-
-
-
-
-export const getRefreshMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext> => {
-
-const mutationKey = ['refresh'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refresh>>, void> = () => {
-          
-
-          return  refresh(requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type RefreshMutationResult = NonNullable<Awaited<ReturnType<typeof refresh>>>
-    
-    export type RefreshMutationError = unknown
-
-    export const useRefresh = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refresh>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getRefreshMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof refresh>>,
         TError,
         void,
         TContext
-      > => {
-      return useMutation(getRefreshMutationOptions(options), queryClient);
-    }
-    export type logoutResponse200 = {
-  data: ApiRespDtoVoid
-  status: 200
-}
-    
-export type logoutResponseSuccess = (logoutResponse200) & {
-  headers: Headers;
-};
-;
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof refresh>>,
+    TError,
+    void,
+    TContext
+> => {
+    const mutationKey = ['refresh'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
 
-export type logoutResponse = (logoutResponseSuccess)
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof refresh>>,
+        void
+    > = () => {
+        return refresh(requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type RefreshMutationResult = NonNullable<
+    Awaited<ReturnType<typeof refresh>>
+>;
+
+export type RefreshMutationError = unknown;
+
+export const useRefresh = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof refresh>>,
+            TError,
+            void,
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof refresh>>,
+    TError,
+    void,
+    TContext
+> => {
+    return useMutation(getRefreshMutationOptions(options), queryClient);
+};
+export type logoutResponse200 = {
+    data: ApiRespDtoVoid;
+    status: 200;
+};
+
+export type logoutResponseSuccess = logoutResponse200 & {
+    headers: Headers;
+};
+export type logoutResponse = logoutResponseSuccess;
 
 export const getLogoutUrl = () => {
+    return `/user/auth/logout`;
+};
 
+export const logout = async (
+    options?: RequestInit,
+): Promise<logoutResponse> => {
+    return customInstance<logoutResponse>(getLogoutUrl(), {
+        ...options,
+        method: 'POST',
+    });
+};
 
-  
-
-  return `/user/auth/logout`
-}
-
-export const logout = async ( options?: RequestInit): Promise<logoutResponse> => {
-  
-  return customInstance<logoutResponse>(getLogoutUrl(),
-  {      
-    ...options,
-    method: 'POST'
-    
-    
-  }
-);}
-
-
-
-
-export const getLogoutMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext> => {
-
-const mutationKey = ['logout'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-      
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logout>>, void> = () => {
-          
-
-          return  logout(requestOptions)
-        }
-
-
-
-        
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type LogoutMutationResult = NonNullable<Awaited<ReturnType<typeof logout>>>
-    
-    export type LogoutMutationError = unknown
-
-    export const useLogout = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient): UseMutationResult<
+export const getLogoutMutationOptions = <
+    TError = unknown,
+    TContext = unknown,
+>(options?: {
+    mutation?: UseMutationOptions<
         Awaited<ReturnType<typeof logout>>,
         TError,
         void,
         TContext
-      > => {
-      return useMutation(getLogoutMutationOptions(options), queryClient);
-    }
-    
+    >;
+    request?: SecondParameter<typeof customInstance>;
+}): UseMutationOptions<
+    Awaited<ReturnType<typeof logout>>,
+    TError,
+    void,
+    TContext
+> => {
+    const mutationKey = ['logout'];
+    const { mutation: mutationOptions, request: requestOptions } = options
+        ? options.mutation &&
+          'mutationKey' in options.mutation &&
+          options.mutation.mutationKey
+            ? options
+            : { ...options, mutation: { ...options.mutation, mutationKey } }
+        : { mutation: { mutationKey }, request: undefined };
+
+    const mutationFn: MutationFunction<
+        Awaited<ReturnType<typeof logout>>,
+        void
+    > = () => {
+        return logout(requestOptions);
+    };
+
+    return { mutationFn, ...mutationOptions };
+};
+
+export type LogoutMutationResult = NonNullable<
+    Awaited<ReturnType<typeof logout>>
+>;
+
+export type LogoutMutationError = unknown;
+
+export const useLogout = <TError = unknown, TContext = unknown>(
+    options?: {
+        mutation?: UseMutationOptions<
+            Awaited<ReturnType<typeof logout>>,
+            TError,
+            void,
+            TContext
+        >;
+        request?: SecondParameter<typeof customInstance>;
+    },
+    queryClient?: QueryClient,
+): UseMutationResult<
+    Awaited<ReturnType<typeof logout>>,
+    TError,
+    void,
+    TContext
+> => {
+    return useMutation(getLogoutMutationOptions(options), queryClient);
+};

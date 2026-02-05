@@ -36,7 +36,7 @@ export default function MyProfilePage() {
 
     const handleCommunityPostClick = (postId) => {
         // Community is board 2
-        navigate(`/board/2/community/${postId}`);
+        navigate(`/board/2/free/${postId}`);
     };
 
     return (

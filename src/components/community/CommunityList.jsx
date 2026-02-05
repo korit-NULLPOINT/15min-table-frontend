@@ -14,7 +14,7 @@ import {
     Divider,
 } from '@mui/material';
 import { CommunityHeader } from './CommunityHeader';
-import { ScrollIndicatorWrapper } from './ScrollIndicatorWrapper';
+import { ScrollIndicatorWrapper } from '../common/ScrollIndicatorWrapper';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { formatDate } from '../../utils/formatDate';
 
