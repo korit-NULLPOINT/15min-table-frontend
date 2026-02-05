@@ -157,8 +157,8 @@ export function AdminManagementLayout({
                                 tableBody
                             )}
 
-                            {/* Sentinel Row */}
-                            {observerRef && (
+                            {/* Sentinel Row - 더 불러올 내용이 있을 때만 표시 */}
+                            {observerRef && isFetchingNextPage && (
                                 <TableRow>
                                     <TableCell
                                         colSpan={10}
@@ -174,15 +174,28 @@ export function AdminManagementLayout({
                                                 alignItems: 'center',
                                             }}
                                         >
-                                            {isFetchingNextPage && (
-                                                <Typography
-                                                    variant="caption"
-                                                    color="text.secondary"
-                                                >
-                                                    더 불러오는 중...
-                                                </Typography>
-                                            )}
+                                            <Typography
+                                                variant="caption"
+                                                color="text.secondary"
+                                            >
+                                                더 불러오는 중...
+                                            </Typography>
                                         </Box>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                            {/* Invisible Sentinel for triggering next page load */}
+                            {observerRef && !isFetchingNextPage && (
+                                <TableRow>
+                                    <TableCell
+                                        colSpan={10}
+                                        padding="none"
+                                        sx={{ borderBottom: 'none' }}
+                                    >
+                                        <Box
+                                            ref={observerRef}
+                                            sx={{ height: 2 }}
+                                        />
                                     </TableCell>
                                 </TableRow>
                             )}

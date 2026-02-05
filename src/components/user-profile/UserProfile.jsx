@@ -2,9 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import {
     ArrowLeft,
     User as UserIcon,
-    MessageSquare,
     Bookmark,
-    Users,
     Mail,
     CheckCircle,
     FileText,
@@ -189,7 +187,7 @@ export function UserProfile({
     };
 
     return (
-        <div className="pt-4">
+        <div className="px-8 py-4">
             <div className="max-w-4xl mx-auto px-6">
                 <button
                     onClick={() => onNavigate('home')}

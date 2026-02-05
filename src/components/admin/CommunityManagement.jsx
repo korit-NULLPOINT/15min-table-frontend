@@ -114,24 +114,30 @@ export function CommunityManagement() {
     const tableHead = (
         <TableRow>
             <TableCell
+                width="25%"
+                align="center"
+                sx={{
+                    backgroundColor: '#3d3226',
+                    color: '#f5f1eb',
+                    fontWeight: 'bold',
+                    pl: '2.5%',
+                }}
+            >
+                제목
+            </TableCell>
+            <TableCell
+                width="25%"
+                align="center"
                 sx={{
                     backgroundColor: '#3d3226',
                     color: '#f5f1eb',
                     fontWeight: 'bold',
                 }}
             >
-                <Typography paddingX={10}>제목</Typography>
+                작성자
             </TableCell>
             <TableCell
-                sx={{
-                    backgroundColor: '#3d3226',
-                    color: '#f5f1eb',
-                    fontWeight: 'bold',
-                }}
-            >
-                <Typography paddingX={5}>작성자</Typography>
-            </TableCell>
-            <TableCell
+                width="15%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
@@ -162,6 +168,7 @@ export function CommunityManagement() {
                 </TableSortLabel>
             </TableCell>
             <TableCell
+                width="10%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
@@ -192,6 +199,7 @@ export function CommunityManagement() {
                 </TableSortLabel>
             </TableCell>
             <TableCell
+                width="10%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
@@ -202,11 +210,13 @@ export function CommunityManagement() {
                 댓글수
             </TableCell>
             <TableCell
+                width="10%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
                     color: '#f5f1eb',
                     fontWeight: 'bold',
+                    pr: '2.5%',
                 }}
             >
                 작업
@@ -224,9 +234,8 @@ export function CommunityManagement() {
                 },
             }}
         >
-            <TableCell sx={{ maxWidth: 300 }}>
+            <TableCell width="25%" align="left" sx={{ pl: '2.5%' }}>
                 <Typography
-                    paddingX={3}
                     noWrap
                     title={post.title}
                     onClick={() => {
@@ -243,11 +252,12 @@ export function CommunityManagement() {
                     {post.title}
                 </Typography>
             </TableCell>
-            <TableCell sx={{ color: '#6b5d4f' }}>
+            <TableCell width="25%" align="center" sx={{ color: '#6b5d4f' }}>
                 <Box
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'center',
                         gap: 1.5,
                     }}
                 >
@@ -269,16 +279,16 @@ export function CommunityManagement() {
                     </Typography>
                 </Box>
             </TableCell>
-            <TableCell align="center" sx={{ color: '#6b5d4f' }}>
+            <TableCell width="15%" align="center" sx={{ color: '#6b5d4f' }}>
                 {formatDate(post.createDt)}
             </TableCell>
-            <TableCell align="center" sx={{ color: '#6b5d4f' }}>
+            <TableCell width="10%" align="center" sx={{ color: '#6b5d4f' }}>
                 {(post.viewCount || 0).toLocaleString()}
             </TableCell>
-            <TableCell align="center" sx={{ color: '#6b5d4f' }}>
+            <TableCell width="10%" align="center" sx={{ color: '#6b5d4f' }}>
                 {(post.commentCount || 0).toLocaleString()}
             </TableCell>
-            <TableCell align="center">
+            <TableCell width="10%" align="center" sx={{ pr: '2.5%' }}>
                 <ActionConfirmButton
                     id={post.postId}
                     onConfirm={() => handleDelete(post.postId)}

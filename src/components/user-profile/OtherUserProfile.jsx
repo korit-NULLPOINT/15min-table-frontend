@@ -1,5 +1,5 @@
 // src/components/user-profile/OtherUserProfile.jsx
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import { ArrowLeft, User as UserIcon } from 'lucide-react';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';

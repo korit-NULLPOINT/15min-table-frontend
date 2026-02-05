@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react';
-import { Menu, User, PenSquare, Mail } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, User, PenSquare } from 'lucide-react';
 import { Alert, AlertTitle, Box, Slide, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 

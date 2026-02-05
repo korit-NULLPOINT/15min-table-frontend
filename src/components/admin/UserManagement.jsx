@@ -10,7 +10,14 @@ import { ActionConfirmButton } from './common/ActionConfirmButton';
 import { useQueryClient } from '@tanstack/react-query';
 
 // MUI Imports
-import { TableRow, TableCell, Typography, Avatar, Chip } from '@mui/material';
+import {
+    TableRow,
+    TableCell,
+    Typography,
+    Avatar,
+    Chip,
+    Box,
+} from '@mui/material';
 import {
     Block as BanIcon,
     CheckCircle as CheckCircleIcon,
@@ -109,24 +116,30 @@ export function UserManagement() {
     const tableHead = (
         <TableRow>
             <TableCell
+                width="25%"
+                align="center"
+                sx={{
+                    backgroundColor: '#3d3226',
+                    color: '#f5f1eb',
+                    fontWeight: 'bold',
+                    pl: '2.5%',
+                }}
+            >
+                이메일
+            </TableCell>
+            <TableCell
+                width="25%"
+                align="center"
                 sx={{
                     backgroundColor: '#3d3226',
                     color: '#f5f1eb',
                     fontWeight: 'bold',
                 }}
             >
-                <Typography paddingX={5}>이메일</Typography>
+                프로필
             </TableCell>
             <TableCell
-                sx={{
-                    backgroundColor: '#3d3226',
-                    color: '#f5f1eb',
-                    fontWeight: 'bold',
-                }}
-            >
-                <Typography paddingX={5}>프로필</Typography>
-            </TableCell>
-            <TableCell
+                width="15%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
@@ -137,6 +150,7 @@ export function UserManagement() {
                 가입일
             </TableCell>
             <TableCell
+                width="10%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
@@ -147,6 +161,7 @@ export function UserManagement() {
                 권한
             </TableCell>
             <TableCell
+                width="10%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
@@ -157,11 +172,13 @@ export function UserManagement() {
                 상태
             </TableCell>
             <TableCell
+                width="10%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
                     color: '#f5f1eb',
                     fontWeight: 'bold',
+                    pr: '2.5%',
                 }}
             >
                 작업
@@ -179,13 +196,20 @@ export function UserManagement() {
                 },
             }}
         >
-            <TableCell sx={{ color: '#6b5d4f' }}>{user.email}</TableCell>
-            <TableCell>
-                <div
-                    style={{
+            <TableCell
+                width="25%"
+                align="left"
+                sx={{ pl: '2.5%', color: '#6b5d4f' }}
+            >
+                {user.email}
+            </TableCell>
+            <TableCell width="25%" align="center">
+                <Box
+                    sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px',
+                        justifyContent: 'center',
+                        gap: 1,
                     }}
                 >
                     <Avatar
@@ -200,12 +224,12 @@ export function UserManagement() {
                     >
                         {user.username}
                     </Typography>
-                </div>
+                </Box>
             </TableCell>
-            <TableCell align="center" sx={{ color: '#6b5d4f' }}>
+            <TableCell width="15%" align="center" sx={{ color: '#6b5d4f' }}>
                 {formatDate(user.createDt)}
             </TableCell>
-            <TableCell align="center" sx={{ color: '#6b5d4f' }}>
+            <TableCell width="10%" align="center" sx={{ color: '#6b5d4f' }}>
                 {(() => {
                     if (!user.userRoles || user.userRoles.length === 0)
                         return '-';
@@ -215,7 +239,7 @@ export function UserManagement() {
                     return mainRole.role?.roleNameKor || '-';
                 })()}
             </TableCell>
-            <TableCell align="center">
+            <TableCell width="10%" align="center">
                 {user.status === 'BANNED' ? (
                     <Chip
                         label="차단됨"
@@ -240,7 +264,7 @@ export function UserManagement() {
                     />
                 )}
             </TableCell>
-            <TableCell align="center">
+            <TableCell width="10%" align="center" sx={{ pr: '2.5%' }}>
                 {user.status === 'BANNED' ? (
                     <ActionConfirmButton
                         id={user.userId}

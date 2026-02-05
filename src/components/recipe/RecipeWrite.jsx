@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { NavLink } from 'react-router-dom';
 import { ArrowLeft, Upload, Mail, Filter, LoaderCircle, X } from 'lucide-react';
 import { Alert, AlertTitle, Box, Button, Slide } from '@mui/material';
 

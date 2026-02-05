@@ -1,10 +1,4 @@
-import {
-    ArrowLeft,
-    User as UserIcon,
-    Star,
-    Sparkles,
-    MapPin,
-} from 'lucide-react';
+import { ArrowLeft, User as UserIcon, Star, Sparkles } from 'lucide-react';
 import {
     Box,
     Container,
@@ -13,8 +7,6 @@ import {
     Button,
     Chip,
     Stack,
-    Grid,
-    Divider,
     IconButton,
     Avatar,
     Modal,
@@ -22,7 +14,7 @@ import {
 import { useState, useRef, useMemo, useEffect } from 'react';
 
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import RecipeComment from './RecipeComment';
+import Comment from '../common/Comment';
 import RecipeRatingBookmark from './RecipeRatingBookmark';
 import { formatDate } from '../../utils/formatDate';
 import KakaoMap from '../KakaoMap';
@@ -561,13 +553,12 @@ export function RecipeDetail({
                 </Paper>
 
                 {/* Comments Section */}
-                <RecipeComment
+                <Comment
+                    targetType="RECIPE"
+                    targetId={recipeDetail.recipeId}
                     comments={comments ?? []}
-                    isLoggedIn={isLoggedIn}
                     onOpenAuth={onOpenAuth}
-                    currentUsername={currentUsername}
                     onNavigate={onNavigate}
-                    recipeDetail={recipeDetail}
                 />
 
                 {/* Ingredient Image Modal */}

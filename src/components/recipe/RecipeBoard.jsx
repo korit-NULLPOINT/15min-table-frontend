@@ -7,7 +7,6 @@ import {
     Typography,
     Button,
     InputBase,
-    IconButton,
     Stack,
     Chip,
     CircularProgress,
