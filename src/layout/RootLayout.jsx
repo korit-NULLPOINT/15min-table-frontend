@@ -73,7 +73,7 @@ export default function RootLayout() {
 
         // FOLLOW → 해당 유저 프로필로
         if (notificationType === 'FOLLOW') {
-            if (actorUserId != null) navigate(`/users/${actorUserId}`);
+            if (actorUserId != null) navigate(`/profile/${actorUserId}`);
         }
 
         // COMMENT / RECIPE_POST → targetType에 따라 이동
@@ -84,8 +84,7 @@ export default function RootLayout() {
         } else if (targetType === 'POST' && targetId != null) {
             // navigate(`/board/2/free/${targetId}?commentId=${commentId ?? ''}`);
             navigate(`/board/2/free/${targetId}`);
-        } else if (targetType === 'FOLLOW') {
-        }
+        } else if (targetType === 'FOLLOW') { /* empty */ }
 
         // 예외 fallback
         console.warn('Unknown notification target:', raw);

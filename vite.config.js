@@ -8,6 +8,11 @@ export default defineConfig({
     server: {
         proxy: {
             // 백엔드로 프록시할 경로들
+            '/user/': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+            },
+            // 필요하면 '/user' 정확히 한 건도 처리
             '/user': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
@@ -60,7 +65,6 @@ export default defineConfig({
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-
             // ✅ SSE 포함 알림
             '/notifications': {
                 target: 'http://localhost:8080',
@@ -71,17 +75,14 @@ export default defineConfig({
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-
-            '/recipes/': {
+            '/recipes': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-
-            '/posts/': {
+            '/posts': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-
             // Admin API (API 요청만 프록시)
             '/admin/manage': {
                 target: 'http://localhost:8080',

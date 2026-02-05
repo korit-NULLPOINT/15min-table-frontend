@@ -19,7 +19,8 @@ export default function OtherUserProfilePage() {
     const navigate = useNavigate();
 
     // ✅ HomePage처럼 outlet에서 모달 열기
-    const { openAuthModal } = useOutletContext();
+    const outletCtx = useOutletContext();
+    const openAuthModal = outletCtx?.openAuthModal;
 
     const principal = usePrincipalState((s) => s.principal);
     const isLoggedIn = !!principal;
@@ -122,8 +123,12 @@ export default function OtherUserProfilePage() {
         <OtherUserProfile
             userId={parsedUserId}
             onNavigate={onNavigate}
-            onRecipeClick={onRecipeClick}
-            onCommunityPostClick={onCommunityPostClick}
+            onRecipeClick={(recipeId) =>
+                handlePostClick(recipeId, null, 'RECIPE')
+            }
+            onCommunityPostClick={(postId) =>
+                handlePostClick(null, postId, 'POST')
+            }
             isLoggedIn={isLoggedIn}
             onOpenAuth={openAuthModal}
             onToggleBookmark={handleToggleBookmark}

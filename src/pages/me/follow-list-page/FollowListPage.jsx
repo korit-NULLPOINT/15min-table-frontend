@@ -14,7 +14,7 @@ export default function FollowListPage({ type }) {
     // FollowList가 onUserClick(user.id, user.name) 형태로 호출하지만,
     // 여기서는 userId만 받아도 추가 인자는 자동으로 무시됨.
     const onUserClick = (userId) => {
-        navigate(`/users/${userId}`);
+        navigate(`/profile/${userId}`);
     };
 
     return (

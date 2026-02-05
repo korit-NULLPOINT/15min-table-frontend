@@ -1,19 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Eye, Star, Bookmark } from 'lucide-react';
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
+
 import { useGetRecipeListByUserId } from '../../apis/generated/user-recipe-controller/user-recipe-controller';
+import { useGetPostListByUserIdByCursor } from '../../apis/generated/user-post-controller/user-post-controller';
 
 export default function UserProfileOtherPosts({
     userId,
     displayName,
     onRecipeClick,
-    onCommunityPostClick, // 추후
+    onCommunityPostClick,
     onToggleBookmark,
     isLoggedIn,
     onOpenAuth,
 }) {
     const [postType, setPostType] = useState('recipe'); // recipe | community
 
+    /** -------------------------
+     * 레시피 목록
+     * ------------------------- */
     const {
         errorMessage: recipeError,
         clearError: clearRecipeError,
@@ -37,7 +42,7 @@ export default function UserProfileOtherPosts({
 
     const recipePage = recipesQuery?.data?.data?.data;
     const recipeItems = recipePage?.items ?? [];
-    const totalCount = recipePage?.totalCount ?? 0;
+    const recipeTotal = recipePage?.totalCount ?? 0;
 
     useEffect(() => {
         if (!recipesQuery.isError) return;
@@ -46,6 +51,42 @@ export default function UserProfileOtherPosts({
         });
     }, [recipesQuery.isError, recipesQuery.error, handleRecipeApiError]);
 
+    /** -------------------------
+     * 커뮤니티 목록(유저별, cursor)
+     * ------------------------- */
+    const {
+        errorMessage: communityError,
+        clearError: clearCommunityError,
+        handleApiError: handleCommunityApiError,
+    } = useApiErrorMessage();
+
+    useEffect(() => {
+        clearCommunityError();
+    }, [userId, postType]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // ✅ params는 일단 undefined로 시작(필드명 모를 때 안전)
+    // 필요하면 { cursor: null, size: 20 } 같은 형태로 확장
+    const communityQuery = useGetPostListByUserIdByCursor(userId, undefined, {
+        query: {
+            enabled: Number.isFinite(userId) && postType === 'community',
+            refetchOnWindowFocus: false,
+        },
+    });
+
+    const communityPage = communityQuery?.data?.data?.data;
+    const communityItems = communityPage?.items ?? [];
+    const communityTotal = communityPage?.totalCount ?? 0;
+
+    useEffect(() => {
+        if (!communityQuery.isError) return;
+        handleCommunityApiError(communityQuery.error, {
+            fallbackMessage: '커뮤니티 글 목록을 불러오지 못했습니다.',
+        });
+    }, [communityQuery.isError, communityQuery.error, handleCommunityApiError]);
+
+    /** -------------------------
+     * 공통
+     * ------------------------- */
     const headerTitle = useMemo(() => {
         return `${displayName}님이 작성한 게시글`;
     }, [displayName]);
@@ -53,9 +94,7 @@ export default function UserProfileOtherPosts({
     const handleBookmarkClick = (e, recipeId, bookmarkedByMe) => {
         e.stopPropagation();
 
-        // 로그인 체크를 여기서 할지, 부모(HomePage처럼)에서 할지 선택
         if (!isLoggedIn) {
-            // onOpenAuth 있으면 모달 열고, 없으면 alert
             if (onOpenAuth) onOpenAuth();
             else alert('로그인이 필요합니다.');
             return;
@@ -82,18 +121,21 @@ export default function UserProfileOtherPosts({
                                 : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                         }`}
                     >
-                        레시피 ({totalCount})
+                        레시피 ({recipeTotal})
                     </button>
 
                     <button
-                        onClick={() => setPostType('community')}
+                        onClick={() => {
+                            clearCommunityError();
+                            setPostType('community');
+                        }}
                         className={`px-4 py-2 rounded-md transition-colors ${
                             postType === 'community'
                                 ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
                                 : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
                         }`}
                     >
-                        커뮤니티
+                        커뮤니티 ({communityTotal})
                     </button>
                 </div>
             </div>
@@ -127,7 +169,10 @@ export default function UserProfileOtherPosts({
                             <div className="grid grid-cols-2 gap-4">
                                 {recipeItems.map((post) => {
                                     const bookmarkedByMe =
-                                        !!post.bookmarkedByMe; // ✅ 목록에 있어야 함
+                                        !!post.bookmarkedByMe;
+
+                                    const thumbSrc =
+                                        post.thumbnailImgUrl?.trim();
 
                                     return (
                                         <div
@@ -137,7 +182,7 @@ export default function UserProfileOtherPosts({
                                             }
                                             className="group relative cursor-pointer bg-white rounded-lg overflow-hidden border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors"
                                         >
-                                            {/* ✅ Bookmark Button Overlay */}
+                                            {/* Bookmark */}
                                             <button
                                                 onClick={(e) =>
                                                     handleBookmarkClick(
@@ -167,11 +212,18 @@ export default function UserProfileOtherPosts({
                                                 />
                                             </button>
 
-                                            <img
-                                                src={post.thumbnailImgUrl || ''}
-                                                alt={post.title}
-                                                className="w-full aspect-video object-cover bg-[#ebe5db] group-hover:scale-105 transition-transform duration-300"
-                                            />
+                                            {/* ✅ src="" 방지 */}
+                                            {thumbSrc ? (
+                                                <img
+                                                    src={thumbSrc}
+                                                    alt={post.title}
+                                                    className="w-full aspect-video object-cover bg-[#ebe5db] group-hover:scale-105 transition-transform duration-300"
+                                                />
+                                            ) : (
+                                                <div className="w-full aspect-video bg-[#ebe5db] flex items-center justify-center text-[#6b5d4f]">
+                                                    썸네일 없음
+                                                </div>
+                                            )}
 
                                             <div className="p-4">
                                                 <h4 className="text-lg text-[#3d3226] mb-2 line-clamp-2">
@@ -203,11 +255,59 @@ export default function UserProfileOtherPosts({
                 </>
             )}
 
-            {/* 커뮤니티 탭(추후) */}
+            {/* 커뮤니티 탭 */}
             {postType === 'community' && (
-                <div className="p-10 text-center border-2 border-dashed border-[#d4cbbf] rounded-lg text-[#6b5d4f]">
-                    커뮤니티 게시글 API는 추후 연결 예정입니다.
-                </div>
+                <>
+                    {communityQuery.isLoading && (
+                        <div className="p-10 text-center text-[#6b5d4f]">
+                            로딩 중...
+                        </div>
+                    )}
+
+                    {communityError && (
+                        <div className="p-10 text-center text-red-600">
+                            {communityError}
+                        </div>
+                    )}
+
+                    {!communityQuery.isLoading &&
+                        !communityError &&
+                        communityItems.length === 0 && (
+                            <div className="p-10 text-center border-2 border-dashed border-[#d4cbbf] rounded-lg text-[#6b5d4f]">
+                                작성한 커뮤니티 글이 아직 없어요.
+                            </div>
+                        )}
+
+                    {!communityQuery.isLoading &&
+                        !communityError &&
+                        communityItems.length > 0 && (
+                            <div className="flex flex-col gap-3">
+                                {communityItems.map((post) => (
+                                    <div
+                                        key={post.postId}
+                                        onClick={() =>
+                                            onCommunityPostClick?.(post.postId)
+                                        }
+                                        className="cursor-pointer bg-white rounded-lg border-2 border-[#e5dfd5] hover:border-[#3d3226] transition-colors p-4"
+                                    >
+                                        <h4 className="text-lg text-[#3d3226] mb-1 line-clamp-2">
+                                            {post.title}
+                                        </h4>
+
+                                        <div className="text-sm text-[#6b5d4f] flex gap-3">
+                                            <span>{post.createDt ?? ''}</span>
+                                            <span>
+                                                조회 {post.viewCount ?? 0}
+                                            </span>
+                                            <span>
+                                                댓글 {post.commentCount ?? 0}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                </>
             )}
         </>
     );
