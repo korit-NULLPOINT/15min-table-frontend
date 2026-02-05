@@ -153,7 +153,7 @@
 [![Backend Skills](https://skillicons.dev/icons?i=spring,java,mysql,postman,redis)](https://skillicons.dev)
 
 ### 🚀 Deployment & Infrastructure
-[![Infra Skills](https://skillicons.dev/icons?i=github,git,docker,aws,notion)](https://skillicons.dev)
+[![Infra Skills](https://skillicons.dev/icons?i=github,git,docker,notion)](https://skillicons.dev)
 
 ### 🤝 Collaboration
 [![Collaboration Skills](https://skillicons.dev/icons?i=idea,vscode)](https://skillicons.dev)
