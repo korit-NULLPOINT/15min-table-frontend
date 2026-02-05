@@ -16,7 +16,7 @@ import {
 import { CommunityHeader } from './CommunityHeader';
 import { ScrollIndicatorWrapper } from './ScrollIndicatorWrapper';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import { formatDate } from '../../apis/utils/formatDate';
+import { formatDate } from '../../utils/formatDate';
 
 export function CommunityList({ onPostClick }) {
     const FREE_BOARD_ID = 2;

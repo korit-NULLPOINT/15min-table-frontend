@@ -1,14 +1,14 @@
 import { Users, BookOpen, MessageSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import AdminLineChart from './AdminLineChart';
+import AdminLineChart from './charts/AdminLineChart';
 import AdminMultiLineChart from './charts/AdminMultiLineChart';
 import {
     useGetDashboardStats,
     useGetRecentActivities,
     useGetTimeSeries,
 } from '../../apis/generated/manage-controller/manage-controller';
-import { formatDate } from '../../apis/utils/formatDate';
+import { formatDate } from '../../utils/formatDate';
 
 export function AdminDashboard() {
     const [selectedMetric, setSelectedMetric] = useState(null);
@@ -52,10 +52,59 @@ export function AdminDashboard() {
         }));
     };
 
-    const usersData = transformData(usersSeries?.data?.data, currentBucket);
-    const recipesData = transformData(recipesSeries?.data?.data, currentBucket);
-    const postsData = transformData(postsSeries?.data?.data, currentBucket);
+    const usersDataRaw = transformData(usersSeries?.data?.data, currentBucket);
+    const recipesDataRaw = transformData(
+        recipesSeries?.data?.data,
+        currentBucket,
+    );
+    const postsDataRaw = transformData(postsSeries?.data?.data, currentBucket);
 
+    // 세 데이터셋의 label을 merge하고 최근 14일 이내 데이터만 필터링
+    const mergeAndFilterLast14Days = (usersArr, recipesArr, postsArr) => {
+        // 모든 label을 수집하여 유니크하게 정렬 (날짜 순)
+        const allLabels = [
+            ...usersArr.map((d) => d.label),
+            ...recipesArr.map((d) => d.label),
+            ...postsArr.map((d) => d.label),
+        ];
+        const uniqueLabels = [...new Set(allLabels)].sort();
+
+        // 가장 최근 label 기준 14개 (일 단위일 경우 14일) 데이터만 사용
+        const last14Labels = uniqueLabels.slice(-14);
+
+        // 각 데이터셋을 label 기준 Map으로 변환
+        const usersMap = new Map(usersArr.map((d) => [d.label, d.value]));
+        const recipesMap = new Map(recipesArr.map((d) => [d.label, d.value]));
+        const postsMap = new Map(postsArr.map((d) => [d.label, d.value]));
+
+        // merged labels 기준으로 데이터 재구성 (없는 값은 null로 처리하여 차트에서 표시 안함)
+        const mergedUsers = last14Labels.map((label) => ({
+            label,
+            value: usersMap.has(label) ? usersMap.get(label) : null,
+        }));
+        const mergedRecipes = last14Labels.map((label) => ({
+            label,
+            value: recipesMap.has(label) ? recipesMap.get(label) : null,
+        }));
+        const mergedPosts = last14Labels.map((label) => ({
+            label,
+            value: postsMap.has(label) ? postsMap.get(label) : null,
+        }));
+
+        return {
+            labels: last14Labels,
+            usersData: mergedUsers,
+            recipesData: mergedRecipes,
+            postsData: mergedPosts,
+        };
+    };
+
+    const {
+        labels: chartLabels,
+        usersData,
+        recipesData,
+        postsData,
+    } = mergeAndFilterLast14Days(usersDataRaw, recipesDataRaw, postsDataRaw);
     const { data: dashboardStats } = useGetDashboardStats();
     const { data: recentActivities } = useGetRecentActivities({ limit: 3 });
 
@@ -193,7 +242,7 @@ export function AdminDashboard() {
 
                 {selectedMetric === null ? (
                     <AdminMultiLineChart
-                        xLabels={usersData.map((d) => d.label)}
+                        xLabels={chartLabels}
                         series={[
                             {
                                 data: usersData.map((d) => d.value),

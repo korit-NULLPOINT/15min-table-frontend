@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { currentUserCommunityPosts } from '../../utils/recipeData';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import { formatDate } from '../../apis/utils/formatDate';
+import { formatDate } from '../../utils/formatDate';
 import { Pen, PenIcon, Trash2Icon, Trash2, FileText } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { removeRecipe } from '../../apis/generated/recipe-controller/recipe-controller';

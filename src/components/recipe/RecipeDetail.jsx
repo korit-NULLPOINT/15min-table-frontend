@@ -24,7 +24,7 @@ import { useState, useRef, useMemo, useEffect } from 'react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import RecipeComment from './RecipeComment';
 import RecipeRatingBookmark from './RecipeRatingBookmark';
-import { formatDate } from '../../apis/utils/formatDate';
+import { formatDate } from '../../utils/formatDate';
 import KakaoMap from '../KakaoMap';
 
 function safeJsonArray(value, fallback = []) {
