@@ -14,7 +14,7 @@ import { useAddPost } from '../../apis/generated/post-controller/post-controller
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { CommunityHeader } from './CommunityHeader';
-import { ScrollIndicatorWrapper } from './ScrollIndicatorWrapper';
+import { ScrollIndicatorWrapper } from '../common/ScrollIndicatorWrapper';
 
 export function CommunityWrite({ onNavigate }) {
     const [title, setTitle] = useState('');

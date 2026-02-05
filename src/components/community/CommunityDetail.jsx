@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import {
     Box,
     Button,
@@ -15,7 +15,7 @@ import {
     ListItemText,
 } from '@mui/material';
 import { CommunityHeader } from './CommunityHeader';
-import { ScrollIndicatorWrapper } from './ScrollIndicatorWrapper';
+import { ScrollIndicatorWrapper } from '../common/ScrollIndicatorWrapper';
 import {
     Delete as DeleteIcon,
     Person as PersonIcon,
@@ -28,6 +28,7 @@ import {
     useDeleteComment,
 } from '../../apis/generated/comment-controller/comment-controller';
 import { usePrincipalState } from '../../store/usePrincipalState';
+import { formatDate } from '../../utils/formatDate';
 
 export function CommunityDetail({
     postId,
@@ -55,12 +56,12 @@ export function CommunityDetail({
     const comments = commentsData?.data?.data || [];
 
     // Scroll to top on mount
-    React.useEffect(() => {
+    useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
     // Notify parent of ownership
-    React.useEffect(() => {
+    useEffect(() => {
         if (post && principal && onIsOwnerFetched) {
             onIsOwnerFetched(principal.username === post.username);
         }
@@ -104,17 +105,6 @@ export function CommunityDetail({
                 },
             },
         );
-    };
-
-    // Formatter
-    const formatDate = (dateString, timeString) => {
-        if (!dateString) return '';
-        const d = new Date(dateString);
-        let formatted = d.toLocaleDateString();
-        if (timeString) {
-            formatted += ` ${timeString}`;
-        }
-        return formatted;
     };
 
     if (isPostLoading) {
@@ -224,9 +214,7 @@ export function CommunityDetail({
                     <Box sx={{ flex: 1, bgcolor: 'white' }}>
                         <List disablePadding>
                             {comments.map((comment, index) => (
-                                <React.Fragment
-                                    key={comment.commentId || index}
-                                >
+                                <Fragment key={comment.commentId || index}>
                                     <ListItem
                                         alignItems="flex-start"
                                         sx={{ px: 3, py: 2 }}
@@ -309,7 +297,7 @@ export function CommunityDetail({
                                     {index < comments.length - 1 && (
                                         <Divider component="li" />
                                     )}
-                                </React.Fragment>
+                                </Fragment>
                             ))}
                             {comments.length === 0 && (
                                 <Box
