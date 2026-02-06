@@ -220,7 +220,7 @@ export function RecipeEdit({ recipeId, boardId = 1 }) {
 
     const handleGoToProfile = () => {
         setShowEmailWarning(false);
-        navigate('/users/me');
+        navigate('/me');
     };
 
     return (

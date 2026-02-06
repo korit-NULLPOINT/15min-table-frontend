@@ -25,6 +25,10 @@ import type {
 
 import type {
   AddPostReqDto,
+  ApiRespDtoCursorRespDtoPostListRespDto,
+  ApiRespDtoInteger,
+  ApiRespDtoPostDetailRespDto,
+  ApiRespDtoVoid,
   GetPostListParams,
   ModifyPostReqDto
 } from '../openAPIDefinition.schemas';
@@ -41,7 +45,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type deletePostResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -118,7 +122,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getDeletePostMutationOptions(options), queryClient);
     }
     export type modifyPostResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -197,7 +201,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getModifyPostMutationOptions(options), queryClient);
     }
     export type addPostResponse200 = {
-  data: Blob
+  data: ApiRespDtoInteger
   status: 200
 }
     
@@ -274,7 +278,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getAddPostMutationOptions(options), queryClient);
     }
     export type getPostListResponse200 = {
-  data: Blob
+  data: ApiRespDtoCursorRespDtoPostListRespDto
   status: 200
 }
     
@@ -393,7 +397,7 @@ export function useGetPostList<TData = Awaited<ReturnType<typeof getPostList>>, 
 
 
 export type getPostDetailResponse200 = {
-  data: Blob
+  data: ApiRespDtoPostDetailRespDto
   status: 200
 }
     

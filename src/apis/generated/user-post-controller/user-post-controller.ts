@@ -20,6 +20,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiRespDtoCursorRespDtoPostListRespDto,
   GetMyPostListByCursorParams,
   GetPostListByUserIdByCursorParams
 } from '../openAPIDefinition.schemas';
@@ -36,7 +37,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type getPostListByUserIdByCursorResponse200 = {
-  data: Blob
+  data: ApiRespDtoCursorRespDtoPostListRespDto
   status: 200
 }
     
@@ -155,7 +156,7 @@ export function useGetPostListByUserIdByCursor<TData = Awaited<ReturnType<typeof
 
 
 export type getMyPostListByCursorResponse200 = {
-  data: Blob
+  data: ApiRespDtoCursorRespDtoPostListRespDto
   status: 200
 }
     

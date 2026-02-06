@@ -24,6 +24,14 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiRespDtoAdminStatsRespDto,
+  ApiRespDtoListAdminActivityRespDto,
+  ApiRespDtoListAdminPostRespDto,
+  ApiRespDtoListAdminRecipeRespDto,
+  ApiRespDtoListAdminTimeSeriesPointDto,
+  ApiRespDtoListUser,
+  ApiRespDtoUser,
+  ApiRespDtoVoid,
   GetAdminPostListParams,
   GetAdminRecipeListParams,
   GetRecentActivitiesParams,
@@ -42,7 +50,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type restoreUserResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -117,7 +125,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getRestoreUserMutationOptions(options), queryClient);
     }
     export type banUserResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -192,7 +200,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getBanUserMutationOptions(options), queryClient);
     }
     export type getUserByUsernameResponse200 = {
-  data: Blob
+  data: ApiRespDtoUser
   status: 200
 }
     
@@ -296,7 +304,7 @@ export function useGetUserByUsername<TData = Awaited<ReturnType<typeof getUserBy
 
 
 export type getUserListResponse200 = {
-  data: Blob
+  data: ApiRespDtoListUser
   status: 200
 }
     
@@ -400,7 +408,7 @@ export function useGetUserList<TData = Awaited<ReturnType<typeof getUserList>>, 
 
 
 export type getDashboardStatsResponse200 = {
-  data: Blob
+  data: ApiRespDtoAdminStatsRespDto
   status: 200
 }
     
@@ -504,7 +512,7 @@ export function useGetDashboardStats<TData = Awaited<ReturnType<typeof getDashbo
 
 
 export type getTimeSeriesResponse200 = {
-  data: Blob
+  data: ApiRespDtoListAdminTimeSeriesPointDto
   status: 200
 }
     
@@ -615,7 +623,7 @@ export function useGetTimeSeries<TData = Awaited<ReturnType<typeof getTimeSeries
 
 
 export type getAdminRecipeListResponse200 = {
-  data: Blob
+  data: ApiRespDtoListAdminRecipeRespDto
   status: 200
 }
     
@@ -726,7 +734,7 @@ export function useGetAdminRecipeList<TData = Awaited<ReturnType<typeof getAdmin
 
 
 export type getAdminPostListResponse200 = {
-  data: Blob
+  data: ApiRespDtoListAdminPostRespDto
   status: 200
 }
     
@@ -837,7 +845,7 @@ export function useGetAdminPostList<TData = Awaited<ReturnType<typeof getAdminPo
 
 
 export type getRecentActivitiesResponse200 = {
-  data: Blob
+  data: ApiRespDtoListAdminActivityRespDto
   status: 200
 }
     

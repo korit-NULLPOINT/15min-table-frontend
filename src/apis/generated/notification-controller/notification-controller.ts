@@ -24,6 +24,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiRespDtoInteger,
+  ApiRespDtoListNotificationRespDto,
+  ApiRespDtoVoid,
   GetNotificationsParams
 } from '../openAPIDefinition.schemas';
 
@@ -39,7 +42,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type markAsReadResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -114,7 +117,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getMarkAsReadMutationOptions(options), queryClient);
     }
     export type markAllAsReadResponse200 = {
-  data: Blob
+  data: ApiRespDtoVoid
   status: 200
 }
     
@@ -189,7 +192,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getMarkAllAsReadMutationOptions(options), queryClient);
     }
     export type getNotificationsResponse200 = {
-  data: Blob
+  data: ApiRespDtoListNotificationRespDto
   status: 200
 }
     
@@ -300,7 +303,7 @@ export function useGetNotifications<TData = Awaited<ReturnType<typeof getNotific
 
 
 export type getUnreadCountResponse200 = {
-  data: Blob
+  data: ApiRespDtoInteger
   status: 200
 }
     

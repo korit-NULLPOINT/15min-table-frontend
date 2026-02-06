@@ -68,7 +68,7 @@ export default function RecipeDetailPage() {
             currentUsername={principal?.username ?? ''}
             onAuthorClick={(authorUserId, authorName) => {
                 if (!authorUserId) return;
-                navigate(`/users/${authorUserId}`, {
+                navigate(`/profile/${authorUserId}`, {
                     state: { username: authorName },
                 });
             }}
