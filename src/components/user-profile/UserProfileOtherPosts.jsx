@@ -9,14 +9,13 @@ import { useGetPostListByUserIdByCursor } from '../../apis/generated/user-post-c
 export default function UserProfileOtherPosts({
     userId,
     displayName,
+    postType,
     onRecipeClick,
     onCommunityPostClick,
     onToggleBookmark,
     isLoggedIn,
     onOpenAuth,
 }) {
-    const [postType, setPostType] = useState('recipe'); // recipe | community
-
     /** -------------------------
      * 레시피 목록
      * ------------------------- */
@@ -43,7 +42,6 @@ export default function UserProfileOtherPosts({
 
     const recipePage = recipesQuery?.data?.data?.data;
     const recipeItems = recipePage?.items ?? [];
-    const recipeTotal = recipePage?.totalCount ?? 0;
 
     useEffect(() => {
         if (!recipesQuery.isError) return;
@@ -76,7 +74,6 @@ export default function UserProfileOtherPosts({
 
     const communityPage = communityQuery?.data?.data?.data;
     const communityItems = communityPage?.items ?? [];
-    const communityTotal = communityPage?.totalCount ?? 0;
 
     useEffect(() => {
         if (!communityQuery.isError) return;
@@ -106,41 +103,6 @@ export default function UserProfileOtherPosts({
 
     return (
         <>
-            {/* 탭 */}
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl text-[#3d3226]">{headerTitle}</h3>
-
-                <div className="flex gap-2 bg-[#ebe5db] p-1 rounded-md border-2 border-[#d4cbbf]">
-                    <button
-                        onClick={() => {
-                            clearRecipeError();
-                            setPostType('recipe');
-                        }}
-                        className={`px-4 py-2 rounded-md transition-colors ${
-                            postType === 'recipe'
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                                : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
-                        }`}
-                    >
-                        레시피 ({recipeTotal})
-                    </button>
-
-                    <button
-                        onClick={() => {
-                            clearCommunityError();
-                            setPostType('community');
-                        }}
-                        className={`px-4 py-2 rounded-md transition-colors ${
-                            postType === 'community'
-                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
-                                : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
-                        }`}
-                    >
-                        커뮤니티 ({communityTotal})
-                    </button>
-                </div>
-            </div>
-
             {/* 레시피 탭 */}
             {postType === 'recipe' && (
                 <>
@@ -282,7 +244,7 @@ export default function UserProfileOtherPosts({
                     {!communityQuery.isLoading &&
                         !communityError &&
                         communityItems.length > 0 && (
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-col gap-5">
                                 {communityItems.map((post) => (
                                     <div
                                         key={post.postId}

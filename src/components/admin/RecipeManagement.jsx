@@ -310,7 +310,7 @@ export function RecipeManagement() {
                 <Typography
                     noWrap
                     onClick={() => {
-                        navigate(`/board/1/recipe/${recipe.recipeId}`);
+                        navigate(`/b/1/recipe/${recipe.recipeId}`);
                     }}
                     title={recipe.title}
                     sx={{

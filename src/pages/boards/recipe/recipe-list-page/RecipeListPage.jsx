@@ -6,7 +6,7 @@ export default function RecipeListPage() {
     const { boardId } = useParams();
 
     const handleRecipeClick = (recipeId) => {
-        navigate(`/board/${boardId}/recipe/${recipeId}`);
+        navigate(`/b/${boardId}/recipe/${recipeId}`);
     };
 
     return (

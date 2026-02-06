@@ -240,7 +240,7 @@ export function CommunityManagement() {
                     noWrap
                     title={post.title}
                     onClick={() => {
-                        navigate(`/board/${FREE_BOARD_ID}/free/${post.postId}`);
+                        navigate(`/b/${FREE_BOARD_ID}/free/${post.postId}`);
                     }}
                     sx={{
                         color: '#3d3226',

@@ -11,7 +11,7 @@ export default function FreeWritePage() {
 
     const onNavigate = (key) => {
         if (key === 'community' || key === 'list') {
-            navigate(`/board/${boardId}/free`);
+            navigate(`/b/${boardId}/free`);
         }
     };
 
@@ -19,7 +19,7 @@ export default function FreeWritePage() {
         try {
             await addPost({ boardId: Number(boardId), data });
             toast.success('게시글이 등록되었습니다.');
-            navigate(`/board/${boardId}/free`);
+            navigate(`/b/${boardId}/free`);
         } catch (err) {
             console.error(err);
             toast.error('게시글 등록 실패');

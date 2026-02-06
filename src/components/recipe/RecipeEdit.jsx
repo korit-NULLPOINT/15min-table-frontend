@@ -213,7 +213,7 @@ export function RecipeEdit({ recipeId, boardId = 1 }) {
                 });
             }
             toast.success('레시피가 수정되었습니다!');
-            navigate(`/board/${boardId}/recipe/${recipeId}`); // 수정 후 상세 페이지로 이동
+            navigate(`/b/${boardId}/recipe/${recipeId}`); // 수정 후 상세 페이지로 이동
         } catch (error) {
             console.error('레시피 수정 실패:', error);
             toast.error('레시피 수정 중 오류가 발생했습니다.');

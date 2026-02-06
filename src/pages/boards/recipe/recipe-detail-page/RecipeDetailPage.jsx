@@ -49,7 +49,7 @@ export default function RecipeDetailPage() {
                 <button
                     className="mt-4 px-4 py-2 rounded bg-[#3d3226] text-[#f5f1eb]"
                     onClick={() =>
-                        navigate(`/board/${boardId}/recipe/filtered`)
+                        navigate(`/b/${boardId}/recipe/filtered`)
                     }
                 >
                     목록으로
@@ -62,7 +62,7 @@ export default function RecipeDetailPage() {
         <RecipeDetail
             recipeDetail={recipeDetail}
             comments={comments}
-            onNavigate={() => navigate(`/board/${boardId}/recipe/filtered`)}
+            onNavigate={() => navigate(`/b/${boardId}/recipe/filtered`)}
             isLoggedIn={isLoggedIn}
             onOpenAuth={() => openAuthModal('signin')} // ✅ 전역 모달 열기
             currentUsername={principal?.username ?? ''}
