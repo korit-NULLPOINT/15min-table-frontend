@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { getAdminRecipeList } from '../../apis/generated/manage-controller/manage-controller';
 import { useRemoveRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
@@ -36,7 +37,7 @@ export function RecipeManagement() {
     useEffect(() => {
         const isAdmin = principal?.userRoles?.some((r) => r.role?.roleId === 1);
         if (principal && !isAdmin) {
-            alert('관리자 권한이 필요합니다.');
+            toast.error('관리자 권한이 필요합니다.');
             navigate('/');
         }
     }, [principal, navigate]);
@@ -144,11 +145,13 @@ export function RecipeManagement() {
                         queryKey: ['adminRecipeList'],
                     });
                     setConfirmingId(null);
-                    alert('성공적으로 삭제되었습니다.');
+                    toast.success('성공적으로 삭제되었습니다.');
                 },
                 onError: (err) => {
                     console.error('Delete failed', err);
-                    alert('삭제에 실패했습니다. (게시판 ID 불일치 가능성)');
+                    toast.error(
+                        '삭제에 실패했습니다. (게시판 ID 불일치 가능성)',
+                    );
                 },
             },
         );

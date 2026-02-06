@@ -209,8 +209,8 @@ export interface PrincipalUser {
   userRoles?: UserRole[];
   authorities?: GrantedAuthority[];
   enabled?: boolean;
-  credentialsNonExpired?: boolean;
   accountNonExpired?: boolean;
+  credentialsNonExpired?: boolean;
   accountNonLocked?: boolean;
 }
 

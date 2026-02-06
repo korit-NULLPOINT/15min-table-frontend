@@ -1,6 +1,7 @@
 // src/components/user-profile/OtherUserProfile.jsx
 import { useEffect, useState } from 'react';
 import { ArrowLeft, User as UserIcon } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
 
@@ -66,7 +67,7 @@ export function OtherUserProfile({
         clearFollowError();
 
         if (!isLoggedIn) {
-            alert('로그인이 필요합니다.');
+            toast.error('로그인이 필요합니다.');
             return;
         }
 

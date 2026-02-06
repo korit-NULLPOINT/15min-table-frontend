@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Star, Bookmark, Share2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 import {
     Paper,
@@ -71,7 +72,7 @@ export default function RecipeRatingBookmark({
                     },
                     onError: (error) => {
                         console.error('Failed to delete rating:', error);
-                        alert('별점 삭제에 실패했습니다.');
+                        toast.error('별점 삭제에 실패했습니다.');
                     },
                 },
             );
@@ -91,7 +92,7 @@ export default function RecipeRatingBookmark({
                     },
                     onError: (error) => {
                         console.error('Failed to update rating:', error);
-                        alert('별점 등록에 실패했습니다.');
+                        toast.error('별점 등록에 실패했습니다.');
                     },
                 },
             );
@@ -132,7 +133,7 @@ export default function RecipeRatingBookmark({
                     },
                     onError: (error) => {
                         console.error('Failed to delete bookmark:', error);
-                        alert('북마크 취소에 실패했습니다.');
+                        toast.error('북마크 취소에 실패했습니다.');
                     },
                 },
             );
@@ -150,7 +151,7 @@ export default function RecipeRatingBookmark({
                     },
                     onError: (error) => {
                         console.error('Failed to add bookmark:', error);
-                        alert('북마크 추가에 실패했습니다.');
+                        toast.error('북마크 추가에 실패했습니다.');
                     },
                 },
             );
@@ -161,10 +162,10 @@ export default function RecipeRatingBookmark({
     const handleShareClick = async () => {
         try {
             await navigator.clipboard.writeText(window.location.href);
-            alert('주소가 클립보드에 복사되었습니다.');
+            toast.success('주소가 클립보드에 복사되었습니다.');
         } catch (err) {
             console.error('Failed to copy text: ', err);
-            alert('주소 복사에 실패했습니다.');
+            toast.error('주소 복사에 실패했습니다.');
         }
     };
 

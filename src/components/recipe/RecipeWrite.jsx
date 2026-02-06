@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Upload, Mail, Filter, LoaderCircle, X } from 'lucide-react';
-import { Alert, AlertTitle, Box, Button, Slide } from '@mui/material';
+import { Box, Button } from '@mui/material';
+import { toast } from 'react-toastify';
 
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { useAddRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
@@ -13,8 +14,6 @@ import { RecipeHashtag } from './RecipeHashtag';
 import { useAddRecipeHashtags } from '../../apis/generated/recipe-hashtag-controller/recipe-hashtag-controller';
 
 export function RecipeWrite({ onNavigate }) {
-    const [showEmailWarning, setShowEmailWarning] = useState(false);
-
     const principal = usePrincipalState((s) => s.principal);
 
     const { mutateAsync: addRecipeMutate, isPending: isAdding } =
@@ -110,14 +109,15 @@ export function RecipeWrite({ onNavigate }) {
         }
         // TEMP_USER >= 3 가정 (너 코드 기준)
         if (minId >= 3) {
-            setShowEmailWarning(true);
+            toast.warning(
+                '이메일 인증이 필요합니다. 프로필 페이지에서 인증을 완료해주세요.',
+            );
             return false;
         }
         return true;
     };
 
     const handleGoToProfile = () => {
-        setShowEmailWarning(false);
         onNavigate?.('profile');
     };
 
@@ -195,7 +195,7 @@ export function RecipeWrite({ onNavigate }) {
         clearSubmitError();
 
         if (!principal) {
-            alert('잘못된 접근 입니다.');
+            toast.error('잘못된 접근 입니다.');
             return;
         }
 
@@ -237,7 +237,7 @@ export function RecipeWrite({ onNavigate }) {
                 });
             }
 
-            alert('레시피가 등록되었습니다!');
+            toast.success('레시피가 등록되었습니다!');
             onNavigate?.('board');
         } catch (e) {
             await handleSubmitApiError(e, {
@@ -259,65 +259,21 @@ export function RecipeWrite({ onNavigate }) {
         return minId >= 3;
     }, [principal]);
 
+    // 미인증 계정 경고 toast
+    useEffect(() => {
+        if (isUnverified) {
+            toast.warning(
+                '미인증 계정입니다. 레시피 작성을 위해 이메일 인증이 필요합니다.',
+                {
+                    autoClose: false,
+                    closeOnClick: false,
+                },
+            );
+        }
+    }, [isUnverified]);
+
     return (
         <div className="py-6">
-            {/* Unverified Account Alert (Top Right) */}
-            <Slide
-                direction="left"
-                in={isUnverified}
-                mountOnEnter
-                unmountOnExit
-            >
-                <Box
-                    sx={{
-                        position: 'fixed',
-                        top: 100,
-                        right: 24,
-                        zIndex: 9999, // Ensure it's above other elements
-                        width: 'auto',
-                        maxWidth: 320,
-                        boxShadow: 4,
-                        borderRadius: 2,
-                    }}
-                >
-                    <Alert
-                        severity="warning"
-                        variant="filled"
-                        sx={{
-                            backgroundColor: '#d97706', // amber-600 to match theme roughly
-                            color: '#fff',
-                            '& .MuiAlert-icon': {
-                                color: '#fff',
-                            },
-                        }}
-                        action={
-                            <Button
-                                color="inherit"
-                                size="small"
-                                onClick={handleGoToProfile}
-                                sx={{
-                                    fontWeight: 'bold',
-                                    border: '1px solid rgba(255,255,255,0.3)',
-                                    '&:hover': {
-                                        backgroundColor:
-                                            'rgba(255,255,255,0.1)',
-                                    },
-                                }}
-                            >
-                                인증하기
-                            </Button>
-                        }
-                    >
-                        <AlertTitle sx={{ fontWeight: 'bold' }}>
-                            미인증 계정 알림
-                        </AlertTitle>
-                        레시피 작성을 위해서는
-                        <br />
-                        이메일 인증이 필요합니다.
-                    </Alert>
-                </Box>
-            </Slide>
-
             <div className="max-w-4xl mx-auto px-6">
                 <button
                     onClick={() => onNavigate?.('home')}
@@ -640,55 +596,6 @@ export function RecipeWrite({ onNavigate }) {
                         </button>
                     </div>
                 </div>
-
-                {/* Email Verification Warning Modal */}
-                {showEmailWarning && (
-                    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-lg shadow-xl max-w-md w-full border-2 border-[#e5dfd5]">
-                            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-4 rounded-t-lg">
-                                <h3 className="text-xl font-bold">
-                                    이메일 인증 필요
-                                </h3>
-                            </div>
-                            <div className="p-6">
-                                <div className="flex items-start gap-4 mb-6">
-                                    <div className="flex-shrink-0 w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-                                        <Mail
-                                            size={24}
-                                            className="text-emerald-600"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-[#3d3226] mb-2">
-                                            게시글 작성을 위해서는 이메일 인증이
-                                            필요합니다.
-                                        </p>
-                                        <p className="text-sm text-[#6b5d4f]">
-                                            프로필 페이지에서 이메일 인증을
-                                            완료해주세요.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() =>
-                                            setShowEmailWarning(false)
-                                        }
-                                        className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] text-[#3d3226] rounded-md hover:border-[#3d3226] transition-colors"
-                                    >
-                                        취소
-                                    </button>
-                                    <button
-                                        onClick={handleGoToProfile}
-                                        className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors shadow-md"
-                                    >
-                                        이메일 인증하기
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     );

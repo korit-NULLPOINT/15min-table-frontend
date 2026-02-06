@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import {
     Box,
     Button,
@@ -69,17 +70,17 @@ export function CommunityWrite({ onNavigate }) {
 
     const handleSubmit = async () => {
         if (!title.trim() || !content.trim()) {
-            alert('제목과 내용을 입력해주세요.');
+            toast.error('제목과 내용을 입력해주세요.');
             return;
         }
 
         if (!freeBoardId) {
-            alert('게시판 정보를 불러오지 못했습니다.');
+            toast.error('게시판 정보를 불러오지 못했습니다.');
             return;
         }
 
         if (!principal) {
-            alert('로그인이 필요합니다.');
+            toast.error('로그인이 필요합니다.');
             return;
         }
 
@@ -109,11 +110,11 @@ export function CommunityWrite({ onNavigate }) {
                 data: reqDto,
             });
 
-            alert('게시글이 등록되었습니다!');
+            toast.success('게시글이 등록되었습니다!');
             onNavigate('community');
         } catch (error) {
             console.error('Post creation failed:', error);
-            alert('게시글 등록에 실패했습니다.');
+            toast.error('게시글 등록에 실패했습니다.');
         }
     };
 

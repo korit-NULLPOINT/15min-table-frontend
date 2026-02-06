@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Trash2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import {
-    Alert,
     Box,
     Paper,
     Typography,
@@ -9,8 +9,6 @@ import {
     TextField,
     Button,
     IconButton,
-    Fade,
-    Slide,
 } from '@mui/material';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { useQueryClient } from '@tanstack/react-query';
@@ -49,31 +47,12 @@ export default function Comment({
     showBorder = true,
 }) {
     const [newComment, setNewComment] = useState('');
-    const [showEmptyWarning, setShowEmptyWarning] = useState(false);
-    const [showAuthAlert, setShowAuthAlert] = useState(false);
     const [shakingCommentId, setShakingCommentId] = useState(null);
     const textareaRef = useRef(null);
 
     const { principal } = usePrincipalState();
     const isLoggedIn = !!principal;
     const queryClient = useQueryClient();
-
-    // Empty warning 자동 숨김
-    useEffect(() => {
-        if (!showEmptyWarning) return;
-        const timer = setTimeout(() => setShowEmptyWarning(false), 2000);
-        return () => clearTimeout(timer);
-    }, [showEmptyWarning]);
-
-    // Auth alert 자동 숨김 + 프로필 이동
-    useEffect(() => {
-        if (!showAuthAlert) return;
-        const timer = setTimeout(() => {
-            setShowAuthAlert(false);
-            onNavigate?.('profile');
-        }, 2000);
-        return () => clearTimeout(timer);
-    }, [showAuthAlert, onNavigate]);
 
     // API 함수 선택
     const addCommentApi =
@@ -86,7 +65,7 @@ export default function Comment({
     // 댓글 작성
     const handleCommentSubmit = async () => {
         if (!isLoggedIn || !principal) {
-            alert('로그인이 필요합니다.');
+            toast.error('로그인이 필요합니다.');
             onOpenAuth?.();
             return;
         }
@@ -98,12 +77,15 @@ export default function Comment({
             ).length > 0;
 
         if (!hasValidRole) {
-            setShowAuthAlert(true);
+            toast.warning(
+                '미인증 계정입니다. 프로필 페이지에서 이메일 인증을 완료해주세요.',
+            );
+            setTimeout(() => onNavigate?.('profile'), 2000);
             return;
         }
 
         if (newComment.trim() === '') {
-            setShowEmptyWarning(true);
+            toast.warning('✍️ 댓글 내용을 입력해주세요.');
             textareaRef.current?.focus();
             return;
         }
@@ -116,7 +98,7 @@ export default function Comment({
             });
         } catch (error) {
             console.error('Failed to add comment:', error);
-            alert('댓글 등록 중 오류가 발생했습니다.');
+            toast.error('댓글 등록 중 오류가 발생했습니다.');
         }
     };
 
@@ -136,7 +118,7 @@ export default function Comment({
             });
         } catch (error) {
             console.error('Failed to delete comment:', error);
-            alert('댓글 삭제 중 오류가 발생했습니다.');
+            toast.error('댓글 삭제 중 오류가 발생했습니다.');
         }
     };
 
@@ -287,10 +269,7 @@ export default function Comment({
                 <TextField
                     inputRef={textareaRef}
                     value={newComment}
-                    onChange={(e) => {
-                        setNewComment(e.target.value);
-                        if (showEmptyWarning) setShowEmptyWarning(false);
-                    }}
+                    onChange={(e) => setNewComment(e.target.value)}
                     placeholder="댓글을 입력하세요..."
                     multiline
                     minRows={3}
@@ -311,42 +290,7 @@ export default function Comment({
                     }}
                 />
 
-                {/* 빈 댓글 경고 */}
-                <Fade in={showEmptyWarning} mountOnEnter unmountOnExit>
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            bgcolor: 'rgba(61, 50, 38, 0.9)',
-                            color: '#f5f1eb',
-                            px: 3,
-                            py: 1.5,
-                            borderRadius: 4,
-                            boxShadow: 4,
-                            zIndex: 10,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            pointerEvents: 'none',
-                        }}
-                    >
-                        <span style={{ fontSize: '1.2rem' }}>✍️</span>
-                        <Typography variant="body2" fontWeight="bold">
-                            댓글 내용을 입력해주세요.
-                        </Typography>
-                    </Box>
-                </Fade>
-
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        mt: 2,
-                    }}
-                >
+                <Box sx={{ mt: 2 }}>
                     <Button
                         onClick={handleCommentSubmit}
                         variant="contained"
@@ -361,43 +305,6 @@ export default function Comment({
                     >
                         댓글 작성
                     </Button>
-
-                    {/* 미인증 계정 Alert */}
-                    <Slide
-                        direction="up"
-                        in={showAuthAlert}
-                        mountOnEnter
-                        unmountOnExit
-                    >
-                        <Alert
-                            severity="warning"
-                            variant="filled"
-                            sx={{
-                                bgcolor: '#d97706',
-                                borderRadius: 2,
-                                color: '#fff',
-                                '& .MuiAlert-icon': { color: '#fff' },
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 1,
-                                }}
-                            >
-                                <Typography variant="body2" fontWeight="bold">
-                                    미인증 계정입니다.
-                                </Typography>
-                                <Typography
-                                    variant="caption"
-                                    sx={{ color: 'rgba(255,255,255,0.8)' }}
-                                >
-                                    2초 후 프로필 이동...
-                                </Typography>
-                            </Box>
-                        </Alert>
-                    </Slide>
                 </Box>
             </Box>
         </Paper>

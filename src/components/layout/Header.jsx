@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Menu, User, PenSquare } from 'lucide-react';
-import { Alert, AlertTitle, Box, Slide, Typography } from '@mui/material';
+import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 import { usePrincipalState } from '../../store/usePrincipalState';
@@ -16,25 +16,13 @@ export function Header({ onOpenAuth, onNavigate, onNotificationClick }) {
     const isLoggedIn = !!principal;
     const logout = usePrincipalState((s) => s.logout);
 
-    const [showAuthModal, setShowAuthModal] = useState(false);
-
-    useEffect(() => {
-        let timer;
-        if (showAuthModal) {
-            timer = setTimeout(() => {
-                setShowAuthModal(false);
-                onNavigate?.('profile');
-            }, 2000);
-        }
-        return () => clearTimeout(timer);
-    }, [showAuthModal, onNavigate]);
-
     const handleWriteClick = () => {
         const minId = Math.min(
             ...(principal?.userRoles?.map((r) => r.roleId) || [Infinity]),
         );
         if (minId >= 3) {
-            setShowAuthModal(true);
+            toast.warning('미인증 계정입니다. 이메일 인증을 완료해주세요.');
+            setTimeout(() => onNavigate?.('profile'), 2000);
         } else {
             onNavigate?.('write');
         }
@@ -116,51 +104,6 @@ export function Header({ onOpenAuth, onNavigate, onNotificationClick }) {
                 onOpenAuth={onOpenAuth}
                 onLogout={handleLogout}
             />
-
-            {/* Unverified Account Alert (Top Right) */}
-            <Slide
-                direction="left"
-                in={showAuthModal}
-                mountOnEnter
-                unmountOnExit
-            >
-                <Box
-                    sx={{
-                        position: 'fixed',
-                        top: 80, // Header height approx
-                        right: 200, // Roughly under the write button area (Write button is left of profile)
-                        zIndex: 9999,
-                        width: 'auto',
-                        maxWidth: 400,
-                        boxShadow: 4,
-                        borderRadius: 2,
-                    }}
-                >
-                    <Alert
-                        severity="warning"
-                        variant="filled"
-                        sx={{
-                            backgroundColor: '#d97706',
-                            color: '#fff',
-                            '& .MuiAlert-icon': {
-                                color: '#fff',
-                            },
-                        }}
-                    >
-                        <AlertTitle fontWeight="bold" sx={{ mb: 1 }}>
-                            미인증 계정 알림
-                        </AlertTitle>
-                        레시피 작성을 위해서는 이메일 인증이 필요합니다.
-                        <Typography
-                            variant="body2"
-                            fontSize={12}
-                            sx={{ mt: 1 }}
-                        >
-                            2초 후 프로필 페이지로 이동합니다...
-                        </Typography>
-                    </Alert>
-                </Box>
-            </Slide>
         </>
     );
 }

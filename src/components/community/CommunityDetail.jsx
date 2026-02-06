@@ -1,11 +1,5 @@
 import { useEffect } from 'react';
-import {
-    Box,
-    Typography,
-    Paper,
-    Divider,
-    CircularProgress,
-} from '@mui/material';
+import { Box, Typography, Paper, CircularProgress } from '@mui/material';
 import { CommunityHeader } from './CommunityHeader';
 import { ScrollIndicatorWrapper } from '../common/ScrollIndicatorWrapper';
 import Comment from '../common/Comment';

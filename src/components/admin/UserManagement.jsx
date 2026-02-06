@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { toast } from 'react-toastify';
 import {
     useGetUserList,
     useBanUser,
@@ -88,7 +89,7 @@ export function UserManagement() {
                     setConfirmingId(null);
                 },
                 onError: (err) => {
-                    alert('차단 처리에 실패했습니다.');
+                    toast.error('차단 처리에 실패했습니다.');
                     console.error(err);
                 },
             },
@@ -106,7 +107,7 @@ export function UserManagement() {
                     setConfirmingId(null);
                 },
                 onError: (err) => {
-                    alert('차단 해제에 실패했습니다.');
+                    toast.error('차단 해제에 실패했습니다.');
                     console.error(err);
                 },
             },

@@ -4,6 +4,7 @@ import { usePrincipalState } from '../../store/usePrincipalState';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { formatDate } from '../../utils/formatDate';
 import { PenIcon, Trash2Icon, FileText, Loader2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 import { removeRecipe } from '../../apis/generated/recipe-controller/recipe-controller';
 import {
@@ -94,7 +95,7 @@ export default function UserProfileMyPosts({
                 );
             } catch (error) {
                 console.error('Failed to delete community post:', error);
-                alert('삭제 중 오류가 발생했습니다.');
+                toast.error('삭제 중 오류가 발생했습니다.');
             }
         }
     };
@@ -119,10 +120,9 @@ export default function UserProfileMyPosts({
                 await queryClient.invalidateQueries({
                     queryKey: getGetMyRecipeListQueryKey(),
                 });
-                // alert('삭제되었습니다.');
             } catch (error) {
                 console.error('Failed to delete recipe:', error);
-                alert('삭제 중 오류가 발생했습니다.');
+                toast.error('삭제 중 오류가 발생했습니다.');
             }
         }
     };
@@ -134,10 +134,9 @@ export default function UserProfileMyPosts({
                 await queryClient.invalidateQueries({
                     queryKey: getGetMyCommentListQueryKey(),
                 });
-                // alert('삭제되었습니다.');
             } catch (error) {
                 console.error('Failed to delete comment:', error);
-                alert('삭제 중 오류가 발생했습니다.');
+                toast.error('삭제 중 오류가 발생했습니다.');
             }
         }
     };

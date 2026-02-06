@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { ArrowLeft, User as UserIcon } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 import { usePrincipalState } from '../../store/usePrincipalState';
 
@@ -146,7 +147,7 @@ export function FollowList({ onNavigate, type, onUserClick }) {
             await invalidateFollowCaches();
         } catch (e) {
             console.error('Follow toggle failed:', e);
-            alert('처리 중 오류가 발생했습니다.');
+            toast.error('처리 중 오류가 발생했습니다.');
         } finally {
             setPendingUserId(null);
         }

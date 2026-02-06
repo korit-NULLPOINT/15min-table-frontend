@@ -25,7 +25,6 @@ import type {
 
 import type {
   AddRecipeHashtagsReqDto,
-  ApiRespDtoListHashtagRespDto,
   SearchHashtagsParams
 } from '../openAPIDefinition.schemas';
 
@@ -41,7 +40,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type addRecipeHashtagsResponse200 = {
-  data: ApiRespDtoListHashtagRespDto
+  data: Blob
   status: 200
 }
     
@@ -117,7 +116,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getAddRecipeHashtagsMutationOptions(options), queryClient);
     }
     export type searchHashtagsResponse200 = {
-  data: ApiRespDtoListHashtagRespDto
+  data: Blob
   status: 200
 }
     
@@ -228,7 +227,7 @@ export function useSearchHashtags<TData = Awaited<ReturnType<typeof searchHashta
 
 
 export type getHashtagsByRecipeIdResponse200 = {
-  data: ApiRespDtoListHashtagRespDto
+  data: Blob
   status: 200
 }
     

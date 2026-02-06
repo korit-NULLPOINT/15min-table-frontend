@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
     TableSortLabel,
     TableRow,
@@ -76,7 +77,7 @@ export function CommunityManagement() {
             },
             onError: (err) => {
                 console.error('Delete failed:', err);
-                alert('게시글 삭제에 실패했습니다.');
+                toast.error('게시글 삭제에 실패했습니다.');
                 setConfirmingId(null);
             },
         },
