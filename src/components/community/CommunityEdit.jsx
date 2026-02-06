@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import MDEditor from '@uiw/react-md-editor';
 import { toast } from 'react-toastify';
 import {
     Box,
@@ -17,6 +18,15 @@ import {
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { CommunityHeader } from './CommunityHeader';
 import { ScrollIndicatorWrapper } from '../common/ScrollIndicatorWrapper';
+import {
+    paperContainerStyles,
+    formLabelStyles,
+    textFieldStyles,
+    mdEditorWrapperStyles,
+    primaryButtonStyles,
+    submitButtonStyles,
+    imageLabelStyles,
+} from './CommunityStyles';
 
 export function CommunityEdit({ postId, boardId, onNavigate }) {
     const [title, setTitle] = useState('');
@@ -109,18 +119,7 @@ export function CommunityEdit({ postId, boardId, onNavigate }) {
     }
 
     return (
-        <Paper
-            elevation={3}
-            sx={{
-                borderRadius: 2,
-                border: '2px solid #e5dfd5',
-                overflow: 'hidden',
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: 0,
-            }}
-        >
+        <Paper elevation={3} sx={paperContainerStyles}>
             {/* Header */}
             <CommunityHeader
                 title="커뮤니티 글 수정"
@@ -141,84 +140,35 @@ export function CommunityEdit({ postId, boardId, onNavigate }) {
                 >
                     {/* Title */}
                     <FormControl fullWidth>
-                        <FormLabel
-                            sx={{
-                                mb: 1,
-                                color: '#3d3226',
-                                fontWeight: 'bold',
-                            }}
-                        >
-                            제목
-                        </FormLabel>
+                        <FormLabel sx={formLabelStyles}>제목</FormLabel>
                         <TextField
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="제목을 입력하세요"
                             variant="outlined"
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    '& fieldset': {
-                                        borderColor: '#d4cbbf',
-                                        borderWidth: 2,
-                                    },
-                                    '&:hover fieldset': {
-                                        borderColor: '#3d3226',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderColor: '#3d3226',
-                                    },
-                                },
-                            }}
+                            sx={textFieldStyles}
                         />
                     </FormControl>
 
                     {/* Content */}
                     <FormControl fullWidth>
-                        <FormLabel
-                            sx={{
-                                mb: 1,
-                                color: '#3d3226',
-                                fontWeight: 'bold',
-                            }}
-                        >
-                            내용
-                        </FormLabel>
-                        <TextField
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            placeholder="내용을 입력하세요..."
-                            multiline
-                            rows={10}
-                            variant="outlined"
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    '& fieldset': {
-                                        borderColor: '#d4cbbf',
-                                        borderWidth: 2,
-                                    },
-                                    '&:hover fieldset': {
-                                        borderColor: '#3d3226',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderColor: '#3d3226',
-                                    },
-                                },
-                            }}
-                        />
+                        <FormLabel sx={formLabelStyles}>내용</FormLabel>
+                        <Box data-color-mode="light" sx={mdEditorWrapperStyles}>
+                            <MDEditor
+                                value={content}
+                                onChange={(val) => setContent(val || '')}
+                                height={275}
+                                preview="live"
+                                textareaProps={{
+                                    placeholder: '내용을 입력하세요...',
+                                }}
+                            />
+                        </Box>
                     </FormControl>
 
                     {/* Image Upload */}
                     <Box>
-                        <FormLabel
-                            sx={{
-                                mb: 1,
-                                display: 'block',
-                                color: '#3d3226',
-                                fontWeight: 'bold',
-                            }}
-                        >
-                            이미지
-                        </FormLabel>
+                        <FormLabel sx={imageLabelStyles}>이미지</FormLabel>
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -231,11 +181,9 @@ export function CommunityEdit({ postId, boardId, onNavigate }) {
                             startIcon={<Upload size={20} />}
                             onClick={() => fileInputRef.current?.click()}
                             sx={{
-                                bgcolor: '#3d3226',
-                                '&:hover': { bgcolor: '#5d4a36' },
+                                ...primaryButtonStyles,
                                 py: 1,
                                 px: 3,
-                                color: '#f5f1eb',
                             }}
                         >
                             이미지 변경
@@ -286,15 +234,7 @@ export function CommunityEdit({ postId, boardId, onNavigate }) {
                         onClick={handleSubmit}
                         fullWidth
                         variant="contained"
-                        sx={{
-                            py: 1.5,
-                            mt: 1.5,
-                            bgcolor: '#3d3226',
-                            fontSize: '1.1rem',
-                            '&:hover': { bgcolor: '#5d4a36' },
-                            color: '#f5f1eb',
-                            fontWeight: 'bold',
-                        }}
+                        sx={submitButtonStyles}
                     >
                         게시글 수정하기
                     </Button>

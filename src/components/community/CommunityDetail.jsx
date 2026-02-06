@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { Box, Typography, Paper, CircularProgress } from '@mui/material';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { CommunityHeader } from './CommunityHeader';
 import { ScrollIndicatorWrapper } from '../common/ScrollIndicatorWrapper';
 import Comment from '../common/Comment';
@@ -8,6 +10,7 @@ import { useGetPostDetail } from '../../apis/generated/post-controller/post-cont
 import { useGetPostCommentListByTarget } from '../../apis/generated/comment-controller/comment-controller';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { formatDate } from '../../utils/formatDate';
+import { markdownContentStyles, paperContainerStyles } from './CommunityStyles';
 
 export function CommunityDetail({ postId, boardId, onIsOwnerFetched }) {
     const principal = usePrincipalState((s) => s.principal);
@@ -63,18 +66,7 @@ export function CommunityDetail({ postId, boardId, onIsOwnerFetched }) {
     }
 
     return (
-        <Paper
-            elevation={3}
-            sx={{
-                borderRadius: 2,
-                border: '2px solid #e5dfd5',
-                overflow: 'hidden',
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: 0,
-            }}
-        >
+        <Paper elevation={3} sx={paperContainerStyles}>
             {/* Fixed Header */}
             <CommunityHeader title={post.title}>
                 <Box
@@ -107,17 +99,16 @@ export function CommunityDetail({ postId, boardId, onIsOwnerFetched }) {
                     elevation={0}
                     sx={{
                         minHeight: '214px',
-                        p: 3,
-                        mt: 1,
+                        px: 3,
+                        py: 1,
                         bgcolor: '#faf8f5',
                     }}
                 >
-                    <Typography
-                        variant="body1"
-                        sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}
-                    >
-                        {post.content}
-                    </Typography>
+                    <Box sx={markdownContentStyles}>
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {post.content || ''}
+                        </ReactMarkdown>
+                    </Box>
                 </Paper>
 
                 {/* Comments Section - 통합 Comment 컴포넌트 사용 */}

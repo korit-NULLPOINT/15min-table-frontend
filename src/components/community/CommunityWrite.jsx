@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import MDEditor from '@uiw/react-md-editor';
 import { toast } from 'react-toastify';
 import {
     Box,
@@ -15,6 +16,14 @@ import { usePrincipalState } from '../../store/usePrincipalState';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import { CommunityHeader } from './CommunityHeader';
 import { ScrollIndicatorWrapper } from '../common/ScrollIndicatorWrapper';
+import {
+    paperContainerStyles,
+    formLabelStyles,
+    textFieldStyles,
+    mdEditorWrapperStyles,
+    submitButtonStyles,
+    imageLabelStyles,
+} from './CommunityStyles';
 
 export function CommunityWrite({ onNavigate }) {
     const [title, setTitle] = useState('');
@@ -119,18 +128,7 @@ export function CommunityWrite({ onNavigate }) {
     };
 
     return (
-        <Paper
-            elevation={3}
-            sx={{
-                borderRadius: 2,
-                border: '2px solid #e5dfd5',
-                overflow: 'hidden',
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                minHeight: 0,
-            }}
-        >
+        <Paper elevation={3} sx={paperContainerStyles}>
             {/* Header */}
             <CommunityHeader
                 title="커뮤니티 글쓰기"
@@ -158,82 +156,38 @@ export function CommunityWrite({ onNavigate }) {
                     >
                         {/* Title */}
                         <FormControl fullWidth>
-                            <FormLabel
-                                sx={{
-                                    mb: 1,
-                                    color: '#3d3226',
-                                    fontWeight: 'bold',
-                                }}
-                            >
-                                제목
-                            </FormLabel>
+                            <FormLabel sx={formLabelStyles}>제목</FormLabel>
                             <TextField
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="제목을 입력하세요"
                                 variant="outlined"
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: '#d4cbbf',
-                                            borderWidth: 2,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: '#3d3226',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: '#3d3226',
-                                        },
-                                    },
-                                }}
+                                sx={textFieldStyles}
                             />
                         </FormControl>
 
                         {/* Content */}
                         <FormControl fullWidth>
-                            <FormLabel
-                                sx={{
-                                    mb: 1,
-                                    color: '#3d3226',
-                                    fontWeight: 'bold',
-                                }}
+                            <FormLabel sx={formLabelStyles}>내용</FormLabel>
+                            <Box
+                                data-color-mode="light"
+                                sx={mdEditorWrapperStyles}
                             >
-                                내용
-                            </FormLabel>
-                            <TextField
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                                placeholder="내용을 입력하세요..."
-                                multiline
-                                rows={10}
-                                variant="outlined"
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        '& fieldset': {
-                                            borderColor: '#d4cbbf',
-                                            borderWidth: 2,
-                                        },
-                                        '&:hover fieldset': {
-                                            borderColor: '#3d3226',
-                                        },
-                                        '&.Mui-focused fieldset': {
-                                            borderColor: '#3d3226',
-                                        },
-                                    },
-                                }}
-                            />
+                                <MDEditor
+                                    value={content}
+                                    onChange={(val) => setContent(val || '')}
+                                    height={275}
+                                    preview="edit"
+                                    textareaProps={{
+                                        placeholder: '내용을 입력하세요...',
+                                    }}
+                                />
+                            </Box>
                         </FormControl>
 
                         {/* Image Upload */}
                         <Box>
-                            <FormLabel
-                                sx={{
-                                    mb: 1,
-                                    display: 'block',
-                                    color: '#3d3226',
-                                    fontWeight: 'bold',
-                                }}
-                            >
+                            <FormLabel sx={imageLabelStyles}>
                                 이미지 (API 미설정으로 랜덤 이미지가 등록됩니다)
                             </FormLabel>
                             <input
@@ -303,15 +257,7 @@ export function CommunityWrite({ onNavigate }) {
                             onClick={handleSubmit}
                             fullWidth
                             variant="contained"
-                            sx={{
-                                py: 1.5,
-                                mt: 1.5,
-                                bgcolor: '#3d3226',
-                                fontSize: '1.1rem',
-                                '&:hover': { bgcolor: '#5d4a36' },
-                                color: '#f5f1eb',
-                                fontWeight: 'bold',
-                            }}
+                            sx={submitButtonStyles}
                         >
                             게시글 등록하기
                         </Button>
