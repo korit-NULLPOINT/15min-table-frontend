@@ -8,8 +8,8 @@ export default function UserProfileBookmarks({
     recipeList,
 }) {
     return (
-        <div className="px-8 pt-3 pb-4">
-            <div className="h-12 flex items-center mb-6 gap-2">
+        <div className="px-8 py-4">
+            <div className="h-12 flex items-center mb-4 gap-2">
                 <div className="w-8 h-8 flex items-center justify-center">
                     <Bookmark size={20} />
                 </div>

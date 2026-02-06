@@ -1,5 +1,5 @@
 import { Users, BookOpen, MessageSquare } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import AdminLineChart from './charts/AdminLineChart';
 import AdminMultiLineChart from './charts/AdminMultiLineChart';

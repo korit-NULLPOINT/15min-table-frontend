@@ -167,24 +167,30 @@ export function RecipeManagement() {
     const tableHead = (
         <TableRow>
             <TableCell
+                width="25%"
+                align="center"
+                sx={{
+                    backgroundColor: '#3d3226',
+                    color: '#f5f1eb',
+                    fontWeight: 'bold',
+                    pl: '2.5%',
+                }}
+            >
+                제목
+            </TableCell>
+            <TableCell
+                width="25%"
+                align="center"
                 sx={{
                     backgroundColor: '#3d3226',
                     color: '#f5f1eb',
                     fontWeight: 'bold',
                 }}
             >
-                <Typography paddingX={10}>제목</Typography>
+                작성자
             </TableCell>
             <TableCell
-                sx={{
-                    backgroundColor: '#3d3226',
-                    color: '#f5f1eb',
-                    fontWeight: 'bold',
-                }}
-            >
-                <Typography paddingX={5}>작성자</Typography>
-            </TableCell>
-            <TableCell
+                width="15%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
@@ -223,6 +229,7 @@ export function RecipeManagement() {
                 </TableSortLabel>
             </TableCell>
             <TableCell
+                width="10%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
@@ -261,6 +268,7 @@ export function RecipeManagement() {
                 </TableSortLabel>
             </TableCell>
             <TableCell
+                width="10%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
@@ -271,11 +279,13 @@ export function RecipeManagement() {
                 답글수
             </TableCell>
             <TableCell
+                width="10%"
                 align="center"
                 sx={{
                     backgroundColor: '#3d3226',
                     color: '#f5f1eb',
                     fontWeight: 'bold',
+                    pr: '2.5%',
                 }}
             >
                 작업
@@ -293,9 +303,8 @@ export function RecipeManagement() {
                 },
             }}
         >
-            <TableCell sx={{ maxWidth: 300 }}>
+            <TableCell width="25%" align="left" sx={{ pl: '2.5%' }}>
                 <Typography
-                    paddingX={3}
                     noWrap
                     onClick={() => {
                         navigate(`/board/1/recipe/${recipe.recipeId}`);
@@ -304,16 +313,20 @@ export function RecipeManagement() {
                     sx={{
                         color: '#3d3226',
                         cursor: 'pointer',
+                        '&:hover': {
+                            textDecoration: 'underline',
+                        },
                     }}
                 >
                     {recipe.title}
                 </Typography>
             </TableCell>
-            <TableCell sx={{ color: '#6b5d4f' }}>
+            <TableCell width="25%" align="center" sx={{ color: '#6b5d4f' }}>
                 <Box
                     sx={{
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'center',
                         gap: 1.5,
                     }}
                 >
@@ -330,16 +343,16 @@ export function RecipeManagement() {
                     </Typography>
                 </Box>
             </TableCell>
-            <TableCell align="center" sx={{ color: '#6b5d4f' }}>
+            <TableCell width="15%" align="center" sx={{ color: '#6b5d4f' }}>
                 {new Date(recipe.createDt).toLocaleDateString()}
             </TableCell>
-            <TableCell align="center" sx={{ color: '#6b5d4f' }}>
+            <TableCell width="10%" align="center" sx={{ color: '#6b5d4f' }}>
                 {recipe.viewCount.toLocaleString()}
             </TableCell>
-            <TableCell align="center" sx={{ color: '#6b5d4f' }}>
+            <TableCell width="10%" align="center" sx={{ color: '#6b5d4f' }}>
                 {recipe.commentCount.toLocaleString()}
             </TableCell>
-            <TableCell align="center">
+            <TableCell width="10%" align="center" sx={{ pr: '2.5%' }}>
                 <ActionConfirmButton
                     id={recipe.recipeId}
                     onConfirm={handleExecuteDelete}

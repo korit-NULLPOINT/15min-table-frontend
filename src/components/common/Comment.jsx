@@ -9,7 +9,6 @@ import {
     TextField,
     Button,
     IconButton,
-    Avatar,
     Fade,
     Slide,
 } from '@mui/material';
@@ -18,58 +17,83 @@ import { useQueryClient } from '@tanstack/react-query';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import {
     addRecipeComment,
+    addPostComment,
     deleteComment,
     getGetRecipeCommentListByTargetQueryKey,
+    getGetPostCommentListByTargetQueryKey,
 } from '../../apis/generated/comment-controller/comment-controller';
 import { formatDate } from '../../utils/formatDate';
 import { shake } from '../../styles/animations';
 
-export default function RecipeComment({
-    comments,
+/**
+ * 통합 Comment 컴포넌트
+ * Recipe와 Community(Post) 댓글 기능을 하나로 통합
+ *
+ * @param {'RECIPE' | 'POST'} targetType - 댓글 대상 타입
+ * @param {number} targetId - recipeId 또는 postId
+ * @param {Array} comments - 댓글 목록
+ * @param {Function} onOpenAuth - 비로그인 시 모달 열기
+ * @param {Function} onNavigate - 네비게이션 함수 (프로필 이동 등)
+ * @param {string} containerBgColor - 컨테이너 배경색 (기본: #ffffff)
+ * @param {number} elevation - Paper elevation (기본: 3)
+ * @param {boolean} showBorder - border/borderRadius 표시 여부 (기본: true)
+ */
+export default function Comment({
+    targetType,
+    targetId,
+    comments = [],
     onOpenAuth,
     onNavigate,
-    recipeDetail,
+    containerBgColor = '#ffffff',
+    elevation = 3,
+    showBorder = true,
 }) {
     const [newComment, setNewComment] = useState('');
     const [showEmptyWarning, setShowEmptyWarning] = useState(false);
-    const textareaRef = useRef(null);
-
-    useEffect(() => {
-        let timer;
-        if (showEmptyWarning) {
-            timer = setTimeout(() => {
-                setShowEmptyWarning(false);
-            }, 2000);
-        }
-        return () => clearTimeout(timer);
-    }, [showEmptyWarning]);
-
     const [showAuthAlert, setShowAuthAlert] = useState(false);
-
-    useEffect(() => {
-        let timer;
-        if (showAuthAlert) {
-            timer = setTimeout(() => {
-                setShowAuthAlert(false);
-                onNavigate('profile');
-            }, 2000);
-        }
-        return () => clearTimeout(timer);
-    }, [showAuthAlert, onNavigate]);
+    const [shakingCommentId, setShakingCommentId] = useState(null);
+    const textareaRef = useRef(null);
 
     const { principal } = usePrincipalState();
     const isLoggedIn = !!principal;
     const queryClient = useQueryClient();
 
+    // Empty warning 자동 숨김
+    useEffect(() => {
+        if (!showEmptyWarning) return;
+        const timer = setTimeout(() => setShowEmptyWarning(false), 2000);
+        return () => clearTimeout(timer);
+    }, [showEmptyWarning]);
+
+    // Auth alert 자동 숨김 + 프로필 이동
+    useEffect(() => {
+        if (!showAuthAlert) return;
+        const timer = setTimeout(() => {
+            setShowAuthAlert(false);
+            onNavigate?.('profile');
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, [showAuthAlert, onNavigate]);
+
+    // API 함수 선택
+    const addCommentApi =
+        targetType === 'RECIPE' ? addRecipeComment : addPostComment;
+    const getQueryKey =
+        targetType === 'RECIPE'
+            ? getGetRecipeCommentListByTargetQueryKey
+            : getGetPostCommentListByTargetQueryKey;
+
+    // 댓글 작성
     const handleCommentSubmit = async () => {
         if (!isLoggedIn || !principal) {
-            alert('잘못된 접근 입니다.');
-            if (onOpenAuth) onOpenAuth();
+            alert('로그인이 필요합니다.');
+            onOpenAuth?.();
             return;
         }
 
+        // 권한 검증 (roleId 1 또는 2)
         const hasValidRole =
-            principal.userRoles.filter(
+            principal.userRoles?.filter(
                 (role) => role.roleId === 1 || role.roleId === 2,
             ).length > 0;
 
@@ -85,14 +109,10 @@ export default function RecipeComment({
         }
 
         try {
-            await addRecipeComment(recipeDetail.recipeId, {
-                content: newComment,
-            });
+            await addCommentApi(targetId, { content: newComment });
             setNewComment('');
             await queryClient.invalidateQueries({
-                queryKey: getGetRecipeCommentListByTargetQueryKey(
-                    recipeDetail.recipeId,
-                ),
+                queryKey: getQueryKey(targetId),
             });
         } catch (error) {
             console.error('Failed to add comment:', error);
@@ -100,20 +120,19 @@ export default function RecipeComment({
         }
     };
 
-    const [shakingCommentId, setShakingCommentId] = useState(null);
-
+    // 댓글 삭제
     const handleCommentDelete = async (commentId) => {
+        // shake 애니메이션
         setShakingCommentId(commentId);
         await new Promise((resolve) => setTimeout(resolve, 400));
         setShakingCommentId(null);
 
         if (!window.confirm('정말 삭제하시겠습니까?')) return;
+
         try {
             await deleteComment(commentId);
             await queryClient.invalidateQueries({
-                queryKey: getGetRecipeCommentListByTargetQueryKey(
-                    recipeDetail.recipeId,
-                ),
+                queryKey: getQueryKey(targetId),
             });
         } catch (error) {
             console.error('Failed to delete comment:', error);
@@ -123,37 +142,44 @@ export default function RecipeComment({
 
     return (
         <Paper
-            elevation={3}
+            elevation={elevation}
             sx={{
                 p: 4,
-                mt: 4,
-                bgcolor: '#ffffff',
-                border: '2px solid #e5dfd5',
-                borderRadius: 2,
+                mt: 2,
+                bgcolor: containerBgColor,
+                border: showBorder ? '2px solid #e5dfd5' : 'none',
+                borderRadius: showBorder ? 2 : 0,
             }}
         >
             <Typography
                 variant="h5"
                 sx={{ mb: 2, color: '#3d3226', fontWeight: 'bold' }}
             >
-                댓글
+                댓글 {comments.length > 0 && `(${comments.length})`}
             </Typography>
 
+            {/* 댓글 목록 */}
             <Stack spacing={3} sx={{ mb: 4 }}>
-                {comments &&
+                {comments.length === 0 ? (
+                    <Box
+                        sx={{
+                            p: 4,
+                            textAlign: 'center',
+                            color: 'text.secondary',
+                        }}
+                    >
+                        작성된 댓글이 없습니다.
+                    </Box>
+                ) : (
                     comments.map((comment) => {
                         const isMine = principal?.userId === comment.userId;
-                        const isShaking =
-                            shakingCommentId ===
-                            (comment.commentId || comment.id);
+                        const commentId = comment.commentId || comment.id;
+                        const isShaking = shakingCommentId === commentId;
 
                         return (
                             <Box
-                                key={comment.commentId || comment.id}
-                                sx={{
-                                    display: 'flex',
-                                    gap: 2,
-                                }}
+                                key={commentId}
+                                sx={{ display: 'flex', gap: 2 }}
                             >
                                 {/* Avatar */}
                                 <Box
@@ -214,15 +240,12 @@ export default function RecipeComment({
                                             <IconButton
                                                 onClick={() =>
                                                     handleCommentDelete(
-                                                        comment.commentId ||
-                                                            comment.id,
+                                                        commentId,
                                                     )
                                                 }
                                                 size="small"
                                                 sx={{
-                                                    color: isShaking
-                                                        ? '#ef4444'
-                                                        : '#ef4444',
+                                                    color: '#ef4444',
                                                     '&:hover': {
                                                         bgcolor:
                                                             'rgba(239, 68, 68, 0.1)',
@@ -255,10 +278,11 @@ export default function RecipeComment({
                                 </Box>
                             </Box>
                         );
-                    })}
+                    })
+                )}
             </Stack>
 
-            {/* Input Area */}
+            {/* 댓글 입력 영역 */}
             <Box sx={{ position: 'relative', mt: 2 }}>
                 <TextField
                     inputRef={textareaRef}
@@ -287,7 +311,7 @@ export default function RecipeComment({
                     }}
                 />
 
-                {/* Empty Warning Tooltip (Custom) */}
+                {/* 빈 댓글 경고 */}
                 <Fade in={showEmptyWarning} mountOnEnter unmountOnExit>
                     <Box
                         sx={{
@@ -338,6 +362,7 @@ export default function RecipeComment({
                         댓글 작성
                     </Button>
 
+                    {/* 미인증 계정 Alert */}
                     <Slide
                         direction="up"
                         in={showAuthAlert}

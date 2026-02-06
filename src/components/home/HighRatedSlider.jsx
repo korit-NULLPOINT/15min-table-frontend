@@ -1,6 +1,5 @@
-import { Star, ChevronLeft, ChevronRight, Award } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Award } from 'lucide-react';
 import { useMemo } from 'react';
-import { ImageWithFallback } from '../figma/ImageWithFallback';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';

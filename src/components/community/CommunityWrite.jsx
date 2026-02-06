@@ -3,12 +3,11 @@ import {
     Box,
     Button,
     TextField,
-    Typography,
     Paper,
     FormControl,
     FormLabel,
 } from '@mui/material';
-import { Upload, LoaderCircle, X } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { useGetBoardList } from '../../apis/generated/board-controller/board-controller';
 import { useAddPost } from '../../apis/generated/post-controller/post-controller';
 import { usePrincipalState } from '../../store/usePrincipalState';

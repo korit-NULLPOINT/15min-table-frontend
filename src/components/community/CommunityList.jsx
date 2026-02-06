@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { MessageSquare, User, LoaderCircle } from 'lucide-react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useInView } from 'react-intersection-observer';
@@ -7,7 +7,6 @@ import {
     Box,
     Typography,
     Paper,
-    Button,
     List,
     ListItem,
     ListItemButton,
@@ -249,9 +248,14 @@ export function CommunityList({ onPostClick }) {
                             </Box>
                         ))}
 
-                        <div
+                        <Box
                             ref={ref}
-                            className="h-4 flex items-center justify-center p-4"
+                            sx={{
+                                height: '2px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
                         >
                             {isFetchingNextPage && (
                                 <LoaderCircle
@@ -259,7 +263,7 @@ export function CommunityList({ onPostClick }) {
                                     size={24}
                                 />
                             )}
-                        </div>
+                        </Box>
                     </List>
                 )}
             </ScrollIndicatorWrapper>

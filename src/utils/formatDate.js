@@ -6,7 +6,8 @@ export function formatDate(dateString) {
     const diffMins = Math.floor(diffMS / (1000 * 60));
     const diffHours = Math.floor(diffMS / (1000 * 60 * 60));
 
-    if (diffMins >= 0 && diffMins < 60) return `${diffMins}분 전`;
+    if (diffMins >= 0 && diffMins < 2) return `방금 전`;
+    if (diffMins >= 2 && diffMins < 60) return `${diffMins}분 전`;
     if (diffHours >= 0 && diffHours < 12) return `${diffHours}시간 전`;
 
     const year = date.getFullYear();

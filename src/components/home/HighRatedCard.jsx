@@ -4,8 +4,6 @@ import { ImageWithFallback } from '../figma/ImageWithFallback';
 export function HighRatedCard({
     recipe,
     onRecipeClick,
-    onOpenAuth,
-    isLoggedIn,
     isBookmarked,
     onToggleBookmark,
 }) {
