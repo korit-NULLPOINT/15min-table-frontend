@@ -574,6 +574,10 @@ export function RecipeWrite({ onNavigate }) {
                         <RecipeHashtag
                             hashtags={hashtags}
                             setHashtags={setHashtags}
+                            title={title}
+                            intro={intro}
+                            ingredients={ingredients}
+                            steps={steps}
                         />
 
                         {/* Submit Button */}
