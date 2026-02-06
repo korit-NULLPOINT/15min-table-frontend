@@ -12,12 +12,12 @@ export default function FreeDetailPage() {
 
     const onNavigate = (target) => {
         if (target === 'community' || target === 'list') {
-            navigate(`/board/${boardId}/free`);
+            navigate(`/b/${boardId}/free`);
         }
     };
 
     const handleEditClick = () => {
-        navigate(`/board/${boardId}/free/${freeId}/edit`);
+        navigate(`/b/${boardId}/free/${freeId}/edit`);
     };
 
     return (

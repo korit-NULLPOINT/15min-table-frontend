@@ -9,7 +9,7 @@ export default function FreeListPage() {
     const navigate = useNavigate();
 
     const handlePostClick = (postId) => {
-        navigate(`/board/${boardId}/free/${postId}`);
+        navigate(`/b/${boardId}/free/${postId}`);
     };
 
     return (
@@ -66,7 +66,7 @@ export default function FreeListPage() {
 
                     <Button
                         startIcon={<EditIcon fontSize="small" />}
-                        onClick={() => navigate(`/board/${boardId}/free/write`)}
+                        onClick={() => navigate(`/b/${boardId}/free/write`)}
                         sx={{
                             width: '120px',
                             display: 'flex',

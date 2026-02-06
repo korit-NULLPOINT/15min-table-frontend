@@ -80,7 +80,7 @@ export default function UserProfileMyPosts({
 
     // 커뮤니티 게시글 수정 핸들러
     const handleCommunityEditClick = (postId) => {
-        navigate(`/board/2/free/${postId}/edit`);
+        navigate(`/b/2/free/${postId}/edit`);
     };
 
     // 커뮤니티 게시글 삭제 핸들러
@@ -109,7 +109,7 @@ export default function UserProfileMyPosts({
     };
 
     const handleEditClick = (recipeId) => {
-        navigate(`/board/1/recipe/${recipeId}/edit`);
+        navigate(`/b/1/recipe/${recipeId}/edit`);
     };
 
     const handleDeleteClick = async (recipeId) => {

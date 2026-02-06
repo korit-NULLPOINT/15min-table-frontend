@@ -22,11 +22,11 @@ export default function MyProfilePage() {
 
     const handleRecipeClick = (recipeId, e) => {
         // e.stopPropagation() etc if needed
-        navigate(`/board/${RECIPE_BOARD_ID}/recipe/${recipeId}`);
+        navigate(`/b/${RECIPE_BOARD_ID}/recipe/${recipeId}`);
     };
 
     const handleEditClick = (recipeId) => {
-        navigate(`/board/${RECIPE_BOARD_ID}/recipe/${recipeId}/edit`);
+        navigate(`/b/${RECIPE_BOARD_ID}/recipe/${recipeId}/edit`);
     };
 
     const onLogout = () => {
@@ -36,7 +36,7 @@ export default function MyProfilePage() {
 
     const handleCommunityPostClick = (postId) => {
         // Community is board 2
-        navigate(`/board/2/free/${postId}`);
+        navigate(`/b/2/free/${postId}`);
     };
 
     return (

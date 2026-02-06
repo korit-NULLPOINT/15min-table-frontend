@@ -7,12 +7,6 @@ export default defineConfig({
     plugins: [react(), tailwindcss()],
     server: {
         proxy: {
-            // 백엔드로 프록시할 경로들
-            '/user/': {
-                target: 'http://localhost:8080',
-                changeOrigin: true,
-            },
-            // 필요하면 '/user' 정확히 한 건도 처리
             '/user': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
@@ -30,18 +24,6 @@ export default defineConfig({
                 changeOrigin: true,
             },
             '/board': {
-                target: 'http://localhost:8080',
-                changeOrigin: true,
-                bypass: (req, res, proxyOptions) => {
-                    if (
-                        req.headers.accept &&
-                        req.headers.accept.includes('text/html')
-                    ) {
-                        return req.url;
-                    }
-                },
-            },
-            '/boards': {
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },

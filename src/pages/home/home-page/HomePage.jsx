@@ -70,7 +70,7 @@ export default function HomePage() {
     const recipes = recipeListResponse?.data?.data?.items || [];
 
     const handleRecipeClick = (recipeId) => {
-        navigate(`/board/${boardId}/recipe/${recipeId}`);
+        navigate(`/b/${boardId}/recipe/${recipeId}`);
     };
 
     if (isLoading) {

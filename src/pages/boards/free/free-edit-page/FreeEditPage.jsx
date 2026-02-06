@@ -9,10 +9,10 @@ export default function FreeEditPage() {
 
     const onNavigate = (key, postId) => {
         if (key === 'community' || key === 'list') {
-            navigate(`/board/${boardId}/free`);
+            navigate(`/b/${boardId}/free`);
         }
         if (key === 'detail') {
-            navigate(`/board/${boardId}/free/${postId || freeId}`);
+            navigate(`/b/${boardId}/free/${postId || freeId}`);
         }
     };
 

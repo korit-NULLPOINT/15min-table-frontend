@@ -1,5 +1,5 @@
 // src/components/user-profile/OtherUserProfile.jsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, User as UserIcon } from 'lucide-react';
 import { usePrincipalState } from '../../store/usePrincipalState';
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
@@ -18,8 +18,9 @@ export function OtherUserProfile({
     onRecipeClick,
     onOpenAuth,
     onToggleBookmark,
-    onCommunityPostClick, // 추후 확장용
+    onCommunityPostClick,
 }) {
+    const [postType, setPostType] = useState('recipe');
     const principal = usePrincipalState((s) => s.principal);
     const isLoggedIn = !!principal;
 
@@ -109,8 +110,8 @@ export function OtherUserProfile({
     const displayName = profile?.username?.trim() || `사용자#${userId}`;
 
     return (
-        <div className="min-h-screen bg-[#f5f1eb] pt-20">
-            <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="min-h-screen bg-[#f5f1eb] pt-4">
+            <div className="max-w-4xl mx-auto px-6 py-4">
                 <button
                     onClick={() => onNavigate?.('back')}
                     className="flex items-center gap-2 mb-6 px-4 py-2 border-2 border-[#3d3226] text-[#3d3226] hover:bg-[#3d3226] hover:text-[#f5f1eb] transition-colors rounded-md"
@@ -194,15 +195,55 @@ export function OtherUserProfile({
                             )}
                         </div>
 
-                        <UserProfileOtherPosts
-                            userId={userId}
-                            displayName={displayName}
-                            onRecipeClick={onRecipeClick}
-                            onCommunityPostClick={onCommunityPostClick}
-                            isLoggedIn={isLoggedIn}
-                            onOpenAuth={onOpenAuth}
-                            onToggleBookmark={onToggleBookmark}
-                        />
+                        <div className="mt-8">
+                            {/* ✅ 탭(고정) */}
+                            <div className="flex items-center justify-between mb-4 sticky top-0 bg-white z-10 py-2">
+                                <h3 className="text-xl text-[#3d3226]">
+                                    {displayName}님이 작성한 게시글
+                                </h3>
+
+                                <div className="flex gap-2 bg-[#ebe5db] p-1 rounded-md border-2 border-[#d4cbbf]">
+                                    <button
+                                        onClick={() => setPostType('recipe')}
+                                        className={`px-4 py-2 rounded-md transition-colors ${
+                                            postType === 'recipe'
+                                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                                : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                        }`}
+                                    >
+                                        레시피
+                                    </button>
+
+                                    <button
+                                        onClick={() => setPostType('community')}
+                                        className={`px-4 py-2 rounded-md transition-colors ${
+                                            postType === 'community'
+                                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md'
+                                                : 'text-[#6b5d4f] hover:bg-[#f5f1eb]'
+                                        }`}
+                                    >
+                                        커뮤니티
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div
+                                className="h-[640px] overflow-y-auto bg-white border-t-2 border-[#e5dfd5] pt-4
+                scrollbar-hide scrollbar-thin scrollbar-track-gray-200 scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full"
+                            >
+                                <UserProfileOtherPosts
+                                    userId={userId}
+                                    displayName={displayName}
+                                    postType={postType}
+                                    onPostTypeChange={setPostType}
+                                    onRecipeClick={onRecipeClick}
+                                    onCommunityPostClick={onCommunityPostClick}
+                                    isLoggedIn={isLoggedIn}
+                                    onOpenAuth={onOpenAuth}
+                                    onToggleBookmark={onToggleBookmark}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
