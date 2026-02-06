@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import {
     Box,
     Button,
@@ -65,7 +66,7 @@ export function CommunityEdit({ postId, boardId, onNavigate }) {
 
     const handleSubmit = async () => {
         if (!title.trim() || !content.trim()) {
-            alert('제목과 내용을 입력해주세요.');
+            toast.error('제목과 내용을 입력해주세요.');
             return;
         }
 
@@ -91,11 +92,11 @@ export function CommunityEdit({ postId, boardId, onNavigate }) {
                 data: reqDto,
             });
 
-            alert('게시글이 수정되었습니다!');
+            toast.success('게시글이 수정되었습니다!');
             onNavigate('detail', postId);
         } catch (error) {
             console.error('Post modification failed:', error);
-            alert('게시글 수정에 실패했습니다.');
+            toast.error('게시글 수정에 실패했습니다.');
         }
     };
 

@@ -8,6 +8,7 @@ import {
     useDeleteBookmark,
 } from '../../../apis/generated/bookmark-controller/bookmark-controller';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 import { getGetRecipeListByUserIdQueryKey } from '../../../apis/generated/user-recipe-controller/user-recipe-controller';
 
@@ -104,7 +105,7 @@ export default function OtherUserProfilePage() {
                     return;
                 }
                 console.error('Failed to toggle bookmark:', error);
-                alert('북마크 변경에 실패했습니다.');
+                toast.error('북마크 변경에 실패했습니다.');
             },
         };
 

@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { CommunityWrite } from '../../../../components/community/CommunityWrite';
 import { addPost } from '../../../../apis/generated/post-controller/post-controller';
+import { toast } from 'react-toastify';
 import { Box, Container, Button } from '@mui/material';
 import { ArrowLeft } from 'lucide-react';
 
@@ -17,11 +18,11 @@ export default function FreeWritePage() {
     const handleWriteSubmit = async (data) => {
         try {
             await addPost({ boardId: Number(boardId), data });
-            alert('게시글이 등록되었습니다.');
+            toast.success('게시글이 등록되었습니다.');
             navigate(`/board/${boardId}/free`);
         } catch (err) {
             console.error(err);
-            alert('게시글 등록 실패');
+            toast.error('게시글 등록 실패');
         }
     };
 

@@ -15,8 +15,6 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ApiRespDtoString,
-  ApiRespDtoVoid,
   SigninReqDto,
   SignupReqDto
 } from '../openAPIDefinition.schemas';
@@ -33,7 +31,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type signupResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     
@@ -109,7 +107,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getSignupMutationOptions(options), queryClient);
     }
     export type signinResponse200 = {
-  data: ApiRespDtoString
+  data: Blob
   status: 200
 }
     
@@ -185,7 +183,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getSigninMutationOptions(options), queryClient);
     }
     export type refreshResponse200 = {
-  data: ApiRespDtoString
+  data: Blob
   status: 200
 }
     
@@ -260,7 +258,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getRefreshMutationOptions(options), queryClient);
     }
     export type logoutResponse200 = {
-  data: ApiRespDtoVoid
+  data: Blob
   status: 200
 }
     

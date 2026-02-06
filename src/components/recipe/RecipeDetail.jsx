@@ -1,4 +1,5 @@
 import { ArrowLeft, User as UserIcon, Star, Sparkles } from 'lucide-react';
+import { toast } from 'react-toastify';
 import {
     Box,
     Container,
@@ -70,7 +71,7 @@ export function RecipeDetail({
             mapRef.current.handleAIStoreMap();
             return;
         }
-        alert(
+        toast.error(
             '지도 기능을 불러오지 못했습니다. (AiStoreMapPage ref 확인 필요)',
         );
     };

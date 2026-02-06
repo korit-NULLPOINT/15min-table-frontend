@@ -1,6 +1,7 @@
 // src/components/AuthModal.jsx
-import { X } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-toastify';
 import {
     useSignin,
     useSignup,
@@ -46,6 +47,17 @@ export function AuthModal({
         /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_]).{8,16}$/;
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
 
+    // 실시간 유효성 검사
+    const isEmailValid = useMemo(() => emailRegex.test(email), [email]);
+    const isPasswordValid = useMemo(
+        () => passwordRegex.test(password),
+        [password],
+    );
+    const isPasswordMatch = useMemo(
+        () => password === passwordConfirm && passwordConfirm.length > 0,
+        [password, passwordConfirm],
+    );
+
     useEffect(() => {
         if (socialData?.email) setEmail(socialData.email);
     }, [socialData]);
@@ -65,7 +77,7 @@ export function AuthModal({
             setError('모든 항목을 입력해주세요.');
             return;
         }
-        if (!emailRegex.test(email)) {
+        if (!isEmailValid) {
             setError('이메일 형식이 올바르지 않습니다.');
             return;
         }
@@ -80,13 +92,13 @@ export function AuthModal({
                     setError('모든 항목을 입력해주세요.');
                     return;
                 }
-                if (!passwordRegex.test(password)) {
+                if (!isPasswordValid) {
                     setError(
                         '비밀번호는 8~16자리, 영문/숫자/특수문자를 포함해야 합니다.',
                     );
                     return;
                 }
-                if (password !== passwordConfirm) {
+                if (!isPasswordMatch) {
                     setError('비밀번호가 일치하지 않습니다.');
                     return;
                 }
@@ -97,7 +109,7 @@ export function AuthModal({
                     const provider = socialData.provider;
                     const providerUserId = socialData.providerUserId;
                     if (!provider || !providerUserId) {
-                        alert(
+                        toast.error(
                             '소셜 로그인 정보(provider/providerUserId)가 없습니다.',
                         );
                         return;
@@ -111,7 +123,7 @@ export function AuthModal({
                         },
                     });
 
-                    alert(
+                    toast.success(
                         '회원가입이 완료되었습니다! 소셜 로그인으로 계속 진행합니다.',
                     );
 
@@ -123,7 +135,7 @@ export function AuthModal({
                 // 일반 회원가입
                 await signupMutate({ data: baseData });
 
-                alert('회원가입이 완료되었습니다! 로그인해주세요.');
+                toast.success('회원가입이 완료되었습니다! 로그인해주세요.');
                 onModeChange?.('signin');
 
                 setEmail('');
@@ -140,7 +152,7 @@ export function AuthModal({
                 const provider = socialData.provider;
                 const providerUserId = socialData.providerUserId;
                 if (!provider || !providerUserId) {
-                    alert(
+                    toast.error(
                         '소셜 로그인 정보(provider/providerUserId)가 없습니다.',
                     );
                     return;
@@ -155,7 +167,7 @@ export function AuthModal({
                     },
                 });
 
-                alert(
+                toast.success(
                     '계정 연동이 완료되었습니다. 소셜 로그인으로 계속 진행합니다.',
                 );
                 window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
@@ -179,7 +191,9 @@ export function AuthModal({
                 onAuthSuccess?.();
                 onClose();
             } else {
-                alert(response?.data?.message || '로그인에 실패했습니다.');
+                toast.error(
+                    response?.data?.message || '로그인에 실패했습니다.',
+                );
             }
 
             setEmail('');
@@ -189,7 +203,7 @@ export function AuthModal({
             // axios 에러 형태 대응
             const errorData = err?.response?.data;
 
-            alert(
+            toast.error(
                 errorData?.message ||
                     (socialData
                         ? '계정 연동/회원가입에 실패했습니다.'
@@ -231,7 +245,11 @@ export function AuthModal({
                         </p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form
+                        onSubmit={handleSubmit}
+                        className="space-y-4"
+                        noValidate
+                    >
                         {mode === 'signup' && (
                             <div>
                                 <label className="block text-sm mb-2 text-[#3d3226]">
@@ -254,28 +272,82 @@ export function AuthModal({
                             <label className="block text-sm mb-2 text-[#3d3226]">
                                 이메일
                             </label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white"
-                                placeholder="email@example.com"
-                                required
-                            />
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className={`w-full px-4 py-3 pr-10 border-2 rounded-md focus:outline-none bg-white ${
+                                        email.length === 0
+                                            ? 'border-[#d4cbbf] focus:border-[#3d3226]'
+                                            : isEmailValid
+                                              ? 'border-green-500 focus:border-green-500'
+                                              : 'border-red-500 focus:border-red-500'
+                                    }`}
+                                    placeholder="email@example.com"
+                                />
+                                {email.length > 0 && (
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                                        {isEmailValid ? (
+                                            <Check
+                                                size={20}
+                                                className="text-green-500"
+                                            />
+                                        ) : (
+                                            <X
+                                                size={20}
+                                                className="text-red-500"
+                                            />
+                                        )}
+                                    </span>
+                                )}
+                            </div>
                         </div>
 
                         <div>
                             <label className="block text-sm mb-2 text-[#3d3226]">
                                 비밀번호
                             </label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none bg-white"
-                                placeholder="••••••••"
-                                required
-                            />
+                            <div className="relative">
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
+                                    className={`w-full px-4 py-3 pr-10 border-2 rounded-md focus:outline-none bg-white ${
+                                        password.length === 0
+                                            ? 'border-[#d4cbbf] focus:border-[#3d3226]'
+                                            : isPasswordValid
+                                              ? 'border-green-500 focus:border-green-500'
+                                              : 'border-red-500 focus:border-red-500'
+                                    }`}
+                                    placeholder="●●●●●●●●"
+                                />
+                                {password.length > 0 && (
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                                        {isPasswordValid ? (
+                                            <Check
+                                                size={20}
+                                                className="text-green-500"
+                                            />
+                                        ) : (
+                                            <X
+                                                size={20}
+                                                className="text-red-500"
+                                            />
+                                        )}
+                                    </span>
+                                )}
+                            </div>
+                            {mode === 'signup' &&
+                                password.length > 0 &&
+                                !isPasswordValid && (
+                                    <p className="text-red-500 text-xs mt-1">
+                                        8~16자리, 영문/숫자/특수문자(!@#$%^&*?_)
+                                        포함
+                                    </p>
+                                )}
                         </div>
 
                         {mode === 'signup' && (
@@ -283,23 +355,47 @@ export function AuthModal({
                                 <label className="block text-sm mb-2 text-[#3d3226]">
                                     비밀번호 확인
                                 </label>
-                                <input
-                                    type="password"
-                                    value={passwordConfirm}
-                                    onChange={(e) => {
-                                        setPasswordConfirm(e.target.value);
-                                        setError('');
-                                    }}
-                                    className={`w-full px-4 py-3 border-2 rounded-md focus:border-[#3d3226] focus:outline-none bg-white ${
-                                        error
-                                            ? 'border-red-500'
-                                            : 'border-[#d4cbbf]'
-                                    }`}
-                                    placeholder="••••••••"
-                                    required
-                                />
+                                <div className="relative">
+                                    <input
+                                        type="password"
+                                        value={passwordConfirm}
+                                        onChange={(e) => {
+                                            setPasswordConfirm(e.target.value);
+                                            setError('');
+                                        }}
+                                        className={`w-full px-4 py-3 pr-10 border-2 rounded-md focus:outline-none bg-white ${
+                                            passwordConfirm.length === 0
+                                                ? 'border-[#d4cbbf] focus:border-[#3d3226]'
+                                                : isPasswordMatch
+                                                  ? 'border-green-500 focus:border-green-500'
+                                                  : 'border-red-500 focus:border-red-500'
+                                        }`}
+                                        placeholder="●●●●●●●●"
+                                    />
+                                    {passwordConfirm.length > 0 && (
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                                            {isPasswordMatch ? (
+                                                <Check
+                                                    size={20}
+                                                    className="text-green-500"
+                                                />
+                                            ) : (
+                                                <X
+                                                    size={20}
+                                                    className="text-red-500"
+                                                />
+                                            )}
+                                        </span>
+                                    )}
+                                </div>
+                                {passwordConfirm.length > 0 &&
+                                    !isPasswordMatch && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            비밀번호가 일치하지 않습니다.
+                                        </p>
+                                    )}
                                 {error && (
-                                    <p className="text-red-500 text-sm mt-1">
+                                    <p className="text-red-500 text-xs mt-1">
                                         {error}
                                     </p>
                                 )}

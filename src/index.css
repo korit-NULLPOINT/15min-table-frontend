@@ -104,6 +104,13 @@ li {
     animation: shake 0.4s ease-in-out;
 }
 
+.Toastify__toast-container--top-center {
+    top: 100px !important;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+}
+
 /* Custom Scrollbar */
 html {
     overflow-y: auto; /* Scrollbar only appears when needed */
@@ -126,4 +133,3 @@ html {
 ::-webkit-scrollbar-thumb:hover {
     background: #3d3226; /* Hover color */
 }
-

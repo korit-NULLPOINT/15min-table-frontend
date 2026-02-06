@@ -10,6 +10,7 @@ import {
 import { getGetRecipeListQueryKey } from '../../../apis/generated/recipe-controller/recipe-controller';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePrincipalState } from '../../../store/usePrincipalState';
+import { toast } from 'react-toastify';
 
 export default function HomePage() {
     const navigate = useNavigate();
@@ -47,7 +48,7 @@ export default function HomePage() {
                 }
 
                 console.error('Failed to toggle bookmark:', error);
-                alert('북마크 변경에 실패했습니다.');
+                toast.error('북마크 변경에 실패했습니다.');
             },
         };
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Shuffle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { useGetRecipeList } from '../../apis/generated/recipe-controller/recipe-controller';
 
 export function Sidebar({
@@ -63,11 +64,11 @@ export function Sidebar({
                 handleRecipeClick(randomRecipeId);
                 onClose?.();
             } else {
-                alert('등록된 레시피가 없습니다 ㅠㅠ');
+                toast.error('등록된 레시피가 없습니다 ㅠㅠ');
             }
         } catch (error) {
             console.error('랜덤 레시피 실패:', error);
-            alert('레시피를 불러오는데 실패했습니다.');
+            toast.error('레시피를 불러오는데 실패했습니다.');
         } finally {
             setRandomStatus('idle');
         }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Eye, Star, Bookmark } from 'lucide-react';
 import { useApiErrorMessage } from '../../hooks/useApiErrorMessage';
+import { toast } from 'react-toastify';
 
 import { useGetRecipeListByUserId } from '../../apis/generated/user-recipe-controller/user-recipe-controller';
 import { useGetPostListByUserIdByCursor } from '../../apis/generated/user-post-controller/user-post-controller';
@@ -96,7 +97,7 @@ export default function UserProfileOtherPosts({
 
         if (!isLoggedIn) {
             if (onOpenAuth) onOpenAuth();
-            else alert('로그인이 필요합니다.');
+            else toast.error('로그인이 필요합니다.');
             return;
         }
 

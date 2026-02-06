@@ -6,6 +6,7 @@ import {
     useState,
 } from 'react';
 import { X, Search } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 import IngredientMap from './map/IngredientMap';
 
@@ -47,7 +48,8 @@ function loadDaumPostcodeAndOpen(onComplete) {
     script.async = true;
     script.onload = () =>
         new window.daum.Postcode({ oncomplete: onComplete }).open();
-    script.onerror = () => alert('주소 검색 스크립트를 불러오지 못했습니다.');
+    script.onerror = () =>
+        toast.error('주소 검색 스크립트를 불러오지 못했습니다.');
     document.body.appendChild(script);
 }
 const KakaoMap = forwardRef(function KakaoMap({ ingredients = [] }, ref) {
@@ -116,7 +118,7 @@ const KakaoMap = forwardRef(function KakaoMap({ ingredients = [] }, ref) {
                 data.address || data.roadAddress || data.jibunAddress;
 
             if (!fullAddress) {
-                alert('주소를 다시 선택해주세요.');
+                toast.error('주소를 다시 선택해주세요.');
                 return;
             }
 
@@ -247,7 +249,7 @@ const KakaoMap = forwardRef(function KakaoMap({ ingredients = [] }, ref) {
                                                                 if (
                                                                     !userAddress
                                                                 ) {
-                                                                    alert(
+                                                                    toast.error(
                                                                         '출발지 주소를 먼저 선택해주세요.',
                                                                     );
                                                                     return;
@@ -255,7 +257,7 @@ const KakaoMap = forwardRef(function KakaoMap({ ingredients = [] }, ref) {
                                                                 if (
                                                                     !originLocation
                                                                 ) {
-                                                                    alert(
+                                                                    toast.error(
                                                                         '출발지 위치 정보를 불러오지 못했습니다.',
                                                                     );
                                                                     return;

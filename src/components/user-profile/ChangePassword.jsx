@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 import { changePassword } from '../../apis/generated/user-account-controller/user-account-controller';
 import { usePrincipalState } from '../../store/usePrincipalState';
@@ -28,7 +29,7 @@ function ChangePassword({ onClose }) {
         setError('');
 
         if (!principal?.userId) {
-            alert('로그인 정보를 찾을 수 없습니다.');
+            toast.error('로그인 정보를 찾을 수 없습니다.');
             return;
         }
 
@@ -65,7 +66,7 @@ function ChangePassword({ onClose }) {
             const ok = httpStatus === 200 || body?.status === 'success';
 
             if (ok) {
-                alert(body?.message || '비밀번호가 변경되었습니다.');
+                toast.success(body?.message || '비밀번호가 변경되었습니다.');
 
                 // ✅ 비밀번호 변경 후에는 토큰이 무효 처리될 수 있으니 로그아웃 권장
                 logout();
@@ -75,11 +76,11 @@ function ChangePassword({ onClose }) {
                 return;
             }
 
-            alert(body?.message || '비밀번호 변경에 실패했습니다.');
+            toast.error(body?.message || '비밀번호 변경에 실패했습니다.');
         } catch (err) {
             // axios 에러 형태
             const errorData = err?.response?.data;
-            alert(
+            toast.error(
                 errorData?.message || '비밀번호 변경 중 오류가 발생했습니다.',
             );
 
