@@ -493,6 +493,10 @@ export function RecipeEdit({ recipeId, boardId = 1 }) {
                         <RecipeHashtag
                             hashtags={hashtags}
                             setHashtags={setHashtags}
+                            title={title}
+                            intro={intro}
+                            ingredients={ingredients}
+                            steps={steps}
                         />
 
                         {/* Submit Button */}

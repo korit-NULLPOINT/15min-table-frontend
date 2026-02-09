@@ -1,34 +1,82 @@
 import { useState } from 'react';
-import { Sparkles, Plus, X } from 'lucide-react';
-// import { useGenerateAIHashtags } from '../../apis/generated/ai-controller/ai-controller';
+import { Sparkles, Plus, X, LoaderCircle } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { useGenerateHashtags } from '../../apis/generated/ai-controller/ai-controller';
 
-export function RecipeHashtag({ hashtags, setHashtags }) {
+export function RecipeHashtag({
+    hashtags,
+    setHashtags,
+    title,
+    intro,
+    ingredients,
+    steps,
+}) {
     const [newHashtag, setNewHashtag] = useState('');
     const [warning, setWarning] = useState('');
-    // const { mutateAsync: generateAIHashtagsMutate } = useGenerateAIHashtags();
 
-    const generateAIHashtags = () => {
+    // AI 해시태그 생성 훅
+    const { mutateAsync: generateHashtagsMutate, isPending: isGenerating } =
+        useGenerateHashtags();
+
+    const generateAIHashtags = async () => {
         if (hashtags.length >= 4) {
             setWarning('해시태그는 4개까지 가능합니다.');
             return;
         }
 
-        // Mock AI hashtag generation
-        const aiHashtags = /* useGenerateAIHashtags()?.data?.data?.data || */ [
-            '15분요리',
-            '간단레시피',
-            '자취생필수',
-            '초간단',
-        ];
+        // 입력 데이터 유효성 검사 (필수는 아니지만, 너무 없으면 AI가 생성을 못할 수 있음)
+        if (
+            !title &&
+            !intro &&
+            (!ingredients || ingredients.length === 0) &&
+            !steps
+        ) {
+            toast.warning(
+                '레시피 정보를 입력해야 AI 해시태그를 생성할 수 있습니다.',
+            );
+            return;
+        }
 
-        // 기존 태그 제외하고 추가 가능한 개수만큼만 가져오기
-        const availableSlots = 4 - hashtags.length;
-        const newTags = aiHashtags
-            .filter((tag) => !hashtags.includes(tag))
-            .slice(0, availableSlots);
+        try {
+            const ingredientsStr = Array.isArray(ingredients)
+                ? ingredients.join(', ')
+                : String(ingredients);
 
-        setHashtags([...hashtags, ...newTags]);
-        setWarning('');
+            const result = await generateHashtagsMutate({
+                data: {
+                    title,
+                    intro,
+                    ingredients: ingredientsStr,
+                    steps,
+                    limit: 4, // 최대 4개 요청
+                },
+            });
+
+            const aiHashtags = (result?.data?.data?.hashtags || []).map(
+                (tag) => (tag.startsWith('#') ? tag.slice(1) : tag),
+            );
+
+            // 기존 태그 제외하고 추가 가능한 개수만큼만 가져오기
+            const availableSlots = 4 - hashtags.length;
+            const newTags = aiHashtags
+                .filter((tag) => !hashtags.includes(tag))
+                .slice(0, availableSlots);
+
+            if (newTags.length === 0) {
+                toast.info('추가할 새로운 해시태그가 없습니다.');
+            } else {
+                setHashtags([...hashtags, ...newTags]);
+                toast.success(
+                    `${newTags.length}개의 해시태그가 생성되었습니다!`,
+                );
+            }
+            setWarning('');
+        } catch (error) {
+            console.error('AI 해시태그 생성 실패:', error);
+            toast.error(
+                'AI 해시태그 생성에 실패했습니다. 잠시 후 다시 시도해주세요.',
+            );
+        }
     };
 
     const addHashtag = () => {
@@ -57,18 +105,21 @@ export function RecipeHashtag({ hashtags, setHashtags }) {
         setWarning('');
     };
 
-    // console.log(hashtags);
-
     return (
         <div>
             <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm text-[#3d3226]">해시태그</label>
                 <button
                     onClick={generateAIHashtags}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md"
+                    disabled={isGenerating || hashtags.length >= 4}
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-md hover:from-emerald-600 hover:to-teal-700 transition-colors text-sm shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    <Sparkles size={16} />
-                    AI 해시태그 생성
+                    {isGenerating ? (
+                        <LoaderCircle size={16} className="animate-spin" />
+                    ) : (
+                        <Sparkles size={16} />
+                    )}
+                    {isGenerating ? '생성 중...' : 'AI 해시태그 생성'}
                 </button>
             </div>
 
@@ -87,10 +138,12 @@ export function RecipeHashtag({ hashtags, setHashtags }) {
                         }
                         className="flex-1 px-4 py-3 border-2 border-[#d4cbbf] rounded-md focus:border-[#3d3226] focus:outline-none"
                         placeholder="해시태그 입력 (# 없이)"
+                        disabled={isGenerating}
                     />
                     <button
                         onClick={addHashtag}
-                        className="px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors"
+                        disabled={isGenerating}
+                        className="px-6 py-3 bg-[#3d3226] text-[#f5f1eb] rounded-md hover:bg-[#5d4a36] transition-colors disabled:opacity-50"
                     >
                         <Plus size={20} />
                     </button>

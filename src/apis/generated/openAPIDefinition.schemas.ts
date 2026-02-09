@@ -165,6 +165,25 @@ export interface AddPostReqDto {
   imgUrls?: string[];
 }
 
+export interface AiHashtagReqDto {
+  title?: string;
+  intro?: string;
+  ingredients?: string;
+  steps?: string;
+  limit?: number;
+}
+
+export interface AiHashtagRespDto {
+  hashtags?: string[];
+}
+
+export interface ApiRespDtoAiHashtagRespDto {
+  status?: string;
+  message?: string;
+  /** 응답 데이터(없으면 null) */
+  data?: AiHashtagRespDto;
+}
+
 export interface UserProfileRespDto {
   userId?: number;
   username?: string;
