@@ -24,6 +24,9 @@ import {
  * - EventSource는 헤더 못 넣어서 소셜 흐름은 보통 백이 리다이렉트로 토큰 내려줌.
  * - 여기서는 "연동/가입 성공 -> 다시 /oauth2/authorization/{provider}로 이동" 흐름을 사용.
  */
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export function AuthModal({
     isOpen,
     onClose,
@@ -128,7 +131,7 @@ export function AuthModal({
                     );
 
                     // 소셜 가입 후 OAuth2 로그인 플로우 재시작(백에서 토큰 발급/리다이렉트)
-                    window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
+                    window.location.href = `${API_BASE_URL}/oauth2/authorization/${provider}`;
                     return;
                 }
 
@@ -170,7 +173,7 @@ export function AuthModal({
                 toast.success(
                     '계정 연동이 완료되었습니다. 소셜 로그인으로 계속 진행합니다.',
                 );
-                window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
+                window.location.href = `${API_BASE_URL}/oauth2/authorization/${provider}`;
                 return;
             }
 
@@ -213,7 +216,7 @@ export function AuthModal({
     };
 
     const handleSocialLogin = (provider) => {
-        window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
+        window.location.href = `${API_BASE_URL}/oauth2/authorization/${provider}`;
     };
 
     const switchMode = () => {
