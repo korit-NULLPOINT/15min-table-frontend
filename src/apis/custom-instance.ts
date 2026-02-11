@@ -16,7 +16,7 @@ import { usePrincipalState } from '../store/usePrincipalState';
 
 // 1) Axios 인스턴스
 export const AXIOS_INSTANCE = Axios.create({
-    baseURL: '',
+    baseURL: '/api',
     withCredentials: true,
 });
 
