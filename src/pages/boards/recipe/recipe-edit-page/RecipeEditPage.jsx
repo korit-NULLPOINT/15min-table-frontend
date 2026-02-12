@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { RecipeEdit } from '../../../../components/Recipe/RecipeEdit';
+import { RecipeEdit } from '../../../../components/recipe/RecipeEdit';
 
 export default function RecipeEditPage() {
     const { boardId, recipeId } = useParams();
