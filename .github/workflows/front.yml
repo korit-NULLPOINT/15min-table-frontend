@@ -32,13 +32,14 @@ jobs:
           echo "${{ secrets.REACT_ENV }}" | base64 --decode > ./.env
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
-      - name: Deploy on VM (no key test)
+      - name: Deploy on VM
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
-          port: 22
-          # key: ${{ secrets.VM_SSH_KEY }}   # ← 테스트용으로 잠깐 주석/삭제
+          key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            echo "hello from github actions"
-
+            set -e
+            sudo docker compose -f frontend-compose.yml pull
+            sudo docker compose -f frontend-compose.yml down
+            sudo docker compose -f frontend-compose.yml up -d
