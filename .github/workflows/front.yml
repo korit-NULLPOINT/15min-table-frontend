@@ -7,14 +7,14 @@ on:
 jobs:
   deploy_team:
     runs-on: ubuntu-latest
-    
+
     strategy:
       fail-fast: false
       matrix:
         env: [15mintablefront-sjw, cicd-frontend-hjhong, 15mintable-front-chan]
 
     environment: ${{ matrix.env }}
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,7 +32,34 @@ jobs:
           echo "${{ secrets.REACT_ENV }}" | base64 --decode > ./.env
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
-      - name: Deploy on VM
+
+      # ✅ 너 환경에서만 실행 (vars로 분기)
+      - name: Prepare SSH key (B64)
+        if: vars.USE_SSH_KEY_B64 == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "${{ secrets.VM_SSH_KEY_B64 }}" | base64 -d > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+
+      # ✅ 너 환경에서만 key_path 방식
+      - name: Deploy on VM (key_path)
+        if: vars.USE_SSH_KEY_B64 == 'true'
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          debug: true
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key_path: /tmp/id_rsa
+          script: |
+            set -e
+            sudo docker compose -f frontend-compose.yml pull
+            sudo docker compose -f frontend-compose.yml down
+            sudo docker compose -f frontend-compose.yml up -d
+
+      # ✅ 팀원 환경은 기존 key 방식 (vars가 없으면 자동으로 여기로 옴)
+      - name: Deploy on VM (key)
+        if: vars.USE_SSH_KEY_B64 != 'true'
         uses: appleboy/ssh-action@v1.2.2
         with:
           debug: true
