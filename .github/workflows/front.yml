@@ -35,9 +35,11 @@ jobs:
       - name: Deploy on VM
         uses: appleboy/ssh-action@v1.2.2
         with:
+          debug: true
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
+          script_stop: true
           script: |
             set -e
             sudo docker compose -f frontend-compose.yml pull
