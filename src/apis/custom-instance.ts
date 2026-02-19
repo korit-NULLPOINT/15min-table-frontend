@@ -4,6 +4,7 @@ import Axios, {
     type AxiosError,
     type AxiosResponse,
 } from 'axios';
+import { toast } from 'react-toastify';
 import { usePrincipalState } from '../store/usePrincipalState';
 
 /**
@@ -130,9 +131,19 @@ AXIOS_INSTANCE.interceptors.response.use(
             return Promise.reject(error);
         }
 
+        // ===== 429 처리(Too Many Requests) =====
+        if (status === 429) {
+            const msg =
+                (error.response?.data as any)?.message ??
+                '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+            toast.warning(msg);
+        }
+
         return Promise.reject(error);
     },
 );
+
+// ===== 429 처리 =====
 
 // ===== orval bridge =====
 type OrvalRequestOptions = RequestInit & { data?: any };
