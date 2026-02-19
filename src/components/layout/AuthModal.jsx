@@ -46,6 +46,8 @@ export function AuthModal({
     const [username, setUsername] = useState('');
     const [error, setError] = useState('');
 
+    const isSignup = mode === 'signup';
+
     const passwordRegex =
         /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^&*?_]).{8,16}$/;
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
@@ -75,19 +77,21 @@ export function AuthModal({
         e.preventDefault();
         setError('');
 
-        // 공통 검증
+        // ✅ 로그인/회원가입 공통: 빈값만 체크 (로그인 화면에서 형식 피드백 최소화)
         if (email.trim().length === 0 || password.trim().length === 0) {
-            setError('모든 항목을 입력해주세요.');
+            setError('이메일과 비밀번호를 입력해주세요.');
             return;
         }
-        if (!isEmailValid) {
+
+        // ✅ 회원가입에서만 이메일 형식 체크 (원하면 로그인에도 넣어도 됨)
+        if (isSignup && !isEmailValid) {
             setError('이메일 형식이 올바르지 않습니다.');
             return;
         }
 
         try {
             // ✅ 회원가입
-            if (mode === 'signup') {
+            if (isSignup) {
                 if (
                     username.trim().length === 0 ||
                     passwordConfirm.trim().length === 0
@@ -130,7 +134,7 @@ export function AuthModal({
                         '회원가입이 완료되었습니다! 소셜 로그인으로 계속 진행합니다.',
                     );
 
-                    // 소셜 가입 후 OAuth2 로그인 플로우 재시작(백에서 토큰 발급/리다이렉트)
+                    // 소셜 가입 후 OAuth2 로그인 플로우 재시작
                     window.location.href = `${API_BASE_URL}/oauth2/authorization/${provider}`;
                     return;
                 }
@@ -180,14 +184,9 @@ export function AuthModal({
             // 일반 로그인
             response = await signinMutate({ data: { email, password } });
 
-            /**
-             * orval + customInstance 응답 형태:
-             * response = { data: ApiRespDto<...>, status: number, headers: Headers }
-             * ApiRespDto 예시: { status: "success" | "error", message: string, data: <token or dto> }
-             */
             const httpStatus = response?.status;
             const apiStatus = response?.data?.status;
-            const token = response?.data?.data; // ✅ 토큰은 여기
+            const token = response?.data?.data;
 
             if ((httpStatus === 200 || apiStatus === 'success') && token) {
                 localStorage.setItem('AccessToken', token);
@@ -203,7 +202,6 @@ export function AuthModal({
             setPassword('');
             setError('');
         } catch (err) {
-            // axios 에러 형태 대응
             const errorData = err?.response?.data;
 
             toast.error(
@@ -253,7 +251,7 @@ export function AuthModal({
                         className="space-y-4"
                         noValidate
                     >
-                        {mode === 'signup' && (
+                        {isSignup && (
                             <div>
                                 <label className="block text-sm mb-2 text-[#3d3226]">
                                     닉네임
@@ -281,15 +279,18 @@ export function AuthModal({
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className={`w-full px-4 py-3 pr-10 border-2 rounded-md focus:outline-none bg-white ${
-                                        email.length === 0
-                                            ? 'border-[#d4cbbf] focus:border-[#3d3226]'
-                                            : isEmailValid
-                                              ? 'border-green-500 focus:border-green-500'
-                                              : 'border-red-500 focus:border-red-500'
+                                        // ✅ 회원가입에서만 시각적 유효성 표시
+                                        isSignup
+                                            ? email.length === 0
+                                                ? 'border-[#d4cbbf] focus:border-[#3d3226]'
+                                                : isEmailValid
+                                                  ? 'border-green-500 focus:border-green-500'
+                                                  : 'border-red-500 focus:border-red-500'
+                                            : 'border-[#d4cbbf] focus:border-[#3d3226]'
                                     }`}
                                     placeholder="email@example.com"
                                 />
-                                {email.length > 0 && (
+                                {isSignup && email.length > 0 && (
                                     <span className="absolute right-3 top-1/2 -translate-y-1/2">
                                         {isEmailValid ? (
                                             <Check
@@ -319,15 +320,18 @@ export function AuthModal({
                                         setPassword(e.target.value)
                                     }
                                     className={`w-full px-4 py-3 pr-10 border-2 rounded-md focus:outline-none bg-white ${
-                                        password.length === 0
-                                            ? 'border-[#d4cbbf] focus:border-[#3d3226]'
-                                            : isPasswordValid
-                                              ? 'border-green-500 focus:border-green-500'
-                                              : 'border-red-500 focus:border-red-500'
+                                        // ✅ 로그인에서는 비밀번호 형식에 대한 시각적 피드백 제거
+                                        isSignup
+                                            ? password.length === 0
+                                                ? 'border-[#d4cbbf] focus:border-[#3d3226]'
+                                                : isPasswordValid
+                                                  ? 'border-green-500 focus:border-green-500'
+                                                  : 'border-red-500 focus:border-red-500'
+                                            : 'border-[#d4cbbf] focus:border-[#3d3226]'
                                     }`}
                                     placeholder="●●●●●●●●"
                                 />
-                                {password.length > 0 && (
+                                {isSignup && password.length > 0 && (
                                     <span className="absolute right-3 top-1/2 -translate-y-1/2">
                                         {isPasswordValid ? (
                                             <Check
@@ -343,7 +347,8 @@ export function AuthModal({
                                     </span>
                                 )}
                             </div>
-                            {mode === 'signup' &&
+
+                            {isSignup &&
                                 password.length > 0 &&
                                 !isPasswordValid && (
                                     <p className="text-red-500 text-xs mt-1">
@@ -353,7 +358,7 @@ export function AuthModal({
                                 )}
                         </div>
 
-                        {mode === 'signup' && (
+                        {isSignup && (
                             <div>
                                 <label className="block text-sm mb-2 text-[#3d3226]">
                                     비밀번호 확인
@@ -391,18 +396,25 @@ export function AuthModal({
                                         </span>
                                     )}
                                 </div>
+
                                 {passwordConfirm.length > 0 &&
                                     !isPasswordMatch && (
                                         <p className="text-red-500 text-xs mt-1">
                                             비밀번호가 일치하지 않습니다.
                                         </p>
                                     )}
+
                                 {error && (
                                     <p className="text-red-500 text-xs mt-1">
                                         {error}
                                     </p>
                                 )}
                             </div>
+                        )}
+
+                        {/* ✅ 로그인 모드에서도 에러 메시지는 보여주기 */}
+                        {!isSignup && error && (
+                            <p className="text-red-500 text-xs mt-1">{error}</p>
                         )}
 
                         <button
