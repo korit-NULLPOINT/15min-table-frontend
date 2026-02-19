@@ -15,7 +15,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AiHashtagReqDto
+  AiHashtagReqDto,
+  ApiRespDtoAiHashtagRespDto
 } from '../openAPIDefinition.schemas';
 
 import { customInstance } from '../../custom-instance';
@@ -30,7 +31,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 export type generateHashtagsResponse200 = {
-  data: Blob
+  data: ApiRespDtoAiHashtagRespDto
   status: 200
 }
     
