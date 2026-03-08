@@ -9,7 +9,7 @@ const queryClient = new QueryClient();
 export default function App() {
     return (
         <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
+            <BrowserRouter basename={import.meta.env.VITE_APP_BASE_PATH || '/'}>
                 <MainRouter />
                 <ToastContainer
                     position="top-center"
