@@ -13,7 +13,7 @@ jobs:
       matrix:
         # 팀원별 배포 환경
         # 필요 시 아래 배열에 환경명을 다시 추가하면 각자 VM으로 동시 배포 가능
-        # env: [cicd-frontend-hjhong, 15mintable-front-chan, 15mintablefront-sjw]
+        # env: [15mintablefront-sjw, cicd-frontend-hjhong, 15mintable-front-chan]
         env: [15mintablefront-sjw]
 
     environment: ${{ matrix.env }}
@@ -35,14 +35,15 @@ jobs:
 
           echo "${{ secrets.REACT_ENV }}" | base64 --decode > ./.env
 
-      # 배포 전 프론트엔드 빌드 검증
-      # npm run build가 실패하면 Docker build / push / VM 배포 단계는 실행되지 않음
-      - name: Frontend build check
+      # 배포 전 프론트엔드 테스트 및 빌드 검증
+      # npm run test 또는 npm run build가 실패하면 Docker build / push / VM 배포 단계는 실행되지 않음
+      - name: Frontend test and build check
         shell: bash
         run: |
           set -euo pipefail
 
           npm ci
+          npm run test
           npm run build
 
       - name: Docker build and push
