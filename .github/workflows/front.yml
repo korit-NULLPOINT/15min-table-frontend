@@ -11,7 +11,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        env: [15mintablefront-sjw, cicd-frontend-hjhong, 15mintable-front-chan]
+        # 팀원별 배포 환경
+        # 필요 시 아래 배열에 환경명을 다시 추가하면 각자 VM으로 동시 배포 가능
+        # env: [15mintablefront-sjw, cicd-frontend-hjhong, 15mintable-front-chan]
+        env: [15mintablefront-sjw]
 
     environment: ${{ matrix.env }}
     
@@ -25,21 +28,42 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: create_env_and_buils_push
+      - name: Create env
         shell: bash
         run: |
           set -euo pipefail
+
           echo "${{ secrets.REACT_ENV }}" | base64 --decode > ./.env
+
+      # 배포 전 프론트엔드 테스트 및 빌드 검증
+      # npm run test 또는 npm run build가 실패하면 Docker build / push / VM 배포 단계는 실행되지 않음
+      - name: Frontend test and build check
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          npm ci
+          npm run test
+          npm run build
+
+      - name: Docker build and push
+        shell: bash
+        run: |
+          set -euo pipefail
+
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/frontend:latest
+
       - name: Deploy on VM
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
+          command_timeout: 20m
           script: |
             set -e
-            sudo docker compose -f frontend-compose.yml pull
-            sudo docker compose -f frontend-compose.yml down
-            sudo docker compose -f frontend-compose.yml up -d
+            docker-compose -f ~/frontend-compose.yml pull
+            docker ps -a --format '{{.Names}}' | grep -E '(^frontend$|_frontend$)' | xargs -r docker rm -f
+            docker-compose -f ~/frontend-compose.yml up -d
+            docker exec frontend nginx -t
